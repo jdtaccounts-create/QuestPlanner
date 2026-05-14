@@ -1,0 +1,303 @@
+{
+  "2": {
+    "id": 2,
+    "name": "Quêtes de temple",
+    "name_norm": "quetes de temple",
+    "compact": "quetesdetemple",
+    "order": 3
+  },
+  "3": {
+    "id": 3,
+    "name": "Astrub",
+    "name_norm": "astrub",
+    "compact": "astrub",
+    "order": 21
+  },
+  "4": {
+    "id": 4,
+    "name": "Quêtes principales",
+    "name_norm": "quetes principales",
+    "compact": "quetesprincipales",
+    "order": 2
+  },
+  "5": {
+    "id": 5,
+    "name": "Cania",
+    "name_norm": "cania",
+    "compact": "cania",
+    "order": 26
+  },
+  "6": {
+    "id": 6,
+    "name": "Avis de recherche",
+    "name_norm": "avis de recherche",
+    "compact": "avisderecherche",
+    "order": 7
+  },
+  "7": {
+    "id": 7,
+    "name": "Île des Wabbits",
+    "name_norm": "ile des wabbits",
+    "compact": "iledeswabbits",
+    "order": 35
+  },
+  "9": {
+    "id": 9,
+    "name": "Alignement Bonta",
+    "name_norm": "alignement bonta",
+    "compact": "alignementbonta",
+    "order": 4
+  },
+  "10": {
+    "id": 10,
+    "name": "Alignement Brâkmar",
+    "name_norm": "alignement brakmar",
+    "compact": "alignementbrakmar",
+    "order": 5
+  },
+  "11": {
+    "id": 11,
+    "name": "Île de Pandala",
+    "name_norm": "ile de pandala",
+    "compact": "iledepandala",
+    "order": 32
+  },
+  "13": {
+    "id": 13,
+    "name": "Montagne des Koalaks",
+    "name_norm": "montagne des koalaks",
+    "compact": "montagnedeskoalaks",
+    "order": 37
+  },
+  "16": {
+    "id": 16,
+    "name": "Bonta",
+    "name_norm": "bonta",
+    "compact": "bonta",
+    "order": 23
+  },
+  "17": {
+    "id": 17,
+    "name": "Brâkmar",
+    "name_norm": "brakmar",
+    "compact": "brakmar",
+    "order": 24
+  },
+  "18": {
+    "id": 18,
+    "name": "Camps des Bworks et des Gobelins",
+    "name_norm": "camps des bworks et des gobelins",
+    "compact": "campsdesbworksetdesgobelins",
+    "order": 25
+  },
+  "19": {
+    "id": 19,
+    "name": "Incarnam",
+    "name_norm": "incarnam",
+    "compact": "incarnam",
+    "order": 36
+  },
+  "21": {
+    "id": 21,
+    "name": "Île d'Otomaï",
+    "name_norm": "ile d otomai",
+    "compact": "iledotomai",
+    "order": 34
+  },
+  "23": {
+    "id": 23,
+    "name": "Krosmoz",
+    "name_norm": "krosmoz",
+    "compact": "krosmoz",
+    "order": 11
+  },
+  "24": {
+    "id": 24,
+    "name": "Tutoriel guidé",
+    "name_norm": "tutoriel guide",
+    "compact": "tutorielguide",
+    "order": 1
+  },
+  "26": {
+    "id": 26,
+    "name": "Île de Nowel",
+    "name_norm": "ile de nowel",
+    "compact": "iledenowel",
+    "order": 31
+  },
+  "27": {
+    "id": 27,
+    "name": "Île de Frigost",
+    "name_norm": "ile de frigost",
+    "compact": "iledefrigost",
+    "order": 29
+  },
+  "28": {
+    "id": 28,
+    "name": "Événements",
+    "name_norm": "evenements",
+    "compact": "evenements",
+    "order": 9
+  },
+  "29": {
+    "id": 29,
+    "name": "Archipel de Vulkania",
+    "name_norm": "archipel de vulkania",
+    "compact": "archipeldevulkania",
+    "order": 20
+  },
+  "30": {
+    "id": 30,
+    "name": "Sufokia",
+    "name_norm": "sufokia",
+    "compact": "sufokia",
+    "order": 42
+  },
+  "31": {
+    "id": 31,
+    "name": "Almanax",
+    "name_norm": "almanax",
+    "compact": "almanax",
+    "order": 6
+  },
+  "32": {
+    "id": 32,
+    "name": "Justiciers",
+    "name_norm": "justiciers",
+    "compact": "justiciers",
+    "order": 10
+  },
+  "34": {
+    "id": 34,
+    "name": "Enutrosor",
+    "name_norm": "enutrosor",
+    "compact": "enutrosor",
+    "order": 14
+  },
+  "35": {
+    "id": 35,
+    "name": "Srambad",
+    "name_norm": "srambad",
+    "compact": "srambad",
+    "order": 16
+  },
+  "36": {
+    "id": 36,
+    "name": "Xélorium",
+    "name_norm": "xelorium",
+    "compact": "xelorium",
+    "order": 17
+  },
+  "37": {
+    "id": 37,
+    "name": "Île de Moon",
+    "name_norm": "ile de moon",
+    "compact": "iledemoon",
+    "order": 30
+  },
+  "38": {
+    "id": 38,
+    "name": "Ecaflipus",
+    "name_norm": "ecaflipus",
+    "compact": "ecaflipus",
+    "order": 13
+  },
+  "39": {
+    "id": 39,
+    "name": "Saharach",
+    "name_norm": "saharach",
+    "compact": "saharach",
+    "order": 40
+  },
+  "40": {
+    "id": 40,
+    "name": "Nimotopia",
+    "name_norm": "nimotopia",
+    "compact": "nimotopia",
+    "order": 38
+  },
+  "41": {
+    "id": 41,
+    "name": "Sidimote",
+    "name_norm": "sidimote",
+    "compact": "sidimote",
+    "order": 41
+  },
+  "42": {
+    "id": 42,
+    "name": "Tours de la Fratrie",
+    "name_norm": "tours de la fratrie",
+    "compact": "toursdelafratrie",
+    "order": 12
+  },
+  "44": {
+    "id": 44,
+    "name": "Île de Pwâk",
+    "name_norm": "ile de pwak",
+    "compact": "iledepwak",
+    "order": 33
+  },
+  "45": {
+    "id": 45,
+    "name": "Archipel des Écailles",
+    "name_norm": "archipel des ecailles",
+    "compact": "archipeldesecailles",
+    "order": 18
+  },
+  "46": {
+    "id": 46,
+    "name": "Eliocalypse",
+    "name_norm": "eliocalypse",
+    "compact": "eliocalypse",
+    "order": 8
+  },
+  "47": {
+    "id": 47,
+    "name": "Temporis",
+    "name_norm": "temporis",
+    "compact": "temporis",
+    "order": 43
+  },
+  "49": {
+    "id": 49,
+    "name": "Atoll des Possédés",
+    "name_norm": "atoll des possedes",
+    "compact": "atolldespossedes",
+    "order": 22
+  },
+  "50": {
+    "id": 50,
+    "name": "Cauchemar des Ravageurs",
+    "name_norm": "cauchemar des ravageurs",
+    "compact": "cauchemardesravageurs",
+    "order": 27
+  },
+  "52": {
+    "id": 52,
+    "name": "Forêt Maléfique",
+    "name_norm": "foret malefique",
+    "compact": "foretmalefique",
+    "order": 28
+  },
+  "53": {
+    "id": 53,
+    "name": "Archipel de Valonia",
+    "name_norm": "archipel de valonia",
+    "compact": "archipeldevalonia",
+    "order": 19
+  },
+  "55": {
+    "id": 55,
+    "name": "Royaume d'Amakna",
+    "name_norm": "royaume d amakna",
+    "compact": "royaumedamakna",
+    "order": 39
+  },
+  "57": {
+    "id": 57,
+    "name": "Osavora",
+    "name_norm": "osavora",
+    "compact": "osavora",
+    "order": 15
+  }
+}
