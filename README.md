@@ -2,6 +2,12 @@
 
 QuestPlanner est une application Windows pour préparer les items de quêtes Dofus et construire un plan de craft à partir des données DofusDB.
 
+Projet communautaire non officiel, non commercial, non affilié à Ankama ni à DofusDB.
+
+DOFUS et Ankama sont des marques ou propriétés de leurs ayants droit respectifs.
+
+Données issues de DofusDB. Utilisation soumise à la LPNC-IA 1.0.
+
 ## Installer l'application
 
 Télécharge la dernière version depuis l'onglet **Releases** du dépôt GitHub, puis lance :
@@ -18,6 +24,14 @@ Télécharge la dernière version depuis l'onglet **Releases** du dépôt GitHub
 - Plan de craft en trois colonnes : base à craft, sous-crafts, ingrédients.
 - Synchronisation locale avec DofusDB.
 - Mode clair et mode sombre.
+
+## Données et droits
+
+Cette application utilise des données publiques issues de DofusDB pour les quêtes, items, recettes et images d'items.
+
+Le projet est publié à titre non commercial. Il ne doit pas être vendu, monétisé par publicité, abonnement ou intégré dans un service commercial.
+
+Si un ayant droit souhaite une modification, une attribution différente ou le retrait de certains contenus, le dépôt pourra être ajusté en conséquence.
 
 ## Développement
 
