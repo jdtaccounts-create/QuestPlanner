@@ -8,6 +8,8 @@ DOFUS et Ankama sont des marques ou propriétés de leurs ayants droit respectif
 
 Données issues de DofusDB. Utilisation soumise à la LPNC-IA 1.0.
 
+Voir aussi [NOTICE.md](NOTICE.md) pour les crédits et notes de droits.
+
 ## Installer l'application
 
 Télécharge la dernière version depuis l'onglet **Releases** du dépôt GitHub, puis lance :
