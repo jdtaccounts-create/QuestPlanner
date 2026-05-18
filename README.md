@@ -12,10 +12,17 @@ Voir aussi [NOTICE.md](NOTICE.md) pour les crédits et notes de droits.
 
 ## Installer l'application
 
-Télécharge la dernière version depuis l'onglet **Releases** du dépôt GitHub, puis lance :
+Télécharge l'application depuis la dernière release :
 
-- `QuestPlanner_0.1.0_x64-setup.exe` pour l'installation classique Windows
-- ou `QuestPlanner_0.1.0_x64_en-US.msi` si tu préfères le format MSI
+[Télécharger QuestPlanner v0.1.0](https://github.com/jdtaccounts-create/QuestPlanner/releases/tag/v0.1.0)
+
+Fichier recommandé :
+
+- `QuestPlanner_0.1.0_x64-setup.exe` pour l'installation classique Windows.
+
+Autre fichier disponible :
+
+- `QuestPlanner_0.1.0_x64_en-US.msi` pour le format MSI.
 
 ## Fonctionnalités
 
