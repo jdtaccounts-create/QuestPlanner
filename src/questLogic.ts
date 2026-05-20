@@ -655,6 +655,10 @@ function isRecipeExcluded(item: CachedItem | undefined, data: QuestPlannerData):
   return isItemExcluded(item, data) || normalizeText(item?.name || '').includes('eklame')
 }
 
+function isUniquePossessionPrerequisite(item: CachedItem | undefined): boolean {
+  return normalizeText(item?.type_name || '') === 'dofus'
+}
+
 export function buildBaseEntries(data: QuestPlannerData, quests: QuestInfo[]): ItemEntry[] {
   const totals = new Map<number, number>()
   const sources = new Map<number, string[]>()
@@ -663,7 +667,9 @@ export function buildBaseEntries(data: QuestPlannerData, quests: QuestInfo[]): I
   quests.forEach((quest, questIndex) => {
     quest.needItems.forEach((itemId, index) => {
       const quantity = Number(quest.needQuantities[index] || 0)
-      totals.set(itemId, (totals.get(itemId) || 0) + quantity)
+      const item = data.items[String(itemId)]
+      const existing = totals.get(itemId) || 0
+      totals.set(itemId, isUniquePossessionPrerequisite(item) ? Math.max(existing, quantity) : existing + quantity)
       sources.set(itemId, [...(sources.get(itemId) || []), quest.name])
       if (!firstOrder.has(itemId)) firstOrder.set(itemId, questIndex + 1)
     })
