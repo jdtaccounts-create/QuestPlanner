@@ -355,7 +355,13 @@ function clearQuests(): void {
 async function parseClipboard(): Promise<void> {
   if (!data.value) return
   try {
-    const text = await navigator.clipboard.readText()
+    let text = ''
+    if ('__TAURI_INTERNALS__' in window) {
+      const { invoke } = await import('@tauri-apps/api/core')
+      text = await invoke<string>('read_clipboard')
+    } else {
+      text = await navigator.clipboard.readText()
+    }
     const { found, missed } = parseClipboardQuests(data.value, text)
     const existing = new Set(selectedQuests.value.map((quest) => quest.questId))
     const additions = found.filter((quest) => !existing.has(quest.questId))

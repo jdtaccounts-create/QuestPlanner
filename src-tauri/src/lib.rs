@@ -42,6 +42,12 @@ fn open_external_url(url: String) -> Result<(), String> {
   Ok(())
 }
 
+#[tauri::command]
+fn read_clipboard() -> Result<String, String> {
+  let mut clipboard = arboard::Clipboard::new().map_err(|error| error.to_string())?;
+  clipboard.get_text().map_err(|error| error.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
@@ -55,7 +61,7 @@ pub fn run() {
       }
       Ok(())
     })
-    .invoke_handler(tauri::generate_handler![http_get, open_external_url])
+    .invoke_handler(tauri::generate_handler![http_get, open_external_url, read_clipboard])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
