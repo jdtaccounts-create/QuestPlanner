@@ -23,6 +23,22 @@ export interface CachedQuest {
   craft_targets?: number[]
 }
 
+export interface CachedAchievement {
+  id: number
+  name: string
+  slug?: string
+  name_norm?: string
+  slug_norm?: string
+  compact?: string
+  points?: number
+  level?: number
+  category_id?: number
+  category_name?: string
+  need_quests?: number[]
+  need_achievements?: number[]
+  image_url?: string
+}
+
 export interface QuestInfo {
   questId: number
   name: string
@@ -35,6 +51,41 @@ export interface QuestInfo {
   needQuests: number[]
   craftTargets: number[]
   score: number
+}
+
+export interface AchievementInfo {
+  kind: 'achievement'
+  achievementId: number
+  name: string
+  slug: string
+  points: number
+  level: number
+  categoryId: number
+  categoryName: string
+  needQuests: number[]
+  needAchievements: number[]
+  imageUrl: string
+  score: number
+}
+
+export type SearchResult = ({ kind: 'quest' } & QuestInfo) | AchievementInfo
+
+export interface AchievementChoiceOption {
+  key: string
+  label: string
+  description: string
+  questIds: number[]
+  icon?: string
+  materialIcon?: string
+  visualClass?: string
+}
+
+export interface AchievementChoiceRule {
+  achievementId: number
+  title: string
+  subtitle: string
+  fixedQuestIds: number[]
+  options: AchievementChoiceOption[]
 }
 
 export interface CachedItem {
@@ -90,6 +141,7 @@ export interface CraftPlan {
 
 export interface QuestPlannerData {
   quests: Record<string, CachedQuest>
+  achievements: Record<string, CachedAchievement>
   categories: Record<string, { id: number; name: string; name_norm?: string; compact?: string }>
   items: Record<string, CachedItem>
   recipes: Record<string, Recipe | null>
@@ -106,6 +158,8 @@ export interface DatabaseStatus {
   needsSync: boolean
   remoteQuestTotal: number
   localQuestTotal: number
+  remoteAchievementTotal: number
+  localAchievementTotal: number
   remoteQuestCategoryTotal: number
   localQuestCategoryTotal: number
   remoteItemTotal: number
@@ -125,6 +179,156 @@ const EXCLUDED_LEGACY_RAW_TYPES = new Set([
   'Suiveur',
 ])
 let bundledItemsCache: Record<string, CachedItem> | null = null
+
+export const ACHIEVEMENT_CHOICE_RULES: Record<number, AchievementChoiceRule> = {
+  558: {
+    achievementId: 558,
+    title: 'Être plus royaliste que le roi',
+    subtitle: 'Choisis la branche Allister à ajouter. Ce choix conditionne toute la suite de cette série.',
+    fixedQuestIds: [208, 209, 211],
+    options: [
+      {
+        key: 'vil-smisse',
+        label: 'Trahir Allister',
+        description: 'Branche de Vil Smisse',
+        questIds: [216, 217, 218, 219, 220, 892],
+        materialIcon: 'visibility_off',
+        visualClass: 'choice-vil',
+      },
+      {
+        key: 'allister',
+        label: 'Servir Allister',
+        description: 'Branche du roi Allister',
+        questIds: [215, 221, 222, 224, 225, 891],
+        materialIcon: 'account_balance',
+        visualClass: 'choice-allister',
+      },
+    ],
+  },
+  607: {
+    achievementId: 607,
+    title: 'Agriculture ou alchimie',
+    subtitle: 'Choisis le métier utilisé pour cette série de quêtes Frigost.',
+    fixedQuestIds: [],
+    options: [
+      {
+        key: 'paysan',
+        label: 'Paysan',
+        description: 'La branche des récoltes agricoles',
+        questIds: [556, 557, 558, 559, 560, 561, 562, 563, 564, 565],
+        icon: '/choice-icons/jobs/paysan.png',
+        visualClass: 'choice-farmer',
+      },
+      {
+        key: 'alchimiste',
+        label: 'Alchimiste',
+        description: 'La branche des récoltes alchimiques',
+        questIds: [566, 567, 568, 569, 570, 571, 572, 573, 574, 575],
+        icon: '/choice-icons/jobs/alchimiste.png',
+        visualClass: 'choice-alchemist',
+      },
+    ],
+  },
+  554: {
+    achievementId: 554,
+    title: "L'âme de glace",
+    subtitle: "Choisis la quête correspondant à ton alignement.",
+    fixedQuestIds: [1317, 1318, 1326, 1327],
+    options: [
+      {
+        key: 'bonta',
+        label: 'Bontarien',
+        description: 'La destinée',
+        questIds: [710],
+        icon: '/choice-icons/alignments/illus_bontarien.png',
+        visualClass: 'choice-bonta',
+      },
+      {
+        key: 'brakmar',
+        label: 'Brâkmarien',
+        description: 'La fatalité',
+        questIds: [711],
+        icon: '/choice-icons/alignments/illus_brakmarien.png',
+        visualClass: 'choice-brakmar',
+      },
+      {
+        key: 'neutre',
+        label: 'Neutre',
+        description: 'La rivalité',
+        questIds: [1316],
+        icon: '/choice-icons/alignments/illus_neutre.png',
+        visualClass: 'choice-neutral',
+      },
+    ],
+  },
+  982: {
+    achievementId: 982,
+    title: 'Tampon saisonnier',
+    subtitle: 'Choisis la version correspondant au niveau du personnage. Les autres quêtes du succès seront ajoutées automatiquement.',
+    fixedQuestIds: [724, 725, 726, 741, 742],
+    options: [
+      {
+        key: '1-50',
+        label: 'Niveau 1-50',
+        description: 'Éklate vulkaine pour touriste',
+        questIds: [720],
+        icon: '/choice-icons/monsters/krokille-crue.png',
+        visualClass: 'choice-vulkania',
+      },
+      {
+        key: '51-100',
+        label: 'Niveau 51-100',
+        description: 'Éklate vulkaine pour amateur',
+        questIds: [721],
+        icon: '/choice-icons/monsters/krokille-crue.png',
+        visualClass: 'choice-vulkania',
+      },
+      {
+        key: '101-150',
+        label: 'Niveau 101-150',
+        description: 'Éklate vulkaine pour spécialiste',
+        questIds: [722],
+        icon: '/choice-icons/monsters/krokille-crue.png',
+        visualClass: 'choice-vulkania',
+      },
+      {
+        key: '151-200',
+        label: 'Niveau 151-200',
+        description: 'Éklate vulkaine pour expert',
+        questIds: [723],
+        icon: '/choice-icons/monsters/krokille-crue.png',
+        visualClass: 'choice-vulkania',
+      },
+    ],
+  },
+  1678: {
+    achievementId: 1678,
+    title: 'Un citoyen modèle',
+    subtitle: 'Choisis la quête de classe correspondant au personnage.',
+    fixedQuestIds: [1958, 1959, 2009, 1960, 1962],
+    options: [
+      { key: 'feca', label: 'Féca', description: "Tournée d'inspection", questIds: [1963], icon: 'https://api.dofusdb.fr/img/breeds/symbol_1.png', visualClass: 'choice-class' },
+      { key: 'osamodas', label: 'Osamodas', description: 'Série animalière', questIds: [1964], icon: 'https://api.dofusdb.fr/img/breeds/symbol_2.png', visualClass: 'choice-class' },
+      { key: 'enutrof', label: 'Enutrof', description: 'La fête de la chocopépite', questIds: [1965], icon: 'https://api.dofusdb.fr/img/breeds/symbol_3.png', visualClass: 'choice-class' },
+      { key: 'sram', label: 'Sram', description: 'Crime et châtiment', questIds: [1966], icon: 'https://api.dofusdb.fr/img/breeds/symbol_4.png', visualClass: 'choice-class' },
+      { key: 'xelor', label: 'Xélor', description: "Tarot, t'es très fort", questIds: [1967], icon: 'https://api.dofusdb.fr/img/breeds/symbol_5.png', visualClass: 'choice-class' },
+      { key: 'ecaflip', label: 'Ecaflip', description: 'Au petit malheur la chance', questIds: [1968], icon: 'https://api.dofusdb.fr/img/breeds/symbol_6.png', visualClass: 'choice-class' },
+      { key: 'eniripsa', label: 'Eniripsa', description: 'Piques de solution', questIds: [1969], icon: 'https://api.dofusdb.fr/img/breeds/symbol_7.png', visualClass: 'choice-class' },
+      { key: 'iop', label: 'Iop', description: 'Iop et hop', questIds: [1970], icon: 'https://api.dofusdb.fr/img/breeds/symbol_8.png', visualClass: 'choice-class' },
+      { key: 'cra', label: 'Crâ', description: "C'est pour ta pomme", questIds: [1971], icon: 'https://api.dofusdb.fr/img/breeds/symbol_9.png', visualClass: 'choice-class' },
+      { key: 'sadida', label: 'Sadida', description: "C'est pourtant naturel", questIds: [1972], icon: 'https://api.dofusdb.fr/img/breeds/symbol_10.png', visualClass: 'choice-class' },
+      { key: 'sacrieur', label: 'Sacrieur', description: 'Souffre-douleur', questIds: [1973], icon: 'https://api.dofusdb.fr/img/breeds/symbol_11.png', visualClass: 'choice-class' },
+      { key: 'pandawa', label: 'Pandawa', description: "Trempette dans un verre d'eau", questIds: [1974], icon: 'https://api.dofusdb.fr/img/breeds/symbol_12.png', visualClass: 'choice-class' },
+      { key: 'roublard', label: 'Roublard', description: 'Braquage à la Roublard', questIds: [704], icon: 'https://api.dofusdb.fr/img/breeds/symbol_13.png', visualClass: 'choice-class' },
+      { key: 'zobal', label: 'Zobal', description: 'Zobal Hibaba et les 40 Roublards', questIds: [716], icon: 'https://api.dofusdb.fr/img/breeds/symbol_14.png', visualClass: 'choice-class' },
+      { key: 'steamer', label: 'Steamer', description: "L'étrange créature de l'étang bleu", questIds: [938], icon: 'https://api.dofusdb.fr/img/breeds/symbol_15.png', visualClass: 'choice-class' },
+      { key: 'eliotrope', label: 'Eliotrope', description: 'Un rayon de soleil', questIds: [1615], icon: 'https://api.dofusdb.fr/img/breeds/symbol_16.png', visualClass: 'choice-class' },
+      { key: 'huppermage', label: 'Huppermage', description: "Les paroles s'envolent, les aigris restent", questIds: [1677], icon: 'https://api.dofusdb.fr/img/breeds/symbol_17.png', visualClass: 'choice-class' },
+      { key: 'ouginak', label: 'Ouginak', description: 'Une vie de milichien', questIds: [1841], icon: 'https://api.dofusdb.fr/img/breeds/symbol_18.png', visualClass: 'choice-class' },
+      { key: 'forgelance', label: 'Forgelance', description: 'La routine anodine du chevalier citadin', questIds: [2470], icon: 'https://api.dofusdb.fr/img/breeds/symbol_20.png', visualClass: 'choice-class' },
+    ],
+  },
+}
 
 export function normalizeText(value: string): string {
   return (value || '')
@@ -163,6 +367,27 @@ export function questInfoFromCache(rawQuest: CachedQuest): QuestInfo {
   }
 }
 
+export function questResultFromInfo(quest: QuestInfo): SearchResult {
+  return { ...quest, kind: 'quest' }
+}
+
+export function achievementInfoFromCache(rawAchievement: CachedAchievement): AchievementInfo {
+  return {
+    kind: 'achievement',
+    achievementId: Number(rawAchievement.id),
+    name: rawAchievement.name || `Succès ${rawAchievement.id}`,
+    slug: rawAchievement.slug || '',
+    points: Number(rawAchievement.points || 0),
+    level: Number(rawAchievement.level || 0),
+    categoryId: Number(rawAchievement.category_id || 0),
+    categoryName: rawAchievement.category_name || '',
+    needQuests: (rawAchievement.need_quests || []).map(Number),
+    needAchievements: (rawAchievement.need_achievements || []).map(Number),
+    imageUrl: rawAchievement.image_url || '',
+    score: 0,
+  }
+}
+
 export function questScore(queryNorm: string, quest: QuestInfo): number {
   const nameNorm = normalizeText(quest.name)
   const slugNorm = normalizeText(quest.slug)
@@ -180,10 +405,28 @@ export function questScore(queryNorm: string, quest: QuestInfo): number {
   return matched / tokens.length
 }
 
-export function searchQuestsAndCategories(data: QuestPlannerData, query: string, limit = 80): QuestInfo[] {
+function achievementScore(queryNorm: string, achievement: AchievementInfo): number {
+  const nameNorm = normalizeText(achievement.name)
+  const slugNorm = normalizeText(achievement.slug)
+  const queryCompact = queryNorm.replace(/\s/g, '')
+  const nameCompact = nameNorm.replace(/\s/g, '')
+
+  if (queryNorm === nameNorm || queryNorm === slugNorm) return 1.18
+  if (nameNorm.startsWith(queryNorm) || slugNorm.startsWith(queryNorm)) return 1.03
+  if (nameNorm.includes(queryNorm) || slugNorm.includes(queryNorm)) return 0.91
+  if (queryCompact && nameCompact.includes(queryCompact)) return 0.86
+
+  const tokens = queryNorm.split(' ').filter(Boolean)
+  if (!tokens.length) return 0
+  const matched = tokens.filter((token) => nameNorm.includes(token) || slugNorm.includes(token)).length
+  return matched / tokens.length
+}
+
+export function searchQuestsAndCategories(data: QuestPlannerData, query: string, limit = 80): SearchResult[] {
   const queryNorm = normalizeText(query)
   if (!queryNorm) return []
 
+  const results: SearchResult[] = []
   const scoredById = new Map<number, QuestInfo>()
   Object.values(data.quests).forEach((rawQuest) => {
     const quest = questInfoFromCache(rawQuest)
@@ -221,8 +464,22 @@ export function searchQuestsAndCategories(data: QuestPlannerData, query: string,
     })
   })
 
-  return Array.from(scoredById.values())
-    .sort((a, b) => b.score - a.score || a.levelMin - b.levelMin || a.name.localeCompare(b.name, 'fr'))
+  results.push(...Array.from(scoredById.values()).map(questResultFromInfo))
+
+  Object.values(data.achievements || {}).forEach((rawAchievement) => {
+    const achievement = achievementInfoFromCache(rawAchievement)
+    const score = achievementScore(queryNorm, achievement)
+    if (score >= 0.35) {
+      results.push({ ...achievement, score })
+    }
+  })
+
+  return results
+    .sort((a, b) => {
+      const aLevel = a.kind === 'quest' ? a.levelMin : a.level
+      const bLevel = b.kind === 'quest' ? b.levelMin : b.level
+      return b.score - a.score || aLevel - bLevel || a.name.localeCompare(b.name, 'fr')
+    })
     .slice(0, limit)
 }
 
@@ -254,7 +511,9 @@ export function parseClipboardQuests(data: QuestPlannerData, text: string): { fo
   const seen = new Set<number>()
 
   splitQuestLines(text).forEach((line) => {
-    const quest = searchQuestsAndCategories(data, line, 1)[0]
+    const quest = searchQuestsAndCategories(data, line, 4).find(
+      (result): result is { kind: 'quest' } & QuestInfo => result.kind === 'quest',
+    )
     if (quest && quest.score >= 0.7 && !seen.has(quest.questId)) {
       found.push(quest)
       seen.add(quest.questId)
@@ -264,6 +523,77 @@ export function parseClipboardQuests(data: QuestPlannerData, text: string): { fo
   })
 
   return { found, missed }
+}
+
+export function questInfoById(data: QuestPlannerData, questId: number): QuestInfo | null {
+  const rawQuest = data.quests[String(questId)]
+  return rawQuest ? questInfoFromCache(rawQuest) : null
+}
+
+export function achievementChoiceRulesFor(
+  data: QuestPlannerData,
+  achievementId: number,
+  choices: Record<number, string> = {},
+  visited = new Set<number>(),
+): AchievementChoiceRule[] {
+  if (visited.has(achievementId)) return []
+  visited.add(achievementId)
+
+  const rawAchievement = data.achievements?.[String(achievementId)]
+  if (!rawAchievement) return []
+
+  const rules: AchievementChoiceRule[] = []
+  const directRule = ACHIEVEMENT_CHOICE_RULES[achievementId]
+  if (directRule && !choices[achievementId]) {
+    rules.push(directRule)
+  }
+
+  ;(rawAchievement.need_achievements || []).forEach((childId) => {
+    rules.push(...achievementChoiceRulesFor(data, Number(childId), choices, visited))
+  })
+
+  return rules
+}
+
+export function expandAchievementQuestIds(
+  data: QuestPlannerData,
+  achievementId: number,
+  choices: Record<number, string> = {},
+  visited = new Set<number>(),
+): number[] {
+  if (visited.has(achievementId)) return []
+  visited.add(achievementId)
+
+  const rawAchievement = data.achievements?.[String(achievementId)]
+  if (!rawAchievement) return []
+
+  const questIds = new Set<number>()
+  const rule = ACHIEVEMENT_CHOICE_RULES[achievementId]
+
+  if (rule) {
+    const selectedOption = rule.options.find((option) => option.key === choices[achievementId])
+    if (rule.options.length && !selectedOption) return []
+    rule.fixedQuestIds.forEach((questId) => questIds.add(Number(questId)))
+    selectedOption?.questIds.forEach((questId) => questIds.add(Number(questId)))
+  } else {
+    ;(rawAchievement.need_quests || []).forEach((questId) => questIds.add(Number(questId)))
+  }
+
+  ;(rawAchievement.need_achievements || []).forEach((childId) => {
+    expandAchievementQuestIds(data, Number(childId), choices, visited).forEach((questId) => questIds.add(questId))
+  })
+
+  return Array.from(questIds)
+}
+
+export function expandAchievementToQuests(
+  data: QuestPlannerData,
+  achievementId: number,
+  choices: Record<number, string> = {},
+): QuestInfo[] {
+  return expandAchievementQuestIds(data, achievementId, choices)
+    .map((questId) => questInfoById(data, questId))
+    .filter((quest): quest is QuestInfo => Boolean(quest))
 }
 
 function itemImagePath(item: CachedItem): string {
@@ -440,10 +770,16 @@ export function buildCraftPlan(data: QuestPlannerData, entries: ItemEntry[]): Cr
 
 export async function loadQuestPlannerData(): Promise<QuestPlannerData> {
   const stored = await loadStoredQuestPlannerData().catch(() => null)
-  if (stored) return stored
+  if (stored) {
+    return {
+      ...stored,
+      achievements: stored.achievements || {},
+    }
+  }
 
-  const [quests, categories, items, recipes, exclusions, metadata] = await Promise.all([
+  const [quests, achievements, categories, items, recipes, exclusions, metadata] = await Promise.all([
     fetch('/data/quests.json').then((response) => response.json()),
+    fetch('/data/achievements.json').then((response) => response.json()).catch(() => ({})),
     fetch('/data/quest_categories.json').then((response) => response.json()),
     fetch('/data/items.json').then((response) => response.json()),
     fetch('/data/recipes.json').then((response) => response.json()),
@@ -451,7 +787,7 @@ export async function loadQuestPlannerData(): Promise<QuestPlannerData> {
     fetch('/data/metadata.json').then((response) => response.json()),
   ])
 
-  return { quests, categories, items, recipes, exclusions, metadata }
+  return { quests, achievements, categories, items, recipes, exclusions, metadata }
 }
 
 function isTauriRuntime(): boolean {
@@ -655,6 +991,31 @@ function normalizeQuest(rawQuest: any, categories: Record<string, { name?: strin
   }
 }
 
+function normalizeAchievement(rawAchievement: any): CachedAchievement | null {
+  const id = rawAchievement?.id
+  if (id == null) return null
+  const name = rawLocaleValue(rawAchievement, 'name', `Succès ${id}`)
+  const slug = rawLocaleValue(rawAchievement, 'slug', normalizeText(name))
+  const need = rawAchievement.need || {}
+  const categoryId = Number(rawAchievement.categoryId || rawAchievement.category?.id || 0)
+
+  return {
+    id: Number(id),
+    name,
+    slug,
+    name_norm: normalizeText(name),
+    slug_norm: normalizeText(slug),
+    compact: compactText(name),
+    points: Number(rawAchievement.points || 0),
+    level: Number(rawAchievement.level || 0),
+    category_id: categoryId,
+    category_name: rawAchievement.category?.name?.fr || '',
+    need_quests: (need.quests || []).map(Number),
+    need_achievements: (need.achievements || []).map(Number),
+    image_url: rawAchievement.img || '',
+  }
+}
+
 function extractItemTypeId(rawItem: any): number | null {
   const typeId = rawItem?.typeId ?? rawItem?.type?.id
   const normalized = Number(typeId)
@@ -724,6 +1085,7 @@ function idsChecksum(ids: Iterable<string>): string {
 export async function syncQuestPlannerData(progress?: (message: string) => void): Promise<QuestPlannerData> {
   progress?.('Synchronisation DofusDB : catégories...')
   const rawCategoriesPromise = fetchPaginated('/quest-categories', PAGE_LIMIT, 'Catégories', progress)
+  const rawAchievementsPromise = fetchPaginated('/achievements', PAGE_LIMIT, 'Succès', progress)
   const rawItemsPromise = fetchPaginated('/items', PAGE_LIMIT, 'Items', progress)
   const rawRecipesPromise = fetchPaginated('/recipes', PAGE_LIMIT, 'Recettes', progress)
 
@@ -732,12 +1094,14 @@ export async function syncQuestPlannerData(progress?: (message: string) => void)
 
   progress?.('Synchronisation DofusDB : quêtes...')
   const rawQuestsPromise = fetchPaginated('/quests', PAGE_LIMIT, 'Quêtes', progress)
-  const [rawQuests, rawItems, rawRecipes] = await Promise.all([
+  const [rawQuests, rawAchievements, rawItems, rawRecipes] = await Promise.all([
     rawQuestsPromise,
+    rawAchievementsPromise,
     rawItemsPromise,
     rawRecipesPromise,
   ])
   const quests = byId(rawQuests.map((rawQuest) => normalizeQuest(rawQuest, categories)), 'id')
+  const achievements = byId(rawAchievements.map(normalizeAchievement), 'id')
   const items = byId(rawItems.map(normalizeApiItem), 'id')
   const recipes = byId(rawRecipes.map(normalizeRecipe), 'result_id')
 
@@ -745,10 +1109,12 @@ export async function syncQuestPlannerData(progress?: (message: string) => void)
     item_total: Object.keys(items).length,
     recipe_total: Object.keys(recipes).length,
     quest_total: Object.keys(quests).length,
+    achievement_total: Object.keys(achievements).length,
     quest_category_total: Object.keys(categories).length,
     item_ids_checksum: idsChecksum(Object.keys(items)),
     recipe_ids_checksum: idsChecksum(Object.keys(recipes)),
     quest_ids_checksum: idsChecksum(Object.keys(quests)),
+    achievement_ids_checksum: idsChecksum(Object.keys(achievements)),
     quest_category_ids_checksum: idsChecksum(Object.keys(categories)),
     item_schema_version: 2,
     last_sync: new Date().toISOString(),
@@ -756,6 +1122,7 @@ export async function syncQuestPlannerData(progress?: (message: string) => void)
 
   const data: QuestPlannerData = {
     quests,
+    achievements,
     categories,
     items,
     recipes,
@@ -769,13 +1136,14 @@ export async function syncQuestPlannerData(progress?: (message: string) => void)
   }
 
   await saveStoredQuestPlannerData(data)
-  progress?.(`Données synchronisées : ${metadata.quest_total} quêtes, ${metadata.item_total} items, ${metadata.recipe_total} recettes`)
+  progress?.(`Données synchronisées : ${metadata.quest_total} quêtes, ${metadata.achievement_total} succès, ${metadata.item_total} items, ${metadata.recipe_total} recettes`)
   return data
 }
 
 export async function checkQuestPlannerDataStatus(data: QuestPlannerData): Promise<DatabaseStatus> {
-  const [questPage, categoryPage, itemPage, recipePage] = await Promise.all([
+  const [questPage, achievementPage, categoryPage, itemPage, recipePage] = await Promise.all([
     apiGet('/quests', { $limit: 1, $skip: 0 }),
+    apiGet('/achievements', { $limit: 1, $skip: 0 }),
     apiGet('/quest-categories', { $limit: 1, $skip: 0 }),
     apiGet('/items', { $limit: 1, $skip: 0 }),
     apiGet('/recipes', { $limit: 1, $skip: 0 }),
@@ -784,6 +1152,8 @@ export async function checkQuestPlannerDataStatus(data: QuestPlannerData): Promi
   const status = {
     remoteQuestTotal: Number(questPage.total || 0),
     localQuestTotal: Object.keys(data.quests).length,
+    remoteAchievementTotal: Number(achievementPage.total || 0),
+    localAchievementTotal: Object.keys(data.achievements || {}).length,
     remoteQuestCategoryTotal: Number(categoryPage.total || 0),
     localQuestCategoryTotal: Object.keys(data.categories).length,
     remoteItemTotal: Number(itemPage.total || 0),
@@ -794,6 +1164,7 @@ export async function checkQuestPlannerDataStatus(data: QuestPlannerData): Promi
 
   const missingLabels = []
   if (status.remoteQuestTotal !== status.localQuestTotal) missingLabels.push('quêtes')
+  if (status.remoteAchievementTotal !== status.localAchievementTotal) missingLabels.push('succès')
   if (status.remoteQuestCategoryTotal !== status.localQuestCategoryTotal) missingLabels.push('catégories')
   if (status.remoteItemTotal !== status.localItemTotal) missingLabels.push('items')
   if (status.remoteRecipeTotal !== status.localRecipeTotal) missingLabels.push('recettes')

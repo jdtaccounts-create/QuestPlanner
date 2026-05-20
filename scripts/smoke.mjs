@@ -37,6 +37,7 @@ try {
           },
         ],
       },
+      '/achievements': { total: 0, data: [] },
       '/items': {
         total: 1,
         data: [
@@ -67,7 +68,7 @@ try {
   if (await forceSyncButton.isVisible().catch(() => false)) {
     await forceSyncButton.click()
   }
-  await syncPage.waitForFunction(() => document.body.innerText.includes('1 quêtes · 1 items · 0 recettes'))
+  await syncPage.waitForFunction(() => document.body.innerText.includes('1 quêtes · 0 succès · 1 items · 0 recettes'))
   await syncPage.close()
 
   const resetPage = await browser.newPage()
@@ -91,7 +92,7 @@ try {
   await page.locator('.toolbar .q-btn').last().click()
   await page.waitForFunction(() => document.documentElement.dataset.theme === 'dark')
 
-  await page.getByPlaceholder('Rechercher une quête...').fill('Hôtel de glace')
+  await page.getByPlaceholder('Rechercher une quête ou un succès...').fill('Hôtel de glace')
   await page.locator('.result-row').filter({ hasText: 'Hôtel de glace' }).first().click()
   await page.getByRole('button', { name: /Chercher les items/i }).click()
   await page.waitForFunction(() => document.body.innerText.includes('4 items agrégés'))
@@ -101,7 +102,7 @@ try {
   }
   await page.getByRole('button', { name: /Vider/i }).click()
 
-  await page.getByPlaceholder('Rechercher une quête...').fill('Du pain pour les braves')
+  await page.getByPlaceholder('Rechercher une quête ou un succès...').fill('Du pain pour les braves')
   await page.locator('.result-row').filter({ hasText: 'Du pain pour les braves' }).first().click()
   await page.getByRole('button', { name: /Chercher les items/i }).click()
   await page.waitForFunction(() => document.body.innerText.includes('items agrégés'))

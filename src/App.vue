@@ -1,20 +1,26 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import {
+  achievementChoiceRulesFor,
   buildBaseEntries,
   buildCraftPlan,
   CATEGORIES,
   checkQuestPlannerDataStatus,
   ensureItems,
+  expandAchievementToQuests,
   loadQuestPlannerData,
   parseClipboardQuests,
   searchQuestsAndCategories,
   syncQuestPlannerData,
+  type AchievementChoiceOption,
+  type AchievementChoiceRule,
+  type AchievementInfo,
   type CraftLine,
   type CraftPlan,
   type ItemEntry,
   type QuestInfo,
   type QuestPlannerData,
+  type SearchResult,
 } from './questLogic'
 
 const data = ref<QuestPlannerData | null>(null)
@@ -26,6 +32,9 @@ const status = ref('Chargement des données locales...')
 const themeMode = ref<'dark' | 'light'>('dark')
 const questQuery = ref('')
 const selectedQuests = ref<QuestInfo[]>([])
+const pendingAchievement = ref<AchievementInfo | null>(null)
+const pendingChoiceRules = ref<AchievementChoiceRule[]>([])
+const pendingChoiceValues = ref<Record<number, string>>({})
 const currentEntries = ref<ItemEntry[]>([])
 const checkedItemIds = ref<Set<number>>(new Set())
 const craftPlan = ref<CraftPlan | null>(null)
@@ -34,6 +43,7 @@ const craftOpen = ref(false)
 const showSyncConfirm = ref(false)
 
 const questCount = computed(() => Object.keys(data.value?.quests || {}).length)
+const achievementCount = computed(() => Object.keys(data.value?.achievements || {}).length)
 const itemCount = computed(() => Object.keys(data.value?.items || {}).length)
 const recipeCount = computed(() => Object.keys(data.value?.recipes || {}).length)
 
@@ -43,10 +53,11 @@ const searchResults = computed(() => {
 })
 
 const selectedQuestIds = computed(() => new Set(selectedQuests.value.map((quest) => quest.questId)))
+const activeChoiceRule = computed(() => pendingChoiceRules.value.find((rule) => !pendingChoiceValues.value[rule.achievementId]) || null)
 
 const questSidebarWidth = computed(() => {
   const longestSelectedName = selectedQuests.value.reduce((longest, quest) => Math.max(longest, quest.name.length), 0)
-  const longestSearchName = searchResults.value.reduce((longest, quest) => Math.max(longest, quest.name.length), 0)
+  const longestSearchName = searchResults.value.reduce((longest, result) => Math.max(longest, result.name.length), 0)
   const longestName = Math.max(24, longestSelectedName, longestSearchName)
   return `${Math.min(430, Math.max(322, 150 + longestName * 6.8))}px`
 })
@@ -88,7 +99,7 @@ const headerSummary = computed(() => {
   if (loading.value && !data.value) return 'Chargement des données locales...'
   if (!currentEntries.value.length) {
     return data.value
-      ? `${questCount.value} quêtes · ${itemCount.value} items · ${recipeCount.value} recettes`
+      ? `${questCount.value} quêtes · ${achievementCount.value} succès · ${itemCount.value} items · ${recipeCount.value} recettes`
       : status.value
   }
   return `${currentEntries.value.length} items différents · ${remainingEntries.value.length} restants · ${status.value}`
@@ -111,10 +122,11 @@ const coveredByItemId = computed(() => {
 
 function imageUrl(path: string): string {
   if (path.startsWith('http://') || path.startsWith('https://')) return path
+  if (path.startsWith('/')) return path
   return path ? `/${path.replace(/\\/g, '/')}` : ''
 }
 
-async function openDofusDb(kind: 'object' | 'quest', id: number): Promise<void> {
+async function openDofusDb(kind: 'object' | 'quest' | 'achievement', id: number): Promise<void> {
   const url = `https://dofusdb.fr/database/${kind}/${id}`
   if ('__TAURI_INTERNALS__' in window) {
     try {
@@ -229,19 +241,100 @@ function mergeCraftLines(kind: string, lines: CraftLine[]): CraftLine[] {
   return Array.from(merged.values())
 }
 
-function addQuest(quest: QuestInfo): void {
+function addQuest(quest: QuestInfo): boolean {
   if (selectedQuestIds.value.has(quest.questId)) {
     status.value = `Déjà dans la liste : ${quest.name}`
-    return
+    return false
   }
   selectedQuests.value = [...selectedQuests.value, quest]
   questQuery.value = ''
   status.value = `Ajouté : ${quest.name}`
+  return true
+}
+
+function addQuests(quests: QuestInfo[], sourceLabel: string): void {
+  const existing = new Set(selectedQuests.value.map((quest) => quest.questId))
+  const additions = quests.filter((quest) => !existing.has(quest.questId))
+  selectedQuests.value = [...selectedQuests.value, ...additions]
+  questQuery.value = ''
+  status.value = additions.length
+    ? `${additions.length} quêtes ajoutées depuis ${sourceLabel}`
+    : `Toutes les quêtes de ${sourceLabel} sont déjà dans la liste`
+}
+
+function addAchievement(achievement: AchievementInfo): void {
+  if (!data.value) return
+  const requiredRules = achievementChoiceRulesFor(data.value, achievement.achievementId)
+  if (requiredRules.length) {
+    pendingAchievement.value = achievement
+    pendingChoiceRules.value = requiredRules
+    pendingChoiceValues.value = {}
+    status.value = `Choix requis pour ${achievement.name}`
+    return
+  }
+
+  addQuests(expandAchievementToQuests(data.value, achievement.achievementId), achievement.name)
+}
+
+function addSearchResult(result: SearchResult): void {
+  if (result.kind === 'quest') {
+    addQuest(result)
+    return
+  }
+  addAchievement(result)
 }
 
 function addFirstSearchResult(): void {
   const first = searchResults.value[0]
-  if (first) addQuest(first)
+  if (first) addSearchResult(first)
+}
+
+function searchResultSelected(result: SearchResult): boolean {
+  if (result.kind === 'quest') return selectedQuestIds.value.has(result.questId)
+  if (!data.value) return false
+  const quests = expandAchievementToQuests(data.value, result.achievementId)
+  return quests.length > 0 && quests.every((quest) => selectedQuestIds.value.has(quest.questId))
+}
+
+function searchResultMeta(result: SearchResult): string {
+  if (result.kind === 'quest') return `Quête · niv. ${result.levelMin} · ${result.categoryName || 'Sans catégorie'}`
+  const questCount = result.needQuests.length
+  const achievementCount = result.needAchievements.length
+  const parts = [`Succès · ${result.points} pts`]
+  if (questCount) parts.push(`${questCount} quêtes`)
+  if (achievementCount) parts.push(`${achievementCount} succès`)
+  if (result.categoryName) parts.push(result.categoryName)
+  return parts.join(' · ')
+}
+
+function selectAchievementOption(option: AchievementChoiceOption): void {
+  const rule = activeChoiceRule.value
+  if (!rule || !pendingAchievement.value || !data.value) return
+
+  pendingChoiceValues.value = {
+    ...pendingChoiceValues.value,
+    [rule.achievementId]: option.key,
+  }
+
+  const remainingRules = achievementChoiceRulesFor(data.value, pendingAchievement.value.achievementId, pendingChoiceValues.value)
+  if (remainingRules.length) {
+    pendingChoiceRules.value = remainingRules
+    return
+  }
+
+  const achievement = pendingAchievement.value
+  const choices = pendingChoiceValues.value
+  pendingAchievement.value = null
+  pendingChoiceRules.value = []
+  pendingChoiceValues.value = {}
+  addQuests(expandAchievementToQuests(data.value, achievement.achievementId, choices), achievement.name)
+}
+
+function cancelAchievementChoice(): void {
+  pendingAchievement.value = null
+  pendingChoiceRules.value = []
+  pendingChoiceValues.value = {}
+  status.value = 'Ajout du succès annulé'
 }
 
 function removeQuest(questId: number): void {
@@ -357,7 +450,7 @@ async function reloadData(): Promise<void> {
   status.value = 'Chargement des données locales...'
   try {
     data.value = await loadQuestPlannerData()
-    status.value = `Données locales chargées : ${questCount.value} quêtes, ${itemCount.value} items, ${recipeCount.value} recettes`
+    status.value = `Données locales chargées : ${questCount.value} quêtes, ${achievementCount.value} succès, ${itemCount.value} items, ${recipeCount.value} recettes`
     checkLocalDataStatus()
   } catch (error) {
     status.value = error instanceof Error ? error.message : 'Impossible de charger les données locales'
@@ -375,10 +468,10 @@ async function checkLocalDataStatus(): Promise<void> {
       status.value = `Mise à jour disponible (${info.missingLabels.join(', ')}) : clique sur Sync DofusDB`
       return
     }
-    status.value = `Données locales à jour : ${info.localQuestTotal} quêtes, ${info.localItemTotal} items, ${info.localRecipeTotal} recettes`
+    status.value = `Données locales à jour : ${info.localQuestTotal} quêtes, ${info.localAchievementTotal} succès, ${info.localItemTotal} items, ${info.localRecipeTotal} recettes`
   } catch {
     updateAvailable.value = false
-    status.value = `Données locales chargées : ${questCount.value} quêtes, ${itemCount.value} items, ${recipeCount.value} recettes`
+    status.value = `Données locales chargées : ${questCount.value} quêtes, ${achievementCount.value} succès, ${itemCount.value} items, ${recipeCount.value} recettes`
   }
 }
 
@@ -397,7 +490,7 @@ async function syncDatabases(): Promise<void> {
     craftPlan.value = null
     craftCheckedKeys.value = new Set()
     craftOpen.value = false
-    status.value = `Données synchronisées : ${questCount.value} quêtes, ${itemCount.value} items, ${recipeCount.value} recettes`
+    status.value = `Données synchronisées : ${questCount.value} quêtes, ${achievementCount.value} succès, ${itemCount.value} items, ${recipeCount.value} recettes`
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     status.value = message.includes('Failed to fetch')
@@ -499,7 +592,7 @@ onMounted(() => {
             dense
             standout
             clearable
-            placeholder="Rechercher une quête..."
+            placeholder="Rechercher une quête ou un succès..."
             :disable="loading"
             @keyup.enter="addFirstSearchResult"
           >
@@ -510,15 +603,16 @@ onMounted(() => {
 
           <div v-if="questQuery && searchResults.length" class="search-results">
             <button
-              v-for="quest in searchResults"
-              :key="quest.questId"
+              v-for="result in searchResults"
+              :key="`${result.kind}:${result.kind === 'quest' ? result.questId : result.achievementId}`"
               class="result-row"
-              :class="{ selected: selectedQuestIds.has(quest.questId) }"
+              :class="{ selected: searchResultSelected(result), achievement: result.kind === 'achievement' }"
               type="button"
-              @click="addQuest(quest)"
+              @click="addSearchResult(result)"
             >
-              <span>{{ quest.name }}</span>
-              <small>niv. {{ quest.levelMin }} · {{ quest.categoryName || 'Sans catégorie' }}</small>
+              <q-icon :name="result.kind === 'quest' ? 'assignment' : 'emoji_events'" />
+              <span>{{ result.name }}</span>
+              <small>{{ searchResultMeta(result) }}</small>
             </button>
           </div>
         </section>
@@ -652,6 +746,40 @@ onMounted(() => {
         <div class="sync-actions">
           <q-btn flat label="Annuler" @click="showSyncConfirm = false" />
           <q-btn color="primary" unelevated label="Forcer la sync" :loading="syncing" @click="forceSyncDatabases" />
+        </div>
+      </div>
+    </div>
+
+    <div v-if="activeChoiceRule" class="choice-dialog">
+      <div class="choice-card glass-surface">
+        <header>
+          <div>
+            <span class="choice-kicker">Choix requis</span>
+            <h2>{{ activeChoiceRule.title }}</h2>
+          </div>
+          <q-btn dense round flat icon="close" @click="cancelAchievementChoice" />
+        </header>
+        <p>{{ activeChoiceRule.subtitle }}</p>
+
+        <div class="choice-options" :class="{ many: activeChoiceRule.options.length > 8 }">
+          <button
+            v-for="option in activeChoiceRule.options"
+            :key="option.key"
+            class="choice-option"
+            :class="option.visualClass"
+            type="button"
+            @click="selectAchievementOption(option)"
+          >
+            <span class="choice-visual">
+              <img v-if="option.icon" :src="imageUrl(option.icon)" alt="" />
+              <q-icon v-else :name="option.materialIcon || 'route'" />
+            </span>
+            <span class="choice-copy">
+              <strong>{{ option.label }}</strong>
+              <small>{{ option.description }}</small>
+              <em>{{ option.questIds.length > 1 ? `${option.questIds.length} quêtes` : '1 quête' }}</em>
+            </span>
+          </button>
         </div>
       </div>
     </div>
