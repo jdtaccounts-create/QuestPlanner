@@ -771,9 +771,21 @@ export function buildCraftPlan(data: QuestPlannerData, entries: ItemEntry[]): Cr
 export async function loadQuestPlannerData(): Promise<QuestPlannerData> {
   const stored = await loadStoredQuestPlannerData().catch(() => null)
   if (stored) {
-    return {
-      ...stored,
-      achievements: stored.achievements || {},
+    try {
+      const bundledMetadata = await fetch('/data/metadata.json').then((response) => response.json())
+      const storedWithAchievements = { ...stored, achievements: stored.achievements || {} }
+      const bundledIsNewer =
+        Number(bundledMetadata.item_total || 0) > Object.keys(storedWithAchievements.items || {}).length
+        || Number(bundledMetadata.recipe_total || 0) > Object.keys(storedWithAchievements.recipes || {}).length
+        || Number(bundledMetadata.quest_total || 0) > Object.keys(storedWithAchievements.quests || {}).length
+        || Number(bundledMetadata.achievement_total || 0) > Object.keys(storedWithAchievements.achievements || {}).length
+
+      if (!bundledIsNewer) return storedWithAchievements
+    } catch {
+      return {
+        ...stored,
+        achievements: stored.achievements || {},
+      }
     }
   }
 
