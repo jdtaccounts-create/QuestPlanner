@@ -668,11 +668,10 @@ onMounted(() => {
                 :data-item-id="entry.item_id"
                 :class="{ done: isEntryDone(entry) }"
               >
-                <q-checkbox
-                  dense
-                  color="secondary"
-                  :model-value="isChecked(entry.item_id)"
-                  @update:model-value="(value) => setItemChecked(entry.item_id, Boolean(value))"
+                <input
+                  type="checkbox"
+                  :checked="isEntryDone(entry)"
+                  @change="setItemChecked(entry.item_id, ($event.target as HTMLInputElement).checked)"
                 />
                 <button class="item-card" type="button" @click="openDofusDb('object', entry.item_id)">
                   <img v-if="entry.image_path" :src="imageUrl(entry.image_path)" alt="" />
@@ -722,11 +721,10 @@ onMounted(() => {
                     :data-craft-line-key="line.line_key"
                     :class="{ done: craftRowState(line).done }"
                   >
-                    <q-checkbox
-                      dense
-                      color="secondary"
-                      :model-value="craftCheckedKeys.has(line.line_key)"
-                      @update:model-value="(value) => setCraftChecked(line, Boolean(value))"
+                    <input
+                      type="checkbox"
+                      :checked="craftRowState(line).done"
+                      @change="setCraftChecked(line, ($event.target as HTMLInputElement).checked)"
                     />
                     <button class="item-card" type="button" @click="openDofusDb('object', line.item_id)">
                       <img v-if="line.image_path" :src="imageUrl(line.image_path)" alt="" />

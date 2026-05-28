@@ -117,7 +117,7 @@ try {
   const itemId = await craftRow.getAttribute('data-item-id')
   if (!itemId) throw new Error('Craft row has no data-item-id')
 
-  await craftRow.locator('[role="checkbox"]').click()
+  await craftRow.locator('input[type="checkbox"]').click()
   const mainRow = page.locator(`.item-row[data-item-id="${itemId}"]`).first()
   await page.waitForFunction(
     (id) => document.querySelector(`.item-row[data-item-id="${id}"]`)?.classList.contains('done'),
