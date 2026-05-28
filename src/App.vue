@@ -176,6 +176,11 @@ function categoryProgress(category: string): string {
   return `${checked}/${entries.length}`
 }
 
+function craftPanelProgress(section: { lines: CraftLine[] }): string {
+  const checked = section.lines.filter((line) => craftRowState(line).done).length
+  return `${checked}/${section.lines.length}`
+}
+
 function itemSubtype(itemId: number, fallback = ''): string {
   const item = data.value?.items[String(itemId)]
   return item?.type_name || item?.raw_type || fallback || 'Item'
@@ -704,7 +709,7 @@ onMounted(() => {
               <section v-for="section in craftPanels" :key="section.key" class="craft-section">
                 <header>
                   <h3>{{ section.title }}</h3>
-                  <span>{{ section.lines.length }}</span>
+                  <span>{{ craftPanelProgress(section) }}</span>
                 </header>
 
                 <div class="craft-list">
