@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, shallowRef } from 'vue'
 import {
   achievementChoiceRulesFor,
   buildBaseEntries,
@@ -23,6 +23,21 @@ import {
   type SearchResult,
 } from './questLogic'
 
+type AppUpdate = {
+  currentVersion: string
+  version: string
+  date?: string
+  body?: string
+  downloadAndInstall: (onEvent?: (event: DownloadEvent) => void) => Promise<void>
+}
+type DownloadEvent = {
+  event: 'Started' | 'Progress' | 'Finished'
+  data?: {
+    contentLength?: number
+    chunkLength?: number
+  }
+}
+
 const data = ref<QuestPlannerData | null>(null)
 const loading = ref(true)
 const syncing = ref(false)
@@ -41,6 +56,11 @@ const craftPlan = ref<CraftPlan | null>(null)
 const craftCheckedKeys = ref<Set<string>>(new Set())
 const craftOpen = ref(false)
 const showSyncConfirm = ref(false)
+const appUpdate = shallowRef<AppUpdate | null>(null)
+const showAppUpdatePrompt = ref(false)
+const checkingAppUpdate = ref(false)
+const installingAppUpdate = ref(false)
+const appUpdateProgress = ref('')
 
 const questCount = computed(() => Object.keys(data.value?.quests || {}).length)
 const achievementCount = computed(() => Object.keys(data.value?.achievements || {}).length)
@@ -94,6 +114,12 @@ const craftPanels = computed(() => {
 
 const displayedCraftLines = computed(() => craftPanels.value.flatMap((section) => section.lines))
 const craftCheckedCount = computed(() => displayedCraftLines.value.filter((line) => craftRowState(line).done).length)
+const appUpdateButtonVisible = computed(() => !!appUpdate.value || checkingAppUpdate.value || installingAppUpdate.value)
+const appUpdateButtonLabel = computed(() => {
+  if (installingAppUpdate.value) return 'Installation...'
+  if (checkingAppUpdate.value) return 'Recherche...'
+  return 'Mettre à jour'
+})
 
 const headerSummary = computed(() => {
   if (loading.value && !data.value) return 'Chargement des données locales...'
@@ -126,9 +152,13 @@ function imageUrl(path: string): string {
   return path ? `/${path.replace(/\\/g, '/')}` : ''
 }
 
+function isTauriRuntime(): boolean {
+  return '__TAURI_INTERNALS__' in window
+}
+
 async function openDofusDb(kind: 'object' | 'quest' | 'achievement', id: number): Promise<void> {
   const url = `https://dofusdb.fr/database/${kind}/${id}`
-  if ('__TAURI_INTERNALS__' in window) {
+  if (isTauriRuntime()) {
     try {
       const { invoke } = await import('@tauri-apps/api/core')
       await invoke('open_external_url', { url })
@@ -138,6 +168,70 @@ async function openDofusDb(kind: 'object' | 'quest' | 'achievement', id: number)
     }
   }
   window.open(url, '_blank', 'noopener,noreferrer')
+}
+
+async function checkAppUpdate(showPrompt: boolean): Promise<void> {
+  if (!isTauriRuntime() || checkingAppUpdate.value || installingAppUpdate.value) return
+  checkingAppUpdate.value = true
+  appUpdateProgress.value = ''
+  try {
+    const { check } = await import('@tauri-apps/plugin-updater')
+    const update = await check()
+    if (update) {
+      appUpdate.value = update
+      showAppUpdatePrompt.value = showPrompt
+      status.value = `Mise à jour ${update.version} disponible`
+      return
+    }
+    appUpdate.value = null
+    showAppUpdatePrompt.value = false
+    if (!showPrompt) status.value = 'Application déjà à jour'
+  } catch (error) {
+    if (!showPrompt) status.value = `Vérification maj impossible : ${String(error)}`
+  } finally {
+    checkingAppUpdate.value = false
+  }
+}
+
+function declineAppUpdate(): void {
+  showAppUpdatePrompt.value = false
+  appUpdateProgress.value = 'Mise à jour disponible quand tu veux'
+}
+
+async function installAppUpdate(): Promise<void> {
+  if (installingAppUpdate.value) return
+  if (!appUpdate.value) {
+    await checkAppUpdate(false)
+    if (!appUpdate.value) return
+  }
+  installingAppUpdate.value = true
+  showAppUpdatePrompt.value = true
+  appUpdateProgress.value = 'Téléchargement de la mise à jour...'
+  let downloaded = 0
+  let total: number | undefined
+  try {
+    await appUpdate.value.downloadAndInstall((event) => {
+      if (event.event === 'Started') {
+        downloaded = 0
+        total = event.data?.contentLength
+        appUpdateProgress.value = total ? `Téléchargement : 0/${Math.round(total / 1024 / 1024)} Mo` : 'Téléchargement...'
+      } else if (event.event === 'Progress') {
+        downloaded += event.data?.chunkLength || 0
+        appUpdateProgress.value = total
+          ? `Téléchargement : ${Math.min(100, Math.round((downloaded / total) * 100))}%`
+          : `Téléchargement : ${Math.round(downloaded / 1024 / 1024)} Mo`
+      } else {
+        appUpdateProgress.value = 'Installation terminée, redémarrage...'
+      }
+    })
+    const { relaunch } = await import('@tauri-apps/plugin-process')
+    await relaunch()
+  } catch (error) {
+    appUpdateProgress.value = `Mise à jour impossible : ${String(error)}`
+    status.value = appUpdateProgress.value
+  } finally {
+    installingAppUpdate.value = false
+  }
 }
 
 function setItemChecked(itemId: number, checked: boolean): void {
@@ -553,10 +647,11 @@ function toggleTheme(): void {
   applyTheme(themeMode.value === 'dark' ? 'light' : 'dark')
 }
 
-onMounted(() => {
+onMounted(async () => {
   const savedTheme = localStorage.getItem('questplanner-theme')
   applyTheme(savedTheme === 'light' ? 'light' : 'dark')
-  reloadData()
+  await reloadData()
+  await checkAppUpdate(true)
 })
 </script>
 
@@ -586,6 +681,15 @@ onMounted(() => {
           icon="construction"
           label="Plan craft"
           @click="toggleCraftPlan"
+        />
+        <q-btn
+          v-if="appUpdateButtonVisible"
+          color="primary"
+          unelevated
+          icon="system_update_alt"
+          :label="appUpdateButtonLabel"
+          :loading="checkingAppUpdate || installingAppUpdate"
+          @click="installAppUpdate"
         />
         <q-btn round flat :icon="themeMode === 'dark' ? 'light_mode' : 'dark_mode'" @click="toggleTheme" />
       </div>
@@ -755,6 +859,21 @@ onMounted(() => {
         <div class="sync-actions">
           <q-btn flat label="Annuler" @click="showSyncConfirm = false" />
           <q-btn color="primary" unelevated label="Forcer la sync" :loading="syncing" @click="forceSyncDatabases" />
+        </div>
+      </div>
+    </div>
+
+    <div v-if="showAppUpdatePrompt && appUpdate" class="sync-dialog" @click.self="declineAppUpdate">
+      <div class="sync-card glass-surface">
+        <h2>Mettre à jour QuestPlanner ?</h2>
+        <p>
+          La version {{ appUpdate.version }} est disponible. L'installation se fait en arrière-plan,
+          puis l'application redémarre toute seule.
+        </p>
+        <p v-if="appUpdateProgress" class="update-progress">{{ appUpdateProgress }}</p>
+        <div class="sync-actions">
+          <q-btn flat label="Plus tard" :disable="installingAppUpdate" @click="declineAppUpdate" />
+          <q-btn color="primary" unelevated label="Installer" :loading="installingAppUpdate" @click="installAppUpdate" />
         </div>
       </div>
     </div>

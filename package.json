@@ -1,7 +1,7 @@
 {
   "name": "questplanner-quasar",
   "private": true,
-  "version": "0.1.7",
+  "version": "0.1.8",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,11 +10,14 @@
     "smoke": "node scripts/smoke.mjs",
     "sync:achievements": "node scripts/sync-achievements.mjs",
     "sync:data": "node scripts/sync-static-data.mjs",
+    "release:latest": "node scripts/generate-latest-json.mjs",
     "tauri": "tauri"
   },
   "dependencies": {
     "@quasar/extras": "^1.18.0",
     "@tauri-apps/api": "^2.11.0",
+    "@tauri-apps/plugin-process": "^2.3.1",
+    "@tauri-apps/plugin-updater": "^2.10.1",
     "quasar": "^2.19.3",
     "vue": "^3.5.12"
   },

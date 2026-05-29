@@ -817,6 +817,11 @@ button {
   line-height: 1.45;
 }
 
+.sync-card .update-progress {
+  color: var(--text);
+  font-weight: 760;
+}
+
 .sync-actions {
   display: flex;
   justify-content: flex-end;

@@ -1,6 +1,6 @@
 [package]
 name = "questplanner"
-version = "0.1.7"
+version = "0.1.8"
 description = "QuestPlanner"
 authors = ["Moufle"]
 license = ""
@@ -29,3 +29,7 @@ tauri = { version = "2.11.1", features = [] }
 tauri-plugin-log = "2"
 reqwest = "0.12"
 arboard = "3.6"
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-process = "2.3.1"
+tauri-plugin-updater = "2.10.1"
