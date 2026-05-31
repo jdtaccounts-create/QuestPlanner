@@ -19,8 +19,25 @@ export interface CachedQuest {
   category_name?: string
   need_items?: number[]
   need_quantities?: number[]
+  need_item_groups?: NeedItemGroup[]
   need_quests?: number[]
   craft_targets?: number[]
+}
+
+export interface NeedItemGroupItem {
+  item_id: number
+  quantity: number
+}
+
+export interface NeedItemGroupOption {
+  label?: string
+  items: NeedItemGroupItem[]
+}
+
+export interface NeedItemGroup {
+  key?: string
+  label?: string
+  options: NeedItemGroupOption[]
 }
 
 export interface CachedAchievement {
@@ -48,6 +65,7 @@ export interface QuestInfo {
   categoryName: string
   needItems: number[]
   needQuantities: number[]
+  needItemGroups: NeedItemGroup[]
   needQuests: number[]
   craftTargets: number[]
   score: number
@@ -116,6 +134,30 @@ export interface ItemEntry {
   image_path: string
   source: string
   source_quests: string[]
+  order: number
+}
+
+export interface AlternativeItemLine {
+  item_id: number
+  quantity: number
+  name: string
+  raw_type: string
+  category: ItemCategory
+  image_path: string
+}
+
+export interface AlternativeItemOption {
+  option_key: string
+  label: string
+  items: AlternativeItemLine[]
+}
+
+export interface AlternativeItemGroupEntry {
+  group_key: string
+  label: string
+  category: ItemCategory
+  source_quests: string[]
+  options: AlternativeItemOption[]
   order: number
 }
 
@@ -344,10 +386,15 @@ export function compactText(value: string): string {
   return normalizeText(value).replace(/\s/g, '')
 }
 
-export function normalizeItemCategory(rawType = ''): ItemCategory {
-  if (rawType === 'Ressource' || rawType === 'Consommable') {
-    return rawType
-  }
+export function normalizeItemCategory(rawType = '', typeName = ''): ItemCategory {
+  const raw = normalizeText(rawType)
+  const type = normalizeText(typeName)
+
+  if (raw === 'ressource' || raw === 'objet de quete' || raw === 'certificat') return 'Ressource'
+  if (raw === 'consommable') return 'Consommable'
+  if (type.includes('jeton') || type.includes('monnaie') || type.includes('ressource')) return 'Ressource'
+  if (type.includes('potion') || type.includes('pain') || type.includes('biere') || type.includes('poisson comestible')) return 'Consommable'
+
   return 'Equipement'
 }
 
@@ -361,6 +408,17 @@ export function questInfoFromCache(rawQuest: CachedQuest): QuestInfo {
     categoryName: rawQuest.category_name || '',
     needItems: (rawQuest.need_items || []).map(Number),
     needQuantities: (rawQuest.need_quantities || []).map(Number),
+    needItemGroups: (rawQuest.need_item_groups || []).map((group, groupIndex) => ({
+      key: group.key || `group-${groupIndex + 1}`,
+      label: group.label || 'Choix de prérequis',
+      options: (group.options || []).map((option, optionIndex) => ({
+        label: option.label || `Choix ${optionIndex + 1}`,
+        items: (option.items || []).map((item) => ({
+          item_id: Number(item.item_id),
+          quantity: Number(item.quantity || 0),
+        })),
+      })),
+    })),
     needQuests: (rawQuest.need_quests || []).map(Number),
     craftTargets: (rawQuest.craft_targets || []).map(Number),
     score: 0,
@@ -613,12 +671,13 @@ function makeItemEntry(
   order = 0,
 ): ItemEntry {
   const rawType = item?.raw_type || 'Equipement'
+  const typeName = item?.type_name || ''
   const sourceCount = new Set(sourceQuests).size
   return {
     item_id: itemId,
     quantity,
     name: item?.name || `Item ${itemId}`,
-    category: normalizeItemCategory(item?.category || rawType),
+    category: normalizeItemCategory(rawType, typeName),
     raw_type: rawType,
     image_url: item?.image_url || '',
     image_path: item ? itemImagePath(item) : '',
@@ -785,6 +844,7 @@ export async function loadQuestPlannerData(): Promise<QuestPlannerData> {
         || Number(bundledMetadata.recipe_total || 0) > Object.keys(storedWithAchievements.recipes || {}).length
         || Number(bundledMetadata.quest_total || 0) > Object.keys(storedWithAchievements.quests || {}).length
         || Number(bundledMetadata.achievement_total || 0) > Object.keys(storedWithAchievements.achievements || {}).length
+        || Number(bundledMetadata.quest_need_schema_version || 0) > Number(storedWithAchievements.metadata?.quest_need_schema_version || 0)
 
       if (!bundledIsNewer) return storedWithAchievements
     } catch {
@@ -806,6 +866,68 @@ export async function loadQuestPlannerData(): Promise<QuestPlannerData> {
   ])
 
   return { quests, achievements, categories, items, recipes, exclusions, metadata }
+}
+
+function optionCategory(items: AlternativeItemLine[]): ItemCategory {
+  if (items.some((item) => item.category === 'Ressource')) return 'Ressource'
+  if (items.some((item) => item.category === 'Consommable')) return 'Consommable'
+  return items[0]?.category || 'Ressource'
+}
+
+export function alternativeGroupItemIds(quests: QuestInfo[]): number[] {
+  return quests.flatMap((quest) =>
+    quest.needItemGroups.flatMap((group) =>
+      group.options.flatMap((option) => option.items.map((item) => Number(item.item_id))),
+    ),
+  )
+}
+
+export function buildAlternativeGroups(data: QuestPlannerData, quests: QuestInfo[]): AlternativeItemGroupEntry[] {
+  const groups: AlternativeItemGroupEntry[] = []
+
+  quests.forEach((quest, questIndex) => {
+    quest.needItemGroups.forEach((group, groupIndex) => {
+      const options = group.options
+        .map((option, optionIndex) => {
+          const items = option.items
+            .map((entry) => {
+              const itemId = Number(entry.item_id)
+              const item = data.items[String(itemId)]
+              const rawType = item?.raw_type || 'Ressource'
+              const typeName = item?.type_name || ''
+              return {
+                item_id: itemId,
+                quantity: Number(entry.quantity || 0),
+                name: item?.name || `Item ${itemId}`,
+                raw_type: rawType,
+                category: normalizeItemCategory(rawType, typeName),
+                image_path: item ? itemImagePath(item) : '',
+              }
+            })
+            .filter((item) => item.quantity > 0 && !isItemExcluded(data.items[String(item.item_id)], data))
+
+          return {
+            option_key: `${quest.questId}:${group.key || groupIndex}:${optionIndex}`,
+            label: option.label || `Choix ${optionIndex + 1}`,
+            items,
+          }
+        })
+        .filter((option) => option.items.length)
+
+      if (options.length < 2) return
+
+      groups.push({
+        group_key: `${quest.questId}:${group.key || `group-${groupIndex + 1}`}`,
+        label: group.label || quest.name,
+        category: optionCategory(options.flatMap((option) => option.items)),
+        source_quests: [quest.name],
+        options,
+        order: questIndex + 1,
+      })
+    })
+  })
+
+  return groups.sort((a, b) => a.category.localeCompare(b.category, 'fr') || a.order - b.order || a.label.localeCompare(b.label, 'fr'))
 }
 
 function isTauriRuntime(): boolean {
@@ -1059,14 +1181,15 @@ function normalizeApiItem(rawItem: any): CachedItem | null {
   const name = rawLocaleValue(rawItem, 'name', `Item ${id}`)
   const imageUrl = rawItem.img || rawItem.image || ''
   const rawType = extractRawType(rawItem)
+  const typeName = extractItemTypeName(rawItem, 'fr')
 
   return {
     id: Number(id),
     name,
     raw_type: rawType,
-    category: normalizeItemCategory(rawType),
+    category: normalizeItemCategory(rawType, typeName),
     type_id: extractItemTypeId(rawItem),
-    type_name: extractItemTypeName(rawItem, 'fr'),
+    type_name: typeName,
     item_type_category_id: extractItemTypeCategoryId(rawItem),
     image_url: imageUrl,
     image_path: imageUrl,

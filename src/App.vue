@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, shallowRef } from 'vue'
+import { computed, onMounted, ref, shallowRef, watch } from 'vue'
 import {
   achievementChoiceRulesFor,
+  alternativeGroupItemIds,
+  buildAlternativeGroups,
   buildBaseEntries,
   buildCraftPlan,
   CATEGORIES,
@@ -15,6 +17,8 @@ import {
   type AchievementChoiceOption,
   type AchievementChoiceRule,
   type AchievementInfo,
+  type AlternativeItemGroupEntry,
+  type AlternativeItemLine,
   type CraftLine,
   type CraftPlan,
   type ItemEntry,
@@ -41,7 +45,6 @@ type DownloadEvent = {
 const data = ref<QuestPlannerData | null>(null)
 const loading = ref(true)
 const syncing = ref(false)
-const checkingSync = ref(false)
 const updateAvailable = ref(false)
 const status = ref('Chargement des données locales...')
 const themeMode = ref<'dark' | 'light'>('dark')
@@ -51,16 +54,20 @@ const pendingAchievement = ref<AchievementInfo | null>(null)
 const pendingChoiceRules = ref<AchievementChoiceRule[]>([])
 const pendingChoiceValues = ref<Record<number, string>>({})
 const currentEntries = ref<ItemEntry[]>([])
+const currentAlternativeGroups = ref<AlternativeItemGroupEntry[]>([])
 const checkedItemIds = ref<Set<number>>(new Set())
+const selectedAlternativeOptionKeys = ref<Record<string, string>>({})
 const craftPlan = ref<CraftPlan | null>(null)
 const craftCheckedKeys = ref<Set<string>>(new Set())
 const craftOpen = ref(false)
+const choiceOpen = ref(false)
 const showSyncConfirm = ref(false)
 const appUpdate = shallowRef<AppUpdate | null>(null)
 const showAppUpdatePrompt = ref(false)
 const checkingAppUpdate = ref(false)
 const installingAppUpdate = ref(false)
 const appUpdateProgress = ref('')
+let autoComputeTimer: number | undefined
 
 const questCount = computed(() => Object.keys(data.value?.quests || {}).length)
 const achievementCount = computed(() => Object.keys(data.value?.achievements || {}).length)
@@ -82,14 +89,31 @@ const questSidebarWidth = computed(() => {
   return `${Math.min(430, Math.max(322, 150 + longestName * 6.8))}px`
 })
 
+const displayedEntries = computed(() => mergeItemEntries([...currentEntries.value, ...selectedAlternativeEntries()]))
+
 const groupedEntries = computed(() => {
   const groups = Object.fromEntries(CATEGORIES.map((category) => [category, [] as ItemEntry[]]))
-  currentEntries.value.forEach((entry) => groups[entry.category].push(entry))
+  displayedEntries.value.forEach((entry) => groups[entry.category].push(entry))
   CATEGORIES.forEach((category) => groups[category].sort(compareEntries))
   return groups
 })
 
-const remainingEntries = computed(() => currentEntries.value.filter((entry) => !isEntryDone(entry)))
+const groupedAlternativeGroups = computed(() => {
+  const groups = Object.fromEntries(CATEGORIES.map((category) => [category, [] as AlternativeItemGroupEntry[]]))
+  currentAlternativeGroups.value.forEach((group) => groups[group.category].push(group))
+  CATEGORIES.forEach((category) => groups[category].sort(compareAlternativeGroups))
+  return groups
+})
+
+const remainingEntries = computed(() => displayedEntries.value.filter((entry) => !isEntryDone(entry)))
+const unresolvedAlternativeGroups = computed(() =>
+  currentAlternativeGroups.value.filter((group) => !selectedAlternativeOptionKeys.value[group.group_key]),
+)
+const craftTargetCount = computed(() => remainingEntries.value.length)
+const choiceTotalCount = computed(() => currentAlternativeGroups.value.length)
+const choiceResolvedCount = computed(() =>
+  currentAlternativeGroups.value.filter((group) => selectedAlternativeOptionKeys.value[group.group_key]).length,
+)
 
 const craftSections = computed(() => {
   const plan = craftPlan.value
@@ -114,22 +138,6 @@ const craftPanels = computed(() => {
 
 const displayedCraftLines = computed(() => craftPanels.value.flatMap((section) => section.lines))
 const craftCheckedCount = computed(() => displayedCraftLines.value.filter((line) => craftRowState(line).done).length)
-const appUpdateButtonVisible = computed(() => !!appUpdate.value || checkingAppUpdate.value || installingAppUpdate.value)
-const appUpdateButtonLabel = computed(() => {
-  if (installingAppUpdate.value) return 'Installation...'
-  if (checkingAppUpdate.value) return 'Recherche...'
-  return 'Mettre à jour'
-})
-
-const headerSummary = computed(() => {
-  if (loading.value && !data.value) return 'Chargement des données locales...'
-  if (!currentEntries.value.length) {
-    return data.value
-      ? `${questCount.value} quêtes · ${achievementCount.value} succès · ${itemCount.value} items · ${recipeCount.value} recettes`
-      : status.value
-  }
-  return `${currentEntries.value.length} items différents · ${remainingEntries.value.length} restants · ${status.value}`
-})
 
 const coveredByItemId = computed(() => {
   const covered = new Map<number, number>()
@@ -170,7 +178,7 @@ async function openDofusDb(kind: 'object' | 'quest' | 'achievement', id: number)
   window.open(url, '_blank', 'noopener,noreferrer')
 }
 
-async function checkAppUpdate(showPrompt: boolean): Promise<void> {
+async function checkAppUpdate(): Promise<void> {
   if (!isTauriRuntime() || checkingAppUpdate.value || installingAppUpdate.value) return
   checkingAppUpdate.value = true
   appUpdateProgress.value = ''
@@ -179,31 +187,24 @@ async function checkAppUpdate(showPrompt: boolean): Promise<void> {
     const update = await check()
     if (update) {
       appUpdate.value = update
-      showAppUpdatePrompt.value = showPrompt
-      status.value = `Mise à jour ${update.version} disponible`
+      showAppUpdatePrompt.value = true
+      status.value = `Mise à jour ${update.version} requise`
+      checkingAppUpdate.value = false
+      await installAppUpdate()
       return
     }
     appUpdate.value = null
     showAppUpdatePrompt.value = false
-    if (!showPrompt) status.value = 'Application déjà à jour'
   } catch (error) {
-    if (!showPrompt) status.value = `Vérification maj impossible : ${String(error)}`
+    status.value = `Vérification maj impossible : ${String(error)}`
   } finally {
     checkingAppUpdate.value = false
   }
 }
 
-function declineAppUpdate(): void {
-  showAppUpdatePrompt.value = false
-  appUpdateProgress.value = 'Mise à jour disponible quand tu veux'
-}
-
 async function installAppUpdate(): Promise<void> {
   if (installingAppUpdate.value) return
-  if (!appUpdate.value) {
-    await checkAppUpdate(false)
-    if (!appUpdate.value) return
-  }
+  if (!appUpdate.value) return
   installingAppUpdate.value = true
   showAppUpdatePrompt.value = true
   appUpdateProgress.value = 'Téléchargement de la mise à jour...'
@@ -241,6 +242,18 @@ function setItemChecked(itemId: number, checked: boolean): void {
   checkedItemIds.value = next
 }
 
+function selectAlternativeOption(groupKey: string, optionKey: string): void {
+  const next = { ...selectedAlternativeOptionKeys.value }
+  if (next[groupKey] === optionKey) delete next[groupKey]
+  else next[groupKey] = optionKey
+  selectedAlternativeOptionKeys.value = next
+
+  craftPlan.value = null
+  craftCheckedKeys.value = new Set()
+  craftOpen.value = false
+  if (allAlternativeGroupsResolved(next)) choiceOpen.value = false
+}
+
 function setCraftChecked(line: CraftLine, checked: boolean): void {
   const next = new Set(craftCheckedKeys.value)
   if (checked) next.add(line.line_key)
@@ -260,6 +273,19 @@ function isEntryDone(entry: ItemEntry): boolean {
   return isChecked(entry.item_id) || covered >= entry.quantity
 }
 
+function isAlternativeOptionSelected(group: AlternativeItemGroupEntry, optionKey: string): boolean {
+  return selectedAlternativeOptionKeys.value[group.group_key] === optionKey
+}
+
+function isAlternativeGroupResolved(group: AlternativeItemGroupEntry): boolean {
+  return Boolean(selectedAlternativeOptionKeys.value[group.group_key])
+}
+
+function allAlternativeGroupsResolved(selected: Record<string, string>): boolean {
+  return currentAlternativeGroups.value.length > 0
+    && currentAlternativeGroups.value.every((group) => Boolean(selected[group.group_key]))
+}
+
 function categoryTitle(category: string): string {
   return category === 'Equipement' ? 'Equipements' : `${category}s`
 }
@@ -268,6 +294,12 @@ function categoryProgress(category: string): string {
   const entries = groupedEntries.value[category] || []
   const checked = entries.filter((entry) => isEntryDone(entry)).length
   return `${checked}/${entries.length}`
+}
+
+function choicePanelProgress(category: string): string {
+  const alternatives = groupedAlternativeGroups.value[category] || []
+  const resolved = alternatives.filter((group) => selectedAlternativeOptionKeys.value[group.group_key]).length
+  return `${resolved}/${alternatives.length}`
 }
 
 function craftPanelProgress(section: { lines: CraftLine[] }): string {
@@ -284,18 +316,66 @@ function entryMeta(entry: ItemEntry): string {
   return itemSubtype(entry.item_id, entry.raw_type)
 }
 
+function alternativeItemMeta(item: AlternativeItemLine): string {
+  return itemSubtype(item.item_id, item.raw_type)
+}
+
+function selectedAlternativeEntries(): ItemEntry[] {
+  const entries: ItemEntry[] = []
+
+  currentAlternativeGroups.value.forEach((group) => {
+    const optionKey = selectedAlternativeOptionKeys.value[group.group_key]
+    const option = group.options.find((candidate) => candidate.option_key === optionKey)
+    if (!option) return
+
+    option.items.forEach((item, itemIndex) => {
+      entries.push({
+        item_id: item.item_id,
+        quantity: item.quantity,
+        name: item.name,
+        category: item.category,
+        raw_type: item.raw_type,
+        image_url: '',
+        image_path: item.image_path,
+        source: 'Choix de prérequis',
+        source_quests: group.source_quests,
+        order: 10000 + group.order * 100 + itemIndex,
+      })
+    })
+  })
+
+  return entries
+}
+
+function mergeItemEntries(entries: ItemEntry[]): ItemEntry[] {
+  const merged = new Map<number, ItemEntry>()
+
+  entries.forEach((entry) => {
+    const existing = merged.get(entry.item_id)
+    if (!existing) {
+      merged.set(entry.item_id, { ...entry, source_quests: [...entry.source_quests] })
+      return
+    }
+    existing.quantity += entry.quantity
+    existing.source_quests = Array.from(new Set([...existing.source_quests, ...entry.source_quests]))
+    existing.order = Math.min(existing.order, entry.order)
+  })
+
+  return Array.from(merged.values())
+}
+
 function craftMeta(line: CraftLine): string {
   return itemSubtype(line.item_id, line.raw_type)
 }
 
 function craftLineCompletesBaseItem(line: CraftLine): boolean {
   if (line.line_key.startsWith('ingredients:')) {
-    return currentEntries.value.some((entry) => entry.item_id === line.item_id)
+    return displayedEntries.value.some((entry) => entry.item_id === line.item_id)
   }
   const isBaseLine = line.line_key.startsWith('direct_crafts:')
     || line.line_key.startsWith('base_direct:')
     || line.line_key.startsWith('excluded:')
-  return isBaseLine && currentEntries.value.some((entry) => entry.item_id === line.item_id)
+  return isBaseLine && displayedEntries.value.some((entry) => entry.item_id === line.item_id)
 }
 
 function sortKey(value: string): string {
@@ -314,6 +394,12 @@ function compareEntries(a: ItemEntry, b: ItemEntry): number {
     || compareText(entryMeta(a), entryMeta(b))
     || compareText(a.name, b.name)
     || a.order - b.order
+}
+
+function compareAlternativeGroups(a: AlternativeItemGroupEntry, b: AlternativeItemGroupEntry): number {
+  return Number(isAlternativeGroupResolved(a)) - Number(isAlternativeGroupResolved(b))
+    || a.order - b.order
+    || compareText(a.label, b.label)
 }
 
 function compareCraftLines(a: CraftLine, b: CraftLine): number {
@@ -444,10 +530,13 @@ function removeQuest(questId: number): void {
 function clearQuests(): void {
   selectedQuests.value = []
   currentEntries.value = []
+  currentAlternativeGroups.value = []
   checkedItemIds.value = new Set()
+  selectedAlternativeOptionKeys.value = {}
   craftPlan.value = null
   craftCheckedKeys.value = new Set()
   craftOpen.value = false
+  choiceOpen.value = false
   status.value = 'Liste vidée'
 }
 
@@ -475,21 +564,35 @@ async function parseClipboard(): Promise<void> {
 
 async function computeItems(): Promise<void> {
   if (!data.value || !selectedQuests.value.length) {
-    status.value = 'Ajoute au moins une quête'
+    currentEntries.value = []
+    currentAlternativeGroups.value = []
+    checkedItemIds.value = new Set()
+    selectedAlternativeOptionKeys.value = {}
+    craftPlan.value = null
+    craftCheckedKeys.value = new Set()
+    craftOpen.value = false
+    choiceOpen.value = false
+    status.value = data.value ? 'Ajoute au moins une quête' : 'Chargement des données locales...'
     return
   }
   loading.value = true
   try {
-    const neededItemIds = selectedQuests.value.flatMap((quest) => quest.needItems)
+    const neededItemIds = [
+      ...selectedQuests.value.flatMap((quest) => quest.needItems),
+      ...alternativeGroupItemIds(selectedQuests.value),
+    ]
     await ensureItems(data.value, neededItemIds, (message) => {
       status.value = message
     })
     currentEntries.value = buildBaseEntries(data.value, selectedQuests.value)
+    currentAlternativeGroups.value = buildAlternativeGroups(data.value, selectedQuests.value)
     checkedItemIds.value = new Set()
+    selectedAlternativeOptionKeys.value = {}
     craftPlan.value = null
     craftCheckedKeys.value = new Set()
     craftOpen.value = false
-    status.value = `${currentEntries.value.length} items agrégés depuis ${selectedQuests.value.length} quêtes`
+    choiceOpen.value = currentAlternativeGroups.value.length > 0
+    status.value = `${currentEntries.value.length} items et ${currentAlternativeGroups.value.length} choix agrégés depuis ${selectedQuests.value.length} quêtes`
   } catch (error) {
     status.value = error instanceof Error ? `Erreur items : ${error.message}` : 'Erreur items'
   } finally {
@@ -509,22 +612,33 @@ function collectCraftPlanItemIds(plan: CraftPlan): number[] {
 
 async function prepareCraftPlan(): Promise<void> {
   if (!data.value) return
-  if (!remainingEntries.value.length) {
+  if (unresolvedAlternativeGroups.value.length) {
+    const names = unresolvedAlternativeGroups.value.slice(0, 3).map((group) => group.label).join(', ')
+    const suffix = unresolvedAlternativeGroups.value.length > 3 ? ` et ${unresolvedAlternativeGroups.value.length - 3} autre(s)` : ''
+    status.value = `Choisis une option pour ${names}${suffix} avant d'ouvrir le plan craft`
+    craftOpen.value = false
+    choiceOpen.value = true
+    return
+  }
+
+  const craftEntries = remainingEntries.value
+  if (!craftEntries.length) {
     status.value = 'Plan craft : aucun item non coché'
     return
   }
   loading.value = true
   try {
-    await ensureItems(data.value, remainingEntries.value.map((entry) => entry.item_id), (message) => {
+    await ensureItems(data.value, craftEntries.map((entry) => entry.item_id), (message) => {
       status.value = message
     })
-    const firstPlan = buildCraftPlan(data.value, remainingEntries.value)
+    const firstPlan = buildCraftPlan(data.value, craftEntries)
     await ensureItems(data.value, collectCraftPlanItemIds(firstPlan), (message) => {
       status.value = message
     })
-    craftPlan.value = buildCraftPlan(data.value, remainingEntries.value)
+    craftPlan.value = buildCraftPlan(data.value, craftEntries)
     craftCheckedKeys.value = new Set()
     craftOpen.value = true
+    choiceOpen.value = false
     const totalLines = craftSections.value.reduce((total, section) => total + section.lines.length, 0)
     status.value = `Plan craft prêt : ${totalLines} lignes`
   } catch (error) {
@@ -537,9 +651,16 @@ async function prepareCraftPlan(): Promise<void> {
 async function toggleCraftPlan(): Promise<void> {
   if (craftPlan.value) {
     craftOpen.value = !craftOpen.value
+    if (craftOpen.value) choiceOpen.value = false
     return
   }
   await prepareCraftPlan()
+}
+
+function toggleChoicePanel(): void {
+  if (!currentAlternativeGroups.value.length) return
+  choiceOpen.value = !choiceOpen.value
+  if (choiceOpen.value) craftOpen.value = false
 }
 
 function craftRowState(line: CraftLine): { checked: boolean; covered: number; done: boolean; label: string } {
@@ -570,7 +691,8 @@ async function checkLocalDataStatus(): Promise<void> {
     const info = await checkQuestPlannerDataStatus(data.value)
     updateAvailable.value = info.needsSync
     if (info.needsSync) {
-      status.value = `Mise à jour disponible (${info.missingLabels.join(', ')}) : clique sur Sync DofusDB`
+      status.value = `Mise à jour disponible (${info.missingLabels.join(', ')})`
+      if (isTauriRuntime()) await syncDatabases()
       return
     }
     status.value = `Données locales à jour : ${info.localQuestTotal} quêtes, ${info.localAchievementTotal} succès, ${info.localItemTotal} items, ${info.localRecipeTotal} recettes`
@@ -591,10 +713,13 @@ async function syncDatabases(): Promise<void> {
     data.value = synced
     updateAvailable.value = false
     currentEntries.value = []
+    currentAlternativeGroups.value = []
     checkedItemIds.value = new Set()
+    selectedAlternativeOptionKeys.value = {}
     craftPlan.value = null
     craftCheckedKeys.value = new Set()
     craftOpen.value = false
+    choiceOpen.value = false
     status.value = `Données synchronisées : ${questCount.value} quêtes, ${achievementCount.value} succès, ${itemCount.value} items, ${recipeCount.value} recettes`
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
@@ -603,32 +728,6 @@ async function syncDatabases(): Promise<void> {
       : `Erreur sync : ${message}`
   } finally {
     syncing.value = false
-  }
-}
-
-async function requestSyncDatabases(): Promise<void> {
-  if (syncing.value || checkingSync.value) return
-  if (!data.value) {
-    await syncDatabases()
-    return
-  }
-
-  checkingSync.value = true
-  status.value = 'Vérification DofusDB avant synchronisation...'
-  try {
-    const info = await checkQuestPlannerDataStatus(data.value)
-    updateAvailable.value = info.needsSync
-    if (info.needsSync) {
-      await syncDatabases()
-      return
-    }
-    status.value = 'Données déjà à jour : synchronisation complète inutile'
-    showSyncConfirm.value = true
-  } catch {
-    status.value = 'Vérification impossible : confirme si tu veux forcer la synchronisation'
-    showSyncConfirm.value = true
-  } finally {
-    checkingSync.value = false
   }
 }
 
@@ -647,57 +746,35 @@ function toggleTheme(): void {
   applyTheme(themeMode.value === 'dark' ? 'light' : 'dark')
 }
 
+function scheduleComputeItems(): void {
+  if (autoComputeTimer) window.clearTimeout(autoComputeTimer)
+  autoComputeTimer = window.setTimeout(() => {
+    autoComputeTimer = undefined
+    void computeItems()
+  }, 120)
+}
+
+watch(
+  () => selectedQuests.value.map((quest) => quest.questId).join(','),
+  () => {
+    if (!data.value) return
+    scheduleComputeItems()
+  },
+)
+
 onMounted(async () => {
   const savedTheme = localStorage.getItem('questplanner-theme')
   applyTheme(savedTheme === 'light' ? 'light' : 'dark')
   await reloadData()
-  await checkAppUpdate(true)
+  await checkAppUpdate()
 })
 </script>
 
 <template>
   <div class="app-shell">
-    <header class="topbar glass-surface">
-      <div>
-        <h1>QuestPlanner</h1>
-        <p><span class="status-dot" :class="{ warn: updateAvailable }"></span>{{ headerSummary }}</p>
-      </div>
-      <div class="toolbar">
-        <q-btn flat dense icon="refresh" label="Recharger" :loading="loading" @click="reloadData" />
-        <q-btn
-          :flat="!updateAvailable"
-          :unelevated="updateAvailable"
-          dense
-          icon="sync"
-          label="Sync DofusDB"
-          :color="updateAvailable ? 'warning' : undefined"
-          :loading="syncing || checkingSync"
-          @click="requestSyncDatabases"
-        />
-        <q-btn color="primary" unelevated icon="inventory_2" label="Chercher les items" @click="computeItems" />
-        <q-btn
-          color="secondary"
-          unelevated
-          icon="construction"
-          label="Plan craft"
-          @click="toggleCraftPlan"
-        />
-        <q-btn
-          v-if="appUpdateButtonVisible"
-          color="primary"
-          unelevated
-          icon="system_update_alt"
-          :label="appUpdateButtonLabel"
-          :loading="checkingAppUpdate || installingAppUpdate"
-          @click="installAppUpdate"
-        />
-        <q-btn round flat :icon="themeMode === 'dark' ? 'light_mode' : 'dark_mode'" @click="toggleTheme" />
-      </div>
-    </header>
-
     <main
       class="workspace"
-      :class="{ 'craft-mode': craftOpen && craftPlan }"
+      :class="{ 'craft-mode': craftOpen && craftPlan, 'choice-mode': choiceOpen }"
       :style="{ '--quest-sidebar-width': questSidebarWidth }"
     >
       <aside class="quest-sidebar glass-surface">
@@ -712,6 +789,13 @@ onMounted(async () => {
             @keyup.enter="addFirstSearchResult"
           >
             <template #prepend>
+              <button
+                class="theme-search-button"
+                type="button"
+                @click.stop="toggleTheme"
+              >
+                <q-icon :name="themeMode === 'dark' ? 'light_mode' : 'dark_mode'" />
+              </button>
               <q-icon name="search" />
             </template>
           </q-input>
@@ -735,7 +819,7 @@ onMounted(async () => {
         <section class="selected-block">
           <div class="panel-heading">
             <h2>Quêtes sélectionnées</h2>
-            <q-badge rounded color="secondary">{{ selectedQuests.length }}</q-badge>
+            <q-badge rounded>{{ selectedQuests.length }}</q-badge>
           </div>
 
           <div class="selected-actions">
@@ -786,24 +870,106 @@ onMounted(async () => {
                   </span>
                 </button>
               </article>
+
             </div>
             <p v-else class="empty-state">Aucun item</p>
           </article>
         </div>
+
+        <aside class="choice-panel glass-surface" :class="{ open: choiceOpen }">
+          <button
+            v-if="!choiceOpen"
+            class="choice-rail"
+            type="button"
+            :disabled="!currentAlternativeGroups.length"
+            @click="toggleChoicePanel"
+          >
+            <span class="rail-title">Choix</span>
+            <span class="rail-badge">{{ unresolvedAlternativeGroups.length }}</span>
+          </button>
+
+          <div v-else class="choice-expanded">
+            <header class="craft-heading">
+              <q-btn dense round flat icon="close" title="Fermer les choix" @click="choiceOpen = false" />
+              <h2>Items à choisir</h2>
+              <q-badge rounded color="primary">{{ choiceResolvedCount }}/{{ choiceTotalCount }}</q-badge>
+            </header>
+
+            <div class="choice-grid">
+              <section v-for="category in CATEGORIES" :key="category" class="choice-section">
+                <header>
+                  <h3>{{ categoryTitle(category) }}</h3>
+                  <span>{{ choicePanelProgress(category) }}</span>
+                </header>
+
+                <div class="choice-list">
+                  <p v-if="!groupedAlternativeGroups[category].length" class="empty-state compact">Aucun choix</p>
+                  <article
+                    v-for="group in groupedAlternativeGroups[category]"
+                    :key="group.group_key"
+                    class="alternative-row"
+                    :class="{ done: isAlternativeGroupResolved(group) }"
+                  >
+                    <div class="alternative-card">
+                      <header>
+                        <span>{{ group.source_quests.join(', ') }}</span>
+                      </header>
+
+                      <div class="alternative-options">
+                        <template v-for="(option, optionIndex) in group.options" :key="option.option_key">
+                          <div v-if="optionIndex > 0" class="alternative-separator"><span>ou</span></div>
+                          <div
+                            class="alternative-option"
+                            :class="{ selected: isAlternativeOptionSelected(group, option.option_key) }"
+                          >
+                            <button
+                              class="alternative-select"
+                              type="button"
+                              :aria-pressed="isAlternativeOptionSelected(group, option.option_key)"
+                              @click="selectAlternativeOption(group.group_key, option.option_key)"
+                            >
+                              <q-icon :name="isAlternativeOptionSelected(group, option.option_key) ? 'radio_button_checked' : 'radio_button_unchecked'" />
+                            </button>
+                            <button
+                              v-for="item in option.items"
+                              :key="`${option.option_key}:${item.item_id}`"
+                              class="alternative-item"
+                              type="button"
+                              @click="openDofusDb('object', item.item_id)"
+                            >
+                              <img v-if="item.image_path" :src="imageUrl(item.image_path)" alt="" />
+                              <span v-else class="image-fallback">{{ item.name.slice(0, 1) }}</span>
+                              <span class="item-copy">
+                                <strong>{{ item.quantity }} x {{ item.name }}</strong>
+                                <small>{{ alternativeItemMeta(item) }}</small>
+                              </span>
+                            </button>
+                          </div>
+                        </template>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+              </section>
+            </div>
+          </div>
+        </aside>
 
         <aside class="craft-panel glass-surface" :class="{ open: craftOpen && craftPlan }">
           <button
             v-if="!craftOpen || !craftPlan"
             class="craft-rail"
             type="button"
+            :disabled="!craftTargetCount"
             @click="toggleCraftPlan"
           >
             <span class="rail-title">Plan craft</span>
-            <span class="rail-badge">{{ remainingEntries.length }}</span>
+            <span class="rail-badge">{{ craftTargetCount }}</span>
           </button>
 
           <div v-else class="craft-expanded">
             <header class="craft-heading">
+              <q-btn dense round flat icon="close" title="Fermer le plan craft" @click="craftOpen = false" />
               <h2>Plan de craft</h2>
               <q-badge rounded color="primary">{{ craftCheckedCount }}/{{ displayedCraftLines.length }}</q-badge>
             </header>
@@ -863,18 +1029,14 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div v-if="showAppUpdatePrompt && appUpdate" class="sync-dialog" @click.self="declineAppUpdate">
+    <div v-if="showAppUpdatePrompt && appUpdate" class="sync-dialog">
       <div class="sync-card glass-surface">
-        <h2>Mettre à jour QuestPlanner ?</h2>
+        <h2>Mise à jour nécessaire</h2>
         <p>
-          La version {{ appUpdate.version }} est disponible. L'installation se fait en arrière-plan,
+          La version {{ appUpdate.version }} est disponible. QuestPlanner doit l'installer maintenant,
           puis l'application redémarre toute seule.
         </p>
         <p v-if="appUpdateProgress" class="update-progress">{{ appUpdateProgress }}</p>
-        <div class="sync-actions">
-          <q-btn flat label="Plus tard" :disable="installingAppUpdate" @click="declineAppUpdate" />
-          <q-btn color="primary" unelevated label="Installer" :loading="installingAppUpdate" @click="installAppUpdate" />
-        </div>
       </div>
     </div>
 

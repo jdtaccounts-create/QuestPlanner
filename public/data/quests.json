@@ -129,8 +129,12 @@
     "level_min": 31,
     "category_id": 9,
     "category_name": "Alignement Bonta",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      44
+    ],
+    "need_quantities": [
+      10
+    ],
     "need_quests": [],
     "craft_targets": []
   },
@@ -216,8 +220,12 @@
     "level_min": 36,
     "category_id": 9,
     "category_name": "Alignement Bonta",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      1895
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       59
     ],
@@ -302,9 +310,11 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
+      749,
       140
     ],
     "need_quantities": [
+      1,
       10
     ],
     "need_quests": [
@@ -424,8 +434,12 @@
     "level_min": 58,
     "category_id": 9,
     "category_name": "Alignement Bonta",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      30328
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       71
     ],
@@ -468,8 +482,12 @@
     "level_min": 60,
     "category_id": 9,
     "category_name": "Alignement Bonta",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      153
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       73
     ],
@@ -547,14 +565,14 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
-      538,
       2588,
-      2586
+      2586,
+      538
     ],
     "need_quantities": [
-      25,
       4,
-      4
+      4,
+      25
     ],
     "need_quests": [
       77
@@ -571,14 +589,8 @@
     "level_min": 75,
     "category_id": 9,
     "category_name": "Alignement Bonta",
-    "need_items": [
-      2130,
-      2152
-    ],
-    "need_quantities": [
-      1,
-      1
-    ],
+    "need_items": [],
+    "need_quantities": [],
     "need_quests": [
       78
     ],
@@ -595,9 +607,17 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
+      1732,
+      1773,
+      1734,
+      2150,
       17134
     ],
     "need_quantities": [
+      1,
+      5,
+      3,
+      10,
       5
     ],
     "need_quests": [
@@ -632,12 +652,8 @@
     "level_min": 78,
     "category_id": 9,
     "category_name": "Alignement Bonta",
-    "need_items": [
-      2178
-    ],
-    "need_quantities": [
-      3
-    ],
+    "need_items": [],
+    "need_quantities": [],
     "need_quests": [
       81
     ],
@@ -756,7 +772,7 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
-      2356
+      393
     ],
     "need_quantities": [
       1
@@ -862,12 +878,12 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
-      594,
-      6736
+      6736,
+      594
     ],
     "need_quantities": [
-      40,
-      10
+      10,
+      40
     ],
     "need_quests": [
       433
@@ -925,10 +941,12 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      2150
+      2150,
+      1461
     ],
     "need_quantities": [
-      20
+      20,
+      5
     ],
     "need_quests": [
       436
@@ -946,14 +964,14 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      313,
+      9688,
       397,
-      9688
+      313
     ],
     "need_quantities": [
-      50,
       1,
-      1
+      1,
+      50
     ],
     "need_quests": [
       438
@@ -1107,9 +1125,9 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
-      17148,
+      6671,
       537,
-      6671
+      17148
     ],
     "need_quantities": [
       2,
@@ -1131,8 +1149,12 @@
     "level_min": 140,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      10079
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       112
     ],
@@ -1148,8 +1170,12 @@
     "level_min": 140,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      9935
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       114
     ],
@@ -1166,12 +1192,12 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      848,
-      449
+      449,
+      847
     ],
     "need_quantities": [
-      1,
-      12
+      12,
+      10
     ],
     "need_quests": [
       113
@@ -1189,16 +1215,16 @@
     "category_id": 55,
     "category_name": "Royaume d'Amakna",
     "need_items": [
-      16489,
-      450,
       289,
-      17168
+      17168,
+      450,
+      16489
     ],
     "need_quantities": [
       12,
+      10,
       3,
-      12,
-      10
+      12
     ],
     "need_quests": [],
     "craft_targets": []
@@ -1214,22 +1240,22 @@
     "category_id": 55,
     "category_name": "Royaume d'Amakna",
     "need_items": [
-      309,
-      1811,
-      1832,
-      521,
-      528,
       1501,
-      351
+      1811,
+      351,
+      528,
+      521,
+      309,
+      1832
     ],
     "need_quantities": [
-      6,
+      1,
       8,
-      4,
+      12,
       2,
       2,
-      2,
-      12
+      6,
+      4
     ],
     "need_quests": [
       132
@@ -1266,16 +1292,16 @@
     "category_id": 55,
     "category_name": "Royaume d'Amakna",
     "need_items": [
-      882,
-      309,
+      300,
       600,
-      300
+      882,
+      309
     ],
     "need_quantities": [
-      1,
-      6,
+      10,
       30,
-      10
+      1,
+      6
     ],
     "need_quests": [
       134
@@ -1293,22 +1319,22 @@
     "category_id": 55,
     "category_name": "Royaume d'Amakna",
     "need_items": [
-      1895,
-      2044,
+      351,
+      6857,
       2086,
       16840,
-      6857,
-      311,
-      351
+      2044,
+      1895,
+      311
     ],
     "need_quantities": [
+      3,
       1,
       1,
       1,
       1,
       1,
-      10,
-      3
+      10
     ],
     "need_quests": [],
     "craft_targets": []
@@ -1324,14 +1350,14 @@
     "category_id": 55,
     "category_name": "Royaume d'Amakna",
     "need_items": [
-      389,
-      33063,
-      1728
+      1728,
+      7811,
+      389
     ],
     "need_quantities": [
-      2,
       1,
-      1
+      1,
+      2
     ],
     "need_quests": [
       135,
@@ -1388,7 +1414,7 @@
     "category_id": 55,
     "category_name": "Royaume d'Amakna",
     "need_items": [
-      33001
+      7819
     ],
     "need_quantities": [
       1
@@ -1407,7 +1433,7 @@
     "category_id": 16,
     "category_name": "Bonta",
     "need_items": [
-      33063
+      7811
     ],
     "need_quantities": [
       1
@@ -1426,7 +1452,7 @@
     "category_id": 17,
     "category_name": "Brâkmar",
     "need_items": [
-      33063
+      7811
     ],
     "need_quantities": [
       1
@@ -1494,14 +1520,14 @@
     "category_id": 13,
     "category_name": "Montagne des Koalaks",
     "need_items": [
-      2598,
+      2179,
       2599,
-      2179
+      2598
     ],
     "need_quantities": [
+      10,
       5,
-      5,
-      10
+      5
     ],
     "need_quests": [],
     "craft_targets": []
@@ -1617,40 +1643,40 @@
     "category_id": 55,
     "category_name": "Royaume d'Amakna",
     "need_items": [
-      381,
-      400,
-      17140,
-      17181,
-      287,
-      2253,
-      390,
-      1736,
       2331,
-      537,
-      1974,
-      1975,
-      598,
-      600,
       7149,
-      7046
+      1736,
+      1974,
+      2253,
+      381,
+      287,
+      598,
+      390,
+      600,
+      1975,
+      400,
+      7046,
+      537,
+      17181,
+      17140
     ],
     "need_quantities": [
+      3,
+      10,
+      2,
+      3,
+      4,
       20,
-      10,
-      3,
-      2,
       5,
-      4,
-      1,
-      2,
-      3,
-      5,
-      3,
-      4,
       8,
+      1,
       15,
+      4,
       10,
-      1
+      1,
+      5,
+      2,
+      3
     ],
     "need_quests": [],
     "craft_targets": []
@@ -1741,24 +1767,18 @@
     "category_id": 18,
     "category_name": "Camps des Bworks et des Gobelins",
     "need_items": [
-      2264,
-      8515,
       417,
-      2552,
-      8514,
-      8516,
-      8517,
-      8513
+      2264,
+      312,
+      399,
+      2552
     ],
     "need_quantities": [
-      5,
-      5,
       10,
-      2,
+      5,
+      5,
       1,
-      1,
-      1,
-      1
+      2
     ],
     "need_quests": [
       167
@@ -1776,14 +1796,10 @@
     "category_id": 18,
     "category_name": "Camps des Bworks et des Gobelins",
     "need_items": [
-      8519,
-      8520,
-      8521
+      8145
     ],
     "need_quantities": [
-      1,
-      1,
-      1
+      36
     ],
     "need_quests": [],
     "craft_targets": []
@@ -1818,11 +1834,11 @@
     "category_id": 18,
     "category_name": "Camps des Bworks et des Gobelins",
     "need_items": [
-      6926,
-      6927,
       6928,
+      334,
+      6927,
       6929,
-      334
+      6926
     ],
     "need_quantities": [
       1,
@@ -1845,14 +1861,18 @@
     "category_id": 18,
     "category_name": "Camps des Bworks et des Gobelins",
     "need_items": [
-      1021,
       1455,
-      8141
+      8141,
+      1021,
+      643,
+      2539
     ],
     "need_quantities": [
-      1,
       7,
-      7
+      7,
+      1,
+      1,
+      2
     ],
     "need_quests": [],
     "craft_targets": []
@@ -1868,12 +1888,10 @@
     "category_id": 18,
     "category_name": "Camps des Bworks et des Gobelins",
     "need_items": [
-      8145,
-      8525
+      8145
     ],
     "need_quantities": [
-      97,
-      8
+      113
     ],
     "need_quests": [],
     "craft_targets": []
@@ -1955,12 +1973,10 @@
     "category_id": 55,
     "category_name": "Royaume d'Amakna",
     "need_items": [
-      643,
-      8576
+      643
     ],
     "need_quantities": [
-      3,
-      1
+      3
     ],
     "need_quests": [
       211
@@ -1979,19 +1995,19 @@
     "category_name": "Royaume d'Amakna",
     "need_items": [
       336,
-      360,
       361,
       406,
-      428,
-      2288
+      360,
+      2288,
+      428
     ],
     "need_quantities": [
       2,
       5,
-      5,
       1,
-      50,
-      10
+      5,
+      10,
+      50
     ],
     "need_quests": [
       216
@@ -2026,10 +2042,16 @@
     "category_id": 55,
     "category_name": "Royaume d'Amakna",
     "need_items": [
-      2151
+      1732,
+      1773,
+      1734,
+      2150
     ],
     "need_quantities": [
-      1
+      1,
+      5,
+      3,
+      10
     ],
     "need_quests": [
       218
@@ -2080,8 +2102,14 @@
     "level_min": 60,
     "category_id": 55,
     "category_name": "Royaume d'Amakna",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      643,
+      2273
+    ],
+    "need_quantities": [
+      3,
+      1
+    ],
     "need_quests": [
       221
     ],
@@ -2121,21 +2149,21 @@
     "category_id": 55,
     "category_name": "Royaume d'Amakna",
     "need_items": [
-      2288,
-      305,
       336,
-      360,
       361,
+      305,
       406,
+      360,
+      2288,
       428
     ],
     "need_quantities": [
-      10,
-      10,
       2,
-      5,
       3,
+      10,
       1,
+      5,
+      10,
       50
     ],
     "need_quests": [
@@ -2202,15 +2230,15 @@
     "category_id": 21,
     "category_name": "Île d'Otomaï",
     "need_items": [
-      429,
       2553,
-      2551,
-      399
+      399,
+      429,
+      2551
     ],
     "need_quantities": [
+      1,
+      1,
       2,
-      1,
-      1,
       1
     ],
     "need_quests": [],
@@ -2227,10 +2255,10 @@
     "category_id": 21,
     "category_name": "Île d'Otomaï",
     "need_items": [
-      1002,
       8759,
       2618,
-      2617
+      2617,
+      1002
     ],
     "need_quantities": [
       1,
@@ -2271,9 +2299,13 @@
     "category_id": 21,
     "category_name": "Île d'Otomaï",
     "need_items": [
-      8913
+      16385,
+      8913,
+      519
     ],
     "need_quantities": [
+      6,
+      1,
       1
     ],
     "need_quests": [
@@ -2293,9 +2325,9 @@
     "category_name": "Île d'Otomaï",
     "need_items": [
       33313,
-      33314,
       33309,
       33312,
+      33314,
       16489
     ],
     "need_quantities": [
@@ -2321,28 +2353,28 @@
     "category_id": 21,
     "category_name": "Île d'Otomaï",
     "need_items": [
-      289,
-      400,
       533,
+      289,
+      425,
+      11109,
       401,
       423,
-      532,
       405,
-      425,
       16456,
-      11109
+      400,
+      532
     ],
     "need_quantities": [
-      20,
-      18,
       16,
+      20,
+      6,
+      2,
       14,
       12,
-      10,
       8,
-      6,
       4,
-      2
+      18,
+      10
     ],
     "need_quests": [
       232
@@ -2395,10 +2427,20 @@
     "category_name": "Île d'Otomaï",
     "need_items": [
       8919,
-      8918
+      8918,
+      2322,
+      8680,
+      373,
+      365,
+      12745
     ],
     "need_quantities": [
       1,
+      1,
+      4,
+      1,
+      4,
+      4,
       1
     ],
     "need_quests": [
@@ -2417,8 +2459,8 @@
     "category_id": 21,
     "category_name": "Île d'Otomaï",
     "need_items": [
-      33063,
-      33001
+      7819,
+      7811
     ],
     "need_quantities": [
       1,
@@ -2495,7 +2537,7 @@
       7183
     ],
     "need_quantities": [
-      2,
+      1,
       1
     ],
     "need_quests": [],
@@ -2545,8 +2587,12 @@
     "level_min": 113,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      9935
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       247
     ],
@@ -2580,14 +2626,14 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      7032,
+      16477,
       9941,
-      16477
+      7032
     ],
     "need_quantities": [
-      50,
+      2,
       1,
-      2
+      50
     ],
     "need_quests": [
       250
@@ -2606,13 +2652,17 @@
     "category_name": "Alignement Brâkmar",
     "need_items": [
       9941,
-      7032,
-      9993
+      1333,
+      1337,
+      1338,
+      7032
     ],
     "need_quantities": [
       1,
-      50,
-      1
+      1,
+      1,
+      1,
+      50
     ],
     "need_quests": [
       251
@@ -2646,8 +2696,16 @@
     "level_min": 118,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      14479,
+      387,
+      16149
+    ],
+    "need_quantities": [
+      3,
+      45,
+      9
+    ],
     "need_quests": [
       253
     ],
@@ -2718,8 +2776,18 @@
     "level_min": 113,
     "category_id": 9,
     "category_name": "Alignement Bonta",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      425,
+      9935,
+      16219,
+      643
+    ],
+    "need_quantities": [
+      30,
+      1,
+      1,
+      5
+    ],
     "need_quests": [
       258
     ],
@@ -2753,9 +2821,13 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
+      9935,
+      2665,
       16495
     ],
     "need_quantities": [
+      1,
+      1,
       5
     ],
     "need_quests": [
@@ -2774,12 +2846,12 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
-      17187,
-      734
+      734,
+      17187
     ],
     "need_quantities": [
-      9,
-      1
+      1,
+      9
     ],
     "need_quests": [
       261
@@ -2885,8 +2957,12 @@
     "level_min": 132,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      2087
+    ],
+    "need_quantities": [
+      10
+    ],
     "need_quests": [
       267
     ],
@@ -2902,8 +2978,12 @@
     "level_min": 134,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      420
+    ],
+    "need_quantities": [
+      10
+    ],
     "need_quests": [
       446
     ],
@@ -2981,12 +3061,8 @@
     "level_min": 136,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [
-      34229
-    ],
-    "need_quantities": [
-      1
-    ],
+    "need_items": [],
+    "need_quantities": [],
     "need_quests": [
       272,
       273,
@@ -3004,8 +3080,18 @@
     "level_min": 137,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      1973,
+      15070,
+      33380,
+      16496
+    ],
+    "need_quantities": [
+      10,
+      1,
+      1,
+      5
+    ],
     "need_quests": [
       275
     ],
@@ -3022,15 +3108,15 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      33380,
-      15070,
       1973,
+      15070,
+      33380,
       16496
     ],
     "need_quantities": [
-      1,
-      1,
       10,
+      1,
+      1,
       5
     ],
     "need_quests": [
@@ -3127,12 +3213,16 @@
     "need_items": [
       1815,
       2044,
-      33380
+      387,
+      33380,
+      388
     ],
     "need_quantities": [
       1,
       1,
-      1
+      2,
+      1,
+      4
     ],
     "need_quests": [
       281
@@ -3150,16 +3240,18 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
-      16488,
       1334,
+      16488,
+      8800,
       6457,
-      8800
+      1498
     ],
     "need_quantities": [
+      1,
       6,
+      2,
       1,
-      1,
-      2
+      1
     ],
     "need_quests": [
       282
@@ -3194,12 +3286,12 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
-      6457,
-      16488
+      16488,
+      6457
     ],
     "need_quantities": [
-      2,
-      20
+      20,
+      2
     ],
     "need_quests": [
       284
@@ -3217,13 +3309,15 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
-      10019,
       642,
+      6458,
+      16496,
       8780
     ],
     "need_quantities": [
       1,
-      1,
+      3,
+      5,
       5
     ],
     "need_quests": [
@@ -3241,8 +3335,20 @@
     "level_min": 139,
     "category_id": 9,
     "category_name": "Alignement Bonta",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      1456,
+      1457,
+      463,
+      1652,
+      519
+    ],
+    "need_quantities": [
+      2,
+      2,
+      1,
+      1,
+      1
+    ],
     "need_quests": [
       290
     ],
@@ -3293,10 +3399,10 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
-      15171,
-      15172,
       15173,
-      15174
+      15171,
+      15174,
+      15172
     ],
     "need_quantities": [
       1,
@@ -3319,8 +3425,18 @@
     "level_min": 152,
     "category_id": 9,
     "category_name": "Alignement Bonta",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      1974,
+      6764,
+      2632,
+      7045
+    ],
+    "need_quantities": [
+      10,
+      1,
+      1,
+      5
+    ],
     "need_quests": [
       293
     ],
@@ -3337,10 +3453,24 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
-      10083
+      1764,
+      9968,
+      1734,
+      1736,
+      1974,
+      6764,
+      11313,
+      602
     ],
     "need_quantities": [
-      1
+      3,
+      1,
+      10,
+      2,
+      4,
+      1,
+      1,
+      12
     ],
     "need_quests": [
       294
@@ -3357,8 +3487,18 @@
     "level_min": 154,
     "category_id": 9,
     "category_name": "Alignement Bonta",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      425,
+      9935,
+      16219,
+      643
+    ],
+    "need_quantities": [
+      30,
+      1,
+      1,
+      5
+    ],
     "need_quests": [
       295
     ],
@@ -3409,10 +3549,24 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
-      10030,
-      10031
+      2287,
+      8756,
+      7304,
+      7301,
+      643,
+      16465,
+      14474,
+      1686,
+      1689
     ],
     "need_quantities": [
+      5,
+      3,
+      1,
+      5,
+      1,
+      30,
+      3,
       1,
       1
     ],
@@ -3431,8 +3585,20 @@
     "level_min": 158,
     "category_id": 9,
     "category_name": "Alignement Bonta",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      9968,
+      1974,
+      6764,
+      2632,
+      7045
+    ],
+    "need_quantities": [
+      1,
+      10,
+      1,
+      1,
+      5
+    ],
     "need_quests": [
       299
     ],
@@ -3448,8 +3614,22 @@
     "level_min": 159,
     "category_id": 9,
     "category_name": "Alignement Bonta",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      472,
+      311,
+      7059,
+      1337,
+      1335,
+      519
+    ],
+    "need_quantities": [
+      2,
+      10,
+      10,
+      4,
+      5,
+      4
+    ],
     "need_quests": [
       303
     ],
@@ -3466,10 +3646,10 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      15171,
-      15172,
       15173,
-      15174
+      15171,
+      15174,
+      15172
     ],
     "need_quantities": [
       1,
@@ -3492,8 +3672,18 @@
     "level_min": 152,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      1974,
+      6764,
+      2632,
+      7045
+    ],
+    "need_quantities": [
+      10,
+      1,
+      1,
+      5
+    ],
     "need_quests": [
       305
     ],
@@ -3510,10 +3700,28 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      9969
+      1764,
+      2151,
+      1732,
+      1773,
+      1734,
+      1736,
+      1974,
+      2150,
+      11313,
+      602
     ],
     "need_quantities": [
-      1
+      3,
+      1,
+      1,
+      5,
+      3,
+      2,
+      4,
+      10,
+      1,
+      12
     ],
     "need_quests": [],
     "craft_targets": []
@@ -3528,8 +3736,12 @@
     "level_min": 154,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      9935
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       307
     ],
@@ -3546,12 +3758,32 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      9976,
-      8682
+      2574,
+      312,
+      6458,
+      9972,
+      421,
+      8682,
+      16513,
+      16496,
+      8766,
+      7294,
+      9974,
+      8784
     ],
     "need_quantities": [
-      2,
-      2
+      1,
+      1,
+      1,
+      1,
+      3,
+      1,
+      3,
+      1,
+      3,
+      5,
+      1,
+      1
     ],
     "need_quests": [
       308
@@ -3634,8 +3866,54 @@
     "level_min": 158,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      1811,
+      1984,
+      425,
+      1736,
+      17195,
+      311,
+      9981,
+      1974,
+      9382,
+      286,
+      1975,
+      2528,
+      9983,
+      9979,
+      9980,
+      7652,
+      17060,
+      16419,
+      519,
+      435,
+      9982,
+      1406
+    ],
+    "need_quantities": [
+      10,
+      4,
+      40,
+      5,
+      5,
+      5,
+      2,
+      10,
+      2,
+      2,
+      8,
+      10,
+      1,
+      1,
+      1,
+      2,
+      2,
+      2,
+      2,
+      10,
+      1,
+      2
+    ],
     "need_quests": [
       313
     ],
@@ -3651,8 +3929,20 @@
     "level_min": 159,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      9968,
+      1974,
+      6764,
+      2632,
+      7045
+    ],
+    "need_quantities": [
+      1,
+      10,
+      1,
+      1,
+      5
+    ],
     "need_quests": [
       314
     ],
@@ -3700,8 +3990,18 @@
     "level_min": 171,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      7016,
+      16467,
+      313,
+      17154
+    ],
+    "need_quantities": [
+      6,
+      7,
+      7,
+      1
+    ],
     "need_quests": [],
     "craft_targets": []
   },
@@ -3716,22 +4016,28 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      16454,
-      17442,
-      17443,
-      17444,
-      2060,
       11948,
-      420
+      11337,
+      15722,
+      312,
+      420,
+      16454,
+      2060,
+      11335,
+      16497,
+      7036
     ],
     "need_quantities": [
+      1,
+      1,
+      5,
+      10,
+      10,
       70,
-      2,
-      2,
-      2,
       5,
       1,
-      10
+      5,
+      5
     ],
     "need_quests": [
       319
@@ -3750,8 +4056,20 @@
     "level_min": 172,
     "category_id": 9,
     "category_name": "Alignement Bonta",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      2358,
+      303,
+      746,
+      312,
+      1439
+    ],
+    "need_quantities": [
+      80,
+      10,
+      3,
+      5,
+      1
+    ],
     "need_quests": [
       318
     ],
@@ -3767,8 +4085,24 @@
     "level_min": 173,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      1463,
+      11880,
+      1526,
+      14635,
+      1333,
+      7035,
+      16459
+    ],
+    "need_quantities": [
+      1,
+      5,
+      5,
+      100,
+      3,
+      1,
+      1
+    ],
     "need_quests": [
       320
     ],
@@ -3785,9 +4119,15 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      10064
+      16154,
+      1612,
+      16150,
+      1692
     ],
     "need_quantities": [
+      1,
+      1,
+      1,
       1
     ],
     "need_quests": [
@@ -3841,10 +4181,12 @@
     "category_name": "Alignement Bonta",
     "need_items": [
       224,
-      10124
+      6899,
+      371
     ],
     "need_quantities": [
       1,
+      3,
       1
     ],
     "need_quests": [
@@ -3863,22 +4205,22 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      1337,
-      16467,
-      11338,
-      519,
-      1986,
       16387,
-      17060
+      11338,
+      16467,
+      1337,
+      17060,
+      519,
+      1986
     ],
     "need_quantities": [
+      35,
+      2,
+      35,
+      5,
+      3,
       10,
-      70,
-      4,
-      20,
-      20,
-      70,
-      6
+      10
     ],
     "need_quests": [
       323
@@ -3898,10 +4240,10 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
-      10201
+      9689
     ],
     "need_quantities": [
-      1
+      4
     ],
     "need_quests": [
       335
@@ -3918,8 +4260,14 @@
     "level_min": 177,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      399,
+      1333
+    ],
+    "need_quantities": [
+      10,
+      1
+    ],
     "need_quests": [
       324
     ],
@@ -3936,22 +4284,24 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      7925,
       7016,
+      7925,
       746,
-      7036,
       16481,
+      11338,
       15724,
-      11338
+      1461,
+      7036
     ],
     "need_quantities": [
       35,
       35,
       5,
       5,
-      5,
       1,
-      1
+      1,
+      10,
+      5
     ],
     "need_quests": [
       329
@@ -3985,8 +4335,20 @@
     "level_min": 180,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      13741,
+      884,
+      426,
+      7035,
+      11890
+    ],
+    "need_quantities": [
+      1,
+      20,
+      20,
+      2,
+      2
+    ],
     "need_quests": [
       331
     ],
@@ -4037,16 +4399,20 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
-      313,
-      16454,
-      10200,
       11337,
-      11339
+      2252,
+      11339,
+      16454,
+      313,
+      276,
+      1986
     ],
     "need_quantities": [
-      35,
-      35,
       1,
+      1,
+      10,
+      35,
+      35,
       1,
       10
     ],
@@ -4116,8 +4482,12 @@
     "level_min": 31,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      97
+    ],
+    "need_quantities": [
+      10
+    ],
     "need_quests": [],
     "craft_targets": []
   },
@@ -4131,8 +4501,12 @@
     "level_min": 32,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      2044
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       375
     ],
@@ -4237,8 +4611,12 @@
     "level_min": 38,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      2044
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       381
     ],
@@ -4401,10 +4779,10 @@
       1773
     ],
     "need_quantities": [
-      2,
-      2,
-      2,
-      2
+      1,
+      1,
+      1,
+      1
     ],
     "need_quests": [
       390
@@ -4439,10 +4817,16 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      2118
+      2118,
+      885,
+      310,
+      1692
     ],
     "need_quantities": [
-      5
+      5,
+      1,
+      1,
+      1
     ],
     "need_quests": [
       392
@@ -4459,8 +4843,16 @@
     "level_min": 60,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      303,
+      16522,
+      153
+    ],
+    "need_quantities": [
+      3,
+      3,
+      1
+    ],
     "need_quests": [
       393
     ],
@@ -4532,14 +4924,14 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      538,
       2588,
-      2586
+      2586,
+      538
     ],
     "need_quantities": [
-      25,
       4,
-      4
+      4,
+      25
     ],
     "need_quests": [
       397
@@ -4829,9 +5221,29 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
-      10204
+      15453,
+      9279,
+      470,
+      1847,
+      10285,
+      311,
+      287,
+      16389,
+      16456,
+      16469,
+      17156
     ],
     "need_quantities": [
+      1,
+      1,
+      14,
+      5,
+      1,
+      10,
+      7,
+      14,
+      14,
+      7,
       1
     ],
     "need_quests": [],
@@ -4848,10 +5260,20 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      9571
+      1775,
+      1734,
+      368,
+      390,
+      16389,
+      16456
     ],
     "need_quantities": [
-      1
+      5,
+      3,
+      4,
+      1,
+      14,
+      14
     ],
     "need_quests": [],
     "craft_targets": []
@@ -4867,20 +5289,22 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
-      17060,
-      519,
+      9935,
+      16154,
       16389,
       16456,
-      16469,
-      16154
+      17060,
+      519,
+      16469
     ],
     "need_quantities": [
+      1,
+      4,
+      14,
+      14,
       5,
       10,
-      14,
-      14,
-      14,
-      4
+      14
     ],
     "need_quests": [],
     "craft_targets": []
@@ -4896,20 +5320,32 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
+      785,
+      303,
+      1012,
       441,
-      7032,
+      748,
       313,
-      7035,
+      310,
       1433,
-      785
+      7035,
+      13491,
+      8738,
+      7032
     ],
     "need_quantities": [
+      2,
+      6,
+      6,
+      1,
+      2,
+      1,
+      6,
       1,
       1,
+      8,
       1,
-      1,
-      1,
-      2
+      1
     ],
     "need_quests": [],
     "craft_targets": []
@@ -4940,16 +5376,16 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      430,
-      2278,
       16456,
-      16469
+      430,
+      16469,
+      2278
     ],
     "need_quantities": [
-      6,
-      2,
       14,
-      7
+      6,
+      7,
+      2
     ],
     "need_quests": [],
     "craft_targets": []
@@ -5070,18 +5506,22 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      9950,
+      8058,
       311,
-      9951,
-      9952,
-      8058
+      369,
+      757,
+      2436,
+      9686,
+      580
     ],
     "need_quantities": [
-      10,
+      3,
       30,
-      10,
-      10,
-      3
+      20,
+      20,
+      20,
+      3,
+      30
     ],
     "need_quests": [
       256
@@ -5124,10 +5564,12 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
-      1737,
-      16415
+      9935,
+      16415,
+      1737
     ],
     "need_quantities": [
+      1,
       5,
       5
     ],
@@ -5146,8 +5588,14 @@
     "level_min": 179,
     "category_id": 9,
     "category_name": "Alignement Bonta",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      16497,
+      7035
+    ],
+    "need_quantities": [
+      1,
+      1
+    ],
     "need_quests": [
       451
     ],
@@ -5163,8 +5611,20 @@
     "level_min": 180,
     "category_id": 9,
     "category_name": "Alignement Bonta",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      13741,
+      884,
+      426,
+      7035,
+      11890
+    ],
+    "need_quantities": [
+      1,
+      20,
+      20,
+      2,
+      2
+    ],
     "need_quests": [
       456
     ],
@@ -5376,13 +5836,9 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      10408,
-      14443,
-      10409
+      14443
     ],
     "need_quantities": [
-      1,
-      1,
       1
     ],
     "need_quests": [
@@ -5958,12 +6414,10 @@
     "category_id": 23,
     "category_name": "Krosmoz",
     "need_items": [
-      752,
       2455,
       2012
     ],
     "need_quantities": [
-      5,
       10,
       10
     ],
@@ -5982,8 +6436,14 @@
     "level_min": 50,
     "category_id": 23,
     "category_name": "Krosmoz",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      2455,
+      2012
+    ],
+    "need_quantities": [
+      10,
+      10
+    ],
     "need_quests": [
       525
     ],
@@ -6194,12 +6654,8 @@
     "level_min": 130,
     "category_id": 27,
     "category_name": "Île de Frigost",
-    "need_items": [
-      11368
-    ],
-    "need_quantities": [
-      6
-    ],
+    "need_items": [],
+    "need_quantities": [],
     "need_quests": [],
     "craft_targets": []
   },
@@ -6475,8 +6931,14 @@
     "level_min": 160,
     "category_id": 27,
     "category_name": "Île de Frigost",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      11144,
+      11145
+    ],
+    "need_quantities": [
+      40,
+      5
+    ],
     "need_quests": [
       559
     ],
@@ -6751,19 +7213,21 @@
     "category_name": "Île de Frigost",
     "need_items": [
       11107,
+      11242,
+      11240,
+      11260,
       11117,
       11136,
-      11221,
-      11242,
-      11240
+      11221
     ],
     "need_quantities": [
       35,
+      5,
+      5,
+      50,
       30,
       15,
-      1,
-      5,
-      5
+      1
     ],
     "need_quests": [],
     "craft_targets": []
@@ -6834,16 +7298,62 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      11279,
-      11280,
-      11281,
-      11282
+      11224,
+      747,
+      11222,
+      1334,
+      11107,
+      447,
+      11120,
+      11243,
+      11227,
+      444,
+      312,
+      21256,
+      11226,
+      443,
+      6457,
+      11117,
+      11136,
+      445,
+      9941,
+      11248,
+      11254,
+      11257,
+      11223,
+      11229,
+      11250,
+      11241,
+      11238
     ],
     "need_quantities": [
+      10,
+      5,
+      15,
+      5,
+      35,
+      50,
+      20,
+      20,
+      25,
+      75,
+      150,
       5,
       5,
+      25,
       5,
-      5
+      25,
+      25,
+      50,
+      5,
+      10,
+      10,
+      10,
+      20,
+      50,
+      50,
+      50,
+      10
     ],
     "need_quests": [],
     "craft_targets": []
@@ -6859,16 +7369,96 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      11292,
-      11293,
-      11294,
-      11295
+      11224,
+      11228,
+      11256,
+      11222,
+      7013,
+      2250,
+      1770,
+      1010,
+      2481,
+      14278,
+      11243,
+      11242,
+      11240,
+      11227,
+      8354,
+      18368,
+      11249,
+      11253,
+      11239,
+      11226,
+      16165,
+      391,
+      11255,
+      11246,
+      844,
+      11248,
+      11231,
+      11247,
+      2502,
+      2060,
+      11252,
+      11225,
+      11254,
+      11257,
+      11223,
+      11229,
+      11250,
+      11241,
+      11238,
+      11230,
+      13487,
+      11251,
+      2273,
+      2484
     ],
     "need_quantities": [
+      2,
+      2,
+      2,
+      2,
+      80,
+      2,
+      1,
+      2,
+      2,
+      2,
+      10,
+      2,
+      2,
+      10,
       1,
       1,
+      2,
+      10,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
       1,
-      1
+      10,
+      2,
+      10,
+      1,
+      1,
+      2,
+      10,
+      10,
+      10,
+      10,
+      10,
+      11,
+      10,
+      10,
+      10,
+      2,
+      2,
+      1,
+      2
     ],
     "need_quests": [
       581
@@ -6885,8 +7475,14 @@
     "level_min": 140,
     "category_id": 27,
     "category_name": "Île de Frigost",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      11248,
+      11229
+    ],
+    "need_quantities": [
+      3,
+      3
+    ],
     "need_quests": [
       581,
       582
@@ -7033,8 +7629,12 @@
     "level_min": 150,
     "category_id": 27,
     "category_name": "Île de Frigost",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      9687
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       591,
       619,
@@ -7058,7 +7658,33 @@
       592,
       621
     ],
-    "craft_targets": []
+    "craft_targets": [],
+    "need_item_groups": [
+      {
+        "key": "chauffage-biere",
+        "label": "Bière pour le chauffage",
+        "options": [
+          {
+            "label": "Pandaburg",
+            "items": [
+              {
+                "item_id": 7045,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "Pandapils",
+            "items": [
+              {
+                "item_id": 7047,
+                "quantity": 1
+              }
+            ]
+          }
+        ]
+      }
+    ]
   },
   "594": {
     "id": 594,
@@ -7285,8 +7911,12 @@
     "level_min": 160,
     "category_id": 27,
     "category_name": "Île de Frigost",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      11196
+    ],
+    "need_quantities": [
+      25
+    ],
     "need_quests": [
       594
     ],
@@ -7302,8 +7932,12 @@
     "level_min": 170,
     "category_id": 27,
     "category_name": "Île de Frigost",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      11196
+    ],
+    "need_quantities": [
+      25
+    ],
     "need_quests": [
       595
     ],
@@ -7319,8 +7953,12 @@
     "level_min": 180,
     "category_id": 27,
     "category_name": "Île de Frigost",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      11196
+    ],
+    "need_quantities": [
+      25
+    ],
     "need_quests": [
       596
     ],
@@ -7336,8 +7974,12 @@
     "level_min": 190,
     "category_id": 27,
     "category_name": "Île de Frigost",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      11196
+    ],
+    "need_quantities": [
+      25
+    ],
     "need_quests": [
       597
     ],
@@ -7431,23 +8073,23 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      147,
-      397,
-      1526,
       749,
-      7035,
       460,
       11107,
-      11568
+      397,
+      147,
+      1526,
+      11568,
+      7035
     ],
     "need_quantities": [
-      1,
-      4,
-      4,
-      5,
       5,
       20,
       35,
+      4,
+      1,
+      4,
+      5,
       5
     ],
     "need_quests": [],
@@ -7670,24 +8312,20 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      17185,
-      17189,
-      17191,
+      2331,
       17193,
       17199,
-      11505,
-      11510,
-      11503,
-      11339,
+      17189,
       11338,
-      2331,
-      484,
-      153,
-      147,
-      16499
+      11339,
+      17191,
+      11503,
+      17185,
+      11510,
+      11505
     ],
     "need_quantities": [
-      10,
+      50,
       10,
       10,
       10,
@@ -7697,11 +8335,7 @@
       30,
       10,
       10,
-      50,
-      10,
-      10,
-      10,
-      5
+      10
     ],
     "need_quests": [
       582,
@@ -7738,14 +8372,12 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      34276,
-      11102,
-      1324
+      1324,
+      11102
     ],
     "need_quantities": [
       1,
-      2,
-      1
+      2
     ],
     "need_quests": [],
     "craft_targets": []
@@ -7841,13 +8473,13 @@
     "category_name": "Île de Frigost",
     "need_items": [
       8832,
-      8777,
-      11328
+      11328,
+      8777
     ],
     "need_quantities": [
       10,
-      1,
-      5
+      5,
+      1
     ],
     "need_quests": [],
     "craft_targets": []
@@ -7923,12 +8555,16 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      16493,
-      16499,
+      312,
+      11110,
       16497,
-      16495
+      16495,
+      16493,
+      16499
     ],
     "need_quantities": [
+      2,
+      35,
       2,
       2,
       2,
@@ -8347,8 +8983,14 @@
     "level_min": 55,
     "category_id": 55,
     "category_name": "Royaume d'Amakna",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      1021,
+      1019
+    ],
+    "need_quantities": [
+      1,
+      1
+    ],
     "need_quests": [],
     "craft_targets": []
   },
@@ -8363,14 +9005,22 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
+      11243,
+      11475,
+      11371,
+      11370,
+      11239,
       11226,
-      11195,
-      11197
+      11241
     ],
     "need_quantities": [
+      5,
+      10,
+      5,
+      5,
       1,
       1,
-      1
+      5
     ],
     "need_quests": [
       631
@@ -8403,19 +9053,21 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      11323,
-      11324,
       11327,
+      9935,
+      1463,
       11328,
+      11323,
       11325,
-      11326,
-      11563
+      11324,
+      11326
     ],
     "need_quantities": [
       5,
       1,
-      5,
       1,
+      1,
+      5,
       5,
       1,
       1
@@ -8436,18 +9088,18 @@
     "need_items": [
       11891,
       11885,
-      11888,
-      11890,
       11893,
-      11895
+      11895,
+      11888,
+      11890
     ],
     "need_quantities": [
       5,
       5,
       5,
+      1,
       5,
-      5,
-      1
+      5
     ],
     "need_quests": [
       633
@@ -8465,21 +9117,21 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      11339,
-      11880,
-      11882,
-      11338,
       11337,
+      11338,
+      11339,
       11885,
-      11889
+      11880,
+      11889,
+      11882
     ],
     "need_quantities": [
+      1,
+      5,
+      5,
       5,
       5,
       1,
-      5,
-      1,
-      5,
       1
     ],
     "need_quests": [],
@@ -8495,18 +9147,8 @@
     "level_min": 190,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [
-      11304,
-      11305,
-      11901,
-      11902
-    ],
-    "need_quantities": [
-      1,
-      1,
-      1,
-      1
-    ],
+    "need_items": [],
+    "need_quantities": [],
     "need_quests": [],
     "craft_targets": []
   },
@@ -8940,8 +9582,8 @@
     "category_id": 26,
     "category_name": "Île de Nowel",
     "need_items": [
-      9460,
-      9459
+      9459,
+      9460
     ],
     "need_quantities": [
       1,
@@ -9036,8 +9678,7 @@
     "category_id": 28,
     "category_name": "Événements",
     "need_items": [
-      9382,
-      9381,
+      12238,
       1770,
       1775,
       1777,
@@ -9046,21 +9687,11 @@
       9384,
       9386,
       9387,
-      421,
-      428,
-      593,
-      594,
-      11102,
-      1339,
-      306,
-      6842,
-      7904,
-      2253,
-      11695
+      9382,
+      9381
     ],
     "need_quantities": [
-      5,
-      5,
+      1,
       5,
       5,
       5,
@@ -9069,17 +9700,8 @@
       1,
       1,
       1,
-      50,
-      50,
-      20,
-      20,
-      10,
-      1,
-      10,
       5,
-      10,
-      1,
-      1
+      5
     ],
     "need_quests": [],
     "craft_targets": []
@@ -9127,7 +9749,7 @@
     "category_id": 3,
     "category_name": "Astrub",
     "need_items": [
-      12401
+      6857
     ],
     "need_quantities": [
       1
@@ -9719,8 +10341,16 @@
     "level_min": 1,
     "category_id": 29,
     "category_name": "Archipel de Vulkania",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      12587,
+      12582,
+      12584
+    ],
+    "need_quantities": [
+      1,
+      1,
+      1
+    ],
     "need_quests": [
       756
     ],
@@ -9754,7 +10384,96 @@
     "need_items": [],
     "need_quantities": [],
     "need_quests": [],
-    "craft_targets": []
+    "craft_targets": [],
+    "need_item_groups": [
+      {
+        "key": "babiole-otto-brikenbrok",
+        "label": "Babiole d'Otto Brikenbrok",
+        "options": [
+          {
+            "label": "Pierre Noire de Vulkania",
+            "items": [
+              {
+                "item_id": 12582,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "Kœur en Plastique",
+            "items": [
+              {
+                "item_id": 12583,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "Relique du Cimetière des Os Posés",
+            "items": [
+              {
+                "item_id": 12584,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "Conserve de Vacancier",
+            "items": [
+              {
+                "item_id": 12585,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "Cristal de Vie et de Prospérité",
+            "items": [
+              {
+                "item_id": 12586,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "Figurine de Krokille",
+            "items": [
+              {
+                "item_id": 12587,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "Vulkania, terre d'aventure",
+            "items": [
+              {
+                "item_id": 12589,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "La Légende de Grozilla et Grasmera",
+            "items": [
+              {
+                "item_id": 12590,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "Des Krokilles et des Dragœufs",
+            "items": [
+              {
+                "item_id": 12591,
+                "quantity": 1
+              }
+            ]
+          }
+        ]
+      }
+    ]
   },
   "762": {
     "id": 762,
@@ -10024,10 +10743,10 @@
     "category_id": 7,
     "category_name": "Île des Wabbits",
     "need_items": [
-      1455,
       1456,
-      1458,
-      1457
+      1455,
+      1457,
+      1458
     ],
     "need_quantities": [
       1,
@@ -10170,13 +10889,11 @@
     "category_id": 7,
     "category_name": "Île des Wabbits",
     "need_items": [
-      969,
       970,
       971,
-      972
+      969
     ],
     "need_quantities": [
-      1,
       1,
       1,
       1
@@ -10248,8 +10965,12 @@
     "level_min": 50,
     "category_id": 7,
     "category_name": "Île des Wabbits",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      361
+    ],
+    "need_quantities": [
+      100
+    ],
     "need_quests": [
       838
     ],
@@ -10266,11 +10987,9 @@
     "category_id": 7,
     "category_name": "Île des Wabbits",
     "need_items": [
-      361,
       2288
     ],
     "need_quantities": [
-      1,
       1
     ],
     "need_quests": [
@@ -10589,8 +11308,18 @@
     "level_min": 20,
     "category_id": 26,
     "category_name": "Île de Nowel",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      385,
+      420,
+      881,
+      1690
+    ],
+    "need_quantities": [
+      1,
+      1,
+      1,
+      1
+    ],
     "need_quests": [],
     "craft_targets": []
   },
@@ -16679,11 +17408,9 @@
     "category_id": 23,
     "category_name": "Krosmoz",
     "need_items": [
-      6857,
-      13686
+      6857
     ],
     "need_quantities": [
-      1,
       1
     ],
     "need_quests": [
@@ -17959,15 +18686,13 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      11250,
+      11475,
+      11253,
       11254,
       11257,
-      11253,
-      11475,
-      13873
+      11250
     ],
     "need_quantities": [
-      1,
       1,
       1,
       1,
@@ -17988,15 +18713,13 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      11250,
+      11475,
+      11253,
       11254,
       11257,
-      11253,
-      11475,
-      13898
+      11250
     ],
     "need_quantities": [
-      1,
       1,
       1,
       1,
@@ -18017,15 +18740,13 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      11250,
+      11475,
+      11253,
       11254,
       11257,
-      11253,
-      11475,
-      13899
+      11250
     ],
     "need_quantities": [
-      1,
       1,
       1,
       1,
@@ -18046,15 +18767,13 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      11250,
+      11475,
+      11253,
       11254,
       11257,
-      11253,
-      11475,
-      13900
+      11250
     ],
     "need_quantities": [
-      1,
       1,
       1,
       1,
@@ -18075,15 +18794,13 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      11250,
+      11475,
+      11253,
       11254,
       11257,
-      11253,
-      11475,
-      13901
+      11250
     ],
     "need_quantities": [
-      1,
       1,
       1,
       1,
@@ -18104,15 +18821,13 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      11250,
+      11475,
+      11253,
       11254,
       11257,
-      11253,
-      11475,
-      13902
+      11250
     ],
     "need_quantities": [
-      1,
       1,
       1,
       1,
@@ -18133,15 +18848,13 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      11250,
+      11475,
+      11253,
       11254,
       11257,
-      11253,
-      11475,
-      13903
+      11250
     ],
     "need_quantities": [
-      1,
       1,
       1,
       1,
@@ -18162,15 +18875,13 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      11250,
+      11475,
+      11253,
       11254,
       11257,
-      11253,
-      11475,
-      13904
+      11250
     ],
     "need_quantities": [
-      1,
       1,
       1,
       1,
@@ -18191,15 +18902,13 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      11250,
+      11475,
+      11253,
       11254,
       11257,
-      11253,
-      11475,
-      13905
+      11250
     ],
     "need_quantities": [
-      1,
       1,
       1,
       1,
@@ -18220,15 +18929,13 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      11250,
+      11475,
+      11253,
       11254,
       11257,
-      11253,
-      11475,
-      13906
+      11250
     ],
     "need_quantities": [
-      1,
       1,
       1,
       1,
@@ -18249,15 +18956,13 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      11250,
+      11475,
+      11253,
       11254,
       11257,
-      11253,
-      11475,
-      13907
+      11250
     ],
     "need_quantities": [
-      1,
       1,
       1,
       1,
@@ -18278,15 +18983,13 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      11250,
+      11475,
+      11253,
       11254,
       11257,
-      11253,
-      11475,
-      13908
+      11250
     ],
     "need_quantities": [
-      1,
       1,
       1,
       1,
@@ -18307,15 +19010,13 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      11250,
+      11475,
+      11253,
       11254,
       11257,
-      11253,
-      11475,
-      13909
+      11250
     ],
     "need_quantities": [
-      1,
       1,
       1,
       1,
@@ -18336,15 +19037,13 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      11250,
+      11475,
+      11253,
       11254,
       11257,
-      11253,
-      11475,
-      13910
+      11250
     ],
     "need_quantities": [
-      1,
       1,
       1,
       1,
@@ -18365,15 +19064,13 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      11250,
+      11475,
+      11253,
       11254,
       11257,
-      11253,
-      11475,
-      13911
+      11250
     ],
     "need_quantities": [
-      1,
       1,
       1,
       1,
@@ -18394,15 +19091,13 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      11250,
+      11475,
+      11253,
       11254,
       11257,
-      11253,
-      11475,
-      13912
+      11250
     ],
     "need_quantities": [
-      1,
       1,
       1,
       1,
@@ -18873,8 +19568,12 @@
     "level_min": 170,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      11850
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       1317
     ],
@@ -19015,8 +19714,20 @@
     "level_min": 200,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      13919,
+      12001,
+      13941,
+      13929,
+      13977
+    ],
+    "need_quantities": [
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
     "need_quests": [
       1318
     ],
@@ -20797,8 +21508,12 @@
     "level_min": 50,
     "category_id": 23,
     "category_name": "Krosmoz",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      14271
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [],
     "craft_targets": []
   },
@@ -20891,15 +21606,15 @@
     "category_name": "Krosmoz",
     "need_items": [
       387,
-      13608,
       1983,
-      2515
+      2515,
+      13608
     ],
     "need_quantities": [
       2,
-      1,
       5,
-      2
+      2,
+      1
     ],
     "need_quests": [
       1199
@@ -21436,14 +22151,12 @@
     "category_id": 32,
     "category_name": "Justiciers",
     "need_items": [
-      14955,
-      14922,
-      14925,
       14923,
-      14924
+      14924,
+      14925,
+      14922
     ],
     "need_quantities": [
-      1,
       2,
       2,
       2,
@@ -21496,8 +22209,20 @@
     "level_min": 50,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      1456,
+      13730,
+      544,
+      416,
+      1985
+    ],
+    "need_quantities": [
+      6,
+      8,
+      2,
+      10,
+      4
+    ],
     "need_quests": [
       1463
     ],
@@ -21548,9 +22273,9 @@
     "category_id": 4,
     "category_name": "Quêtes principales",
     "need_items": [
-      33063,
-      33001,
-      33011
+      7819,
+      7817,
+      7811
     ],
     "need_quantities": [
       1,
@@ -21663,8 +22388,12 @@
     "level_min": 160,
     "category_id": 5,
     "category_name": "Cania",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      468
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       1474
     ],
@@ -21746,10 +22475,10 @@
     "category_id": 5,
     "category_name": "Cania",
     "need_items": [
-      17197,
-      311,
       1934,
-      410
+      311,
+      410,
+      17197
     ],
     "need_quantities": [
       1,
@@ -21774,9 +22503,9 @@
     "category_id": 5,
     "category_name": "Cania",
     "need_items": [
-      313,
       350,
-      446
+      446,
+      313
     ],
     "need_quantities": [
       10,
@@ -22170,8 +22899,12 @@
     "level_min": 100,
     "category_id": 34,
     "category_name": "Enutrosor",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      9687
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [],
     "craft_targets": []
   },
@@ -22185,12 +22918,8 @@
     "level_min": 100,
     "category_id": 34,
     "category_name": "Enutrosor",
-    "need_items": [
-      15310
-    ],
-    "need_quantities": [
-      1
-    ],
+    "need_items": [],
+    "need_quantities": [],
     "need_quests": [
       1504
     ],
@@ -22206,8 +22935,14 @@
     "level_min": 100,
     "category_id": 34,
     "category_name": "Enutrosor",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      15278,
+      21414
+    ],
+    "need_quantities": [
+      1,
+      1
+    ],
     "need_quests": [
       1505
     ],
@@ -22223,12 +22958,8 @@
     "level_min": 150,
     "category_id": 34,
     "category_name": "Enutrosor",
-    "need_items": [
-      15311
-    ],
-    "need_quantities": [
-      1
-    ],
+    "need_items": [],
+    "need_quantities": [],
     "need_quests": [],
     "craft_targets": []
   },
@@ -22347,9 +23078,9 @@
     "category_name": "Enutrosor",
     "need_items": [
       15177,
-      15178,
       15179,
-      15180
+      15180,
+      15178
     ],
     "need_quantities": [
       1,
@@ -22556,8 +23287,12 @@
     "level_min": 130,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      15444
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       1523
     ],
@@ -22659,8 +23394,12 @@
     "level_min": 100,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      15533
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       1531
     ],
@@ -23106,12 +23845,8 @@
     "level_min": 200,
     "category_id": 35,
     "category_name": "Srambad",
-    "need_items": [
-      15574
-    ],
-    "need_quantities": [
-      1
-    ],
+    "need_items": [],
+    "need_quantities": [],
     "need_quests": [
       1557
     ],
@@ -23176,8 +23911,12 @@
     "level_min": 200,
     "category_id": 35,
     "category_name": "Srambad",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      537
+    ],
+    "need_quantities": [
+      35
+    ],
     "need_quests": [
       1555
     ],
@@ -23269,9 +24008,23 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      15660
+      11107,
+      11891,
+      11110,
+      15661,
+      11503,
+      11102,
+      7035,
+      11933
     ],
     "need_quantities": [
+      7,
+      1,
+      7,
+      1,
+      1,
+      1,
+      1,
       1
     ],
     "need_quests": [],
@@ -23334,8 +24087,18 @@
     "level_min": 100,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      15731,
+      15730,
+      15729,
+      15728
+    ],
+    "need_quantities": [
+      1,
+      1,
+      1,
+      1
+    ],
     "need_quests": [
       1571
     ],
@@ -23545,8 +24308,16 @@
     "level_min": 120,
     "category_id": 36,
     "category_name": "Xélorium",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      389,
+      997,
+      309
+    ],
+    "need_quantities": [
+      1,
+      1,
+      1
+    ],
     "need_quests": [],
     "craft_targets": []
   },
@@ -23725,8 +24496,18 @@
     "level_min": 200,
     "category_id": 36,
     "category_name": "Xélorium",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      15717,
+      15719,
+      15718,
+      15716
+    ],
+    "need_quantities": [
+      3,
+      3,
+      3,
+      3
+    ],
     "need_quests": [
       1598
     ],
@@ -23836,8 +24617,12 @@
     "level_min": 40,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      15990
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [],
     "craft_targets": []
   },
@@ -23885,8 +24670,18 @@
     "level_min": 100,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      7906,
+      14946,
+      14509,
+      14516
+    ],
+    "need_quantities": [
+      10,
+      1,
+      1,
+      10
+    ],
     "need_quests": [
       1609
     ],
@@ -23902,8 +24697,16 @@
     "level_min": 100,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      6961,
+      15990,
+      15416
+    ],
+    "need_quantities": [
+      1,
+      1,
+      1
+    ],
     "need_quests": [
       1609
     ],
@@ -24055,8 +24858,12 @@
     "level_min": 90,
     "category_id": 55,
     "category_name": "Royaume d'Amakna",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      16215
+    ],
+    "need_quantities": [
+      6
+    ],
     "need_quests": [
       1619
     ],
@@ -24198,8 +25005,8 @@
       289,
       303,
       312,
-      421,
-      1782
+      1782,
+      421
     ],
     "need_quantities": [
       1,
@@ -24322,22 +25129,22 @@
     "category_id": 19,
     "category_name": "Incarnam",
     "need_items": [
-      289,
-      519,
-      28256,
-      6765,
       385,
+      289,
       1984,
-      421
+      6765,
+      28256,
+      421,
+      519
     ],
     "need_quantities": [
-      20,
-      8,
       4,
+      10,
+      4,
+      1,
       2,
-      8,
-      8,
-      5
+      5,
+      4
     ],
     "need_quests": [],
     "craft_targets": [
@@ -24589,24 +25396,24 @@
     "category_id": 19,
     "category_name": "Incarnam",
     "need_items": [
-      16512,
-      1782,
-      16518,
       289,
-      16513,
-      16522,
-      421,
       1984,
-      16511
+      16518,
+      1782,
+      16511,
+      421,
+      16522,
+      16513,
+      16512
     ],
     "need_quantities": [
-      2,
-      4,
-      2,
       4,
       2,
       2,
       4,
+      2,
+      4,
+      2,
       2,
       2
     ],
@@ -24682,19 +25489,19 @@
     "category_id": 4,
     "category_name": "Quêtes principales",
     "need_items": [
-      7024,
+      1895,
       11249,
-      15460,
       11231,
-      8784,
-      16953
+      15460,
+      7024,
+      8784
     ],
     "need_quantities": [
-      5,
+      1,
+      1,
       1,
       15,
-      1,
-      1,
+      5,
       1
     ],
     "need_quests": [
@@ -24763,8 +25570,40 @@
     "level_min": 140,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      749,
+      439,
+      18371,
+      14518,
+      8349,
+      8348,
+      15168,
+      1682,
+      14469,
+      750,
+      16217,
+      8392,
+      8383,
+      14512,
+      12744
+    ],
+    "need_quantities": [
+      5,
+      10,
+      1,
+      1,
+      3,
+      10,
+      10,
+      3,
+      8,
+      5,
+      3,
+      10,
+      1,
+      10,
+      5
+    ],
     "need_quests": [
       1657
     ],
@@ -24780,8 +25619,52 @@
     "level_min": 150,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      13725,
+      2588,
+      11695,
+      6475,
+      14518,
+      15075,
+      746,
+      9389,
+      9381,
+      750,
+      6457,
+      2619,
+      748,
+      8763,
+      14516,
+      8391,
+      14635,
+      12016,
+      8481,
+      8803,
+      1002
+    ],
+    "need_quantities": [
+      3,
+      10,
+      1,
+      10,
+      1,
+      10,
+      5,
+      1,
+      10,
+      5,
+      5,
+      5,
+      5,
+      10,
+      10,
+      10,
+      200,
+      1,
+      10,
+      3,
+      10
+    ],
     "need_quests": [
       1658
     ],
@@ -24797,8 +25680,42 @@
     "level_min": 170,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      11228,
+      13503,
+      8779,
+      8346,
+      14515,
+      15069,
+      14513,
+      2645,
+      6457,
+      11221,
+      15072,
+      14635,
+      15727,
+      11241,
+      2543,
+      16212
+    ],
+    "need_quantities": [
+      3,
+      10,
+      10,
+      3,
+      3,
+      10,
+      3,
+      1,
+      5,
+      1,
+      3,
+      400,
+      1,
+      10,
+      5,
+      5
+    ],
     "need_quests": [
       1659
     ],
@@ -24849,8 +25766,14 @@
     "level_min": 50,
     "category_id": 37,
     "category_name": "Île de Moon",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      1021,
+      1019
+    ],
+    "need_quantities": [
+      1,
+      1
+    ],
     "need_quests": [],
     "craft_targets": []
   },
@@ -24933,12 +25856,14 @@
     "category_id": 37,
     "category_name": "Île de Moon",
     "need_items": [
-      1002,
-      1018
+      1018,
+      2620,
+      1002
     ],
     "need_quantities": [
-      11,
-      10
+      10,
+      6,
+      11
     ],
     "need_quests": [],
     "craft_targets": []
@@ -25283,8 +26208,12 @@
     "level_min": 100,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      1324
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       1484
     ],
@@ -25651,14 +26580,14 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
-      17156,
+      16456,
       16469,
-      16456
+      17156
     ],
     "need_quantities": [
-      2,
       14,
-      14
+      14,
+      2
     ],
     "need_quests": [
       343
@@ -25676,11 +26605,13 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      7033,
+      15990,
       470,
+      7033,
       16389
     ],
     "need_quantities": [
+      1,
       14,
       14,
       14
@@ -25700,8 +26631,18 @@
     "level_min": 184,
     "category_id": 9,
     "category_name": "Alignement Bonta",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      7026,
+      1339,
+      16389,
+      7035
+    ],
+    "need_quantities": [
+      1,
+      1,
+      15,
+      1
+    ],
     "need_quests": [
       1715
     ],
@@ -25717,8 +26658,18 @@
     "level_min": 184,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      7028,
+      1334,
+      16389,
+      7035
+    ],
+    "need_quantities": [
+      1,
+      1,
+      15,
+      1
+    ],
     "need_quests": [
       1716
     ],
@@ -25734,8 +26685,22 @@
     "level_min": 185,
     "category_id": 9,
     "category_name": "Alignement Bonta",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      1334,
+      7033,
+      11893,
+      16389,
+      14635,
+      11890
+    ],
+    "need_quantities": [
+      1,
+      10,
+      2,
+      35,
+      2,
+      3
+    ],
     "need_quests": [
       1717
     ],
@@ -25751,8 +26716,22 @@
     "level_min": 185,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      1334,
+      7033,
+      11893,
+      16389,
+      14635,
+      11890
+    ],
+    "need_quantities": [
+      1,
+      10,
+      2,
+      35,
+      2,
+      3
+    ],
     "need_quests": [
       1718
     ],
@@ -25837,10 +26816,22 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      17792
+      311,
+      6671,
+      12789,
+      16389,
+      1730,
+      1975,
+      17156
     ],
     "need_quantities": [
-      2
+      1,
+      5,
+      1,
+      7,
+      5,
+      5,
+      1
     ],
     "need_quests": [
       1724
@@ -25858,11 +26849,19 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      467,
+      9935,
+      10272,
       11919,
-      15533
+      15454,
+      15533,
+      467,
+      15455
     ],
     "need_quantities": [
+      1,
+      1,
+      1,
+      1,
       1,
       1,
       1
@@ -25884,7 +26883,7 @@
     "category_name": "Alignement Brâkmar",
     "need_items": [
       11522,
-      34223
+      15533
     ],
     "need_quantities": [
       1,
@@ -25906,9 +26905,23 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
-      9312
+      2331,
+      351,
+      311,
+      1977,
+      12789,
+      1978,
+      16456,
+      17156
     ],
     "need_quantities": [
+      5,
+      1,
+      1,
+      5,
+      1,
+      5,
+      7,
       1
     ],
     "need_quests": [
@@ -25927,10 +26940,14 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
+      11928,
+      15454,
       466,
-      11928
+      15455
     ],
     "need_quantities": [
+      1,
+      1,
       1,
       1
     ],
@@ -25950,7 +26967,7 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
-      34237
+      15533
     ],
     "need_quantities": [
       1
@@ -26127,7 +27144,7 @@
       17965
     ],
     "need_quantities": [
-      2
+      1
     ],
     "need_quests": [
       1739
@@ -26162,9 +27179,11 @@
     "category_id": 30,
     "category_name": "Sufokia",
     "need_items": [
+      17966,
       17205
     ],
     "need_quantities": [
+      1,
       5
     ],
     "need_quests": [
@@ -26182,8 +27201,12 @@
     "level_min": 200,
     "category_id": 30,
     "category_name": "Sufokia",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      17964
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       1736
     ],
@@ -26216,12 +27239,42 @@
     "level_min": 200,
     "category_id": 30,
     "category_name": "Sufokia",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      17967
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       1731
     ],
-    "craft_targets": []
+    "craft_targets": [],
+    "need_item_groups": [
+      {
+        "key": "acces-attrape-peur",
+        "label": "Accès à l’Attrape-peur",
+        "options": [
+          {
+            "label": "Perles des profondeurs",
+            "items": [
+              {
+                "item_id": 17863,
+                "quantity": 20
+              }
+            ]
+          },
+          {
+            "label": "Pierre Angulaire",
+            "items": [
+              {
+                "item_id": 17988,
+                "quantity": 1
+              }
+            ]
+          }
+        ]
+      }
+    ]
   },
   "1746": {
     "id": 1746,
@@ -26313,36 +27366,36 @@
     "category_id": 30,
     "category_name": "Sufokia",
     "need_items": [
-      17991,
-      17992,
-      17993,
-      17994,
-      17995,
-      17160,
-      17975,
-      17977,
-      17978,
       17970,
-      17971,
+      17991,
       17972,
+      17995,
+      17977,
+      17975,
+      17986,
+      17994,
+      17971,
+      17993,
+      17992,
       17983,
-      17986
+      17978,
+      17160
     ],
     "need_quantities": [
-      6,
-      6,
-      6,
-      6,
-      6,
-      6,
-      2,
-      2,
-      2,
-      2,
-      2,
-      2,
-      2,
-      2
+      1,
+      3,
+      1,
+      3,
+      1,
+      1,
+      1,
+      3,
+      1,
+      3,
+      3,
+      1,
+      1,
+      3
     ],
     "need_quests": [],
     "craft_targets": [
@@ -26422,8 +27475,12 @@
     "level_min": 200,
     "category_id": 30,
     "category_name": "Sufokia",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      17968
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       1747
     ],
@@ -26458,11 +27515,11 @@
     "category_id": 30,
     "category_name": "Sufokia",
     "need_items": [
-      17983,
-      17984,
+      17987,
       17986,
       17985,
-      17987
+      17983,
+      17984
     ],
     "need_quantities": [
       5,
@@ -26583,11 +27640,11 @@
     "category_id": 30,
     "category_name": "Sufokia",
     "need_items": [
-      17983,
-      17984,
       17986,
+      17974,
       17981,
-      17974
+      17983,
+      17984
     ],
     "need_quantities": [
       1,
@@ -26644,12 +27701,12 @@
     "category_id": 5,
     "category_name": "Cania",
     "need_items": [
-      1894,
-      8364
+      8364,
+      1894
     ],
     "need_quantities": [
-      10,
-      1
+      1,
+      10
     ],
     "need_quests": [],
     "craft_targets": []
@@ -26664,8 +27721,14 @@
     "level_min": 20,
     "category_id": 5,
     "category_name": "Cania",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      13351,
+      30328
+    ],
+    "need_quantities": [
+      1,
+      1
+    ],
     "need_quests": [],
     "craft_targets": []
   },
@@ -26725,20 +27788,20 @@
     "category_id": 5,
     "category_name": "Cania",
     "need_items": [
-      428,
       2358,
-      8252,
       2060,
       8249,
-      8250
+      8252,
+      8250,
+      428
     ],
     "need_quantities": [
-      40,
-      60,
-      6,
+      50,
       5,
       5,
-      5
+      5,
+      5,
+      40
     ],
     "need_quests": [],
     "craft_targets": [
@@ -26773,22 +27836,22 @@
     "category_id": 5,
     "category_name": "Cania",
     "need_items": [
-      13505,
-      474,
       350,
-      8322,
+      474,
+      13505,
+      1734,
       18198,
       380,
-      1734
+      8322
     ],
     "need_quantities": [
+      20,
+      20,
+      1,
+      10,
       1,
       20,
-      20,
-      2,
-      2,
-      40,
-      20
+      2
     ],
     "need_quests": [
       1775
@@ -26894,23 +27957,13 @@
     "category_name": "Quêtes principales",
     "need_items": [
       31521,
-      12743,
       12734,
-      18241,
-      737,
-      694,
-      739,
-      7754
+      12743
     ],
     "need_quantities": [
       25,
       5,
-      5,
-      1,
-      1,
-      1,
-      1,
-      1
+      5
     ],
     "need_quests": [
       1471,
@@ -26946,8 +27999,18 @@
     "level_min": 180,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      737,
+      7754,
+      694,
+      739
+    ],
+    "need_quantities": [
+      1,
+      1,
+      1,
+      1
+    ],
     "need_quests": [
       1782
     ],
@@ -26981,8 +28044,12 @@
     "level_min": 190,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      886
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       1785
     ],
@@ -27016,8 +28083,12 @@
     "level_min": 190,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      30328
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       1785,
       1786
@@ -27034,8 +28105,12 @@
     "level_min": 190,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      30328
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       1785,
       1786
@@ -27070,8 +28145,12 @@
     "level_min": 200,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      7415
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       1786
     ],
@@ -27228,8 +28307,8 @@
     "category_name": "Saharach",
     "need_items": [
       18361,
-      16412,
-      18357
+      18357,
+      16412
     ],
     "need_quantities": [
       3,
@@ -27271,10 +28350,10 @@
     "category_id": 39,
     "category_name": "Saharach",
     "need_items": [
-      18348
+      445
     ],
     "need_quantities": [
-      1
+      10
     ],
     "need_quests": [
       1804
@@ -27491,9 +28570,11 @@
     "category_id": 39,
     "category_name": "Saharach",
     "need_items": [
+      311,
       18357
     ],
     "need_quantities": [
+      1,
       1
     ],
     "need_quests": [
@@ -27832,12 +28913,12 @@
     "category_id": 4,
     "category_name": "Quêtes principales",
     "need_items": [
-      421,
-      306
+      306,
+      421
     ],
     "need_quantities": [
-      15,
-      1
+      1,
+      15
     ],
     "need_quests": [
       2009
@@ -27919,18 +29000,16 @@
     "category_id": 40,
     "category_name": "Nimotopia",
     "need_items": [
-      311,
-      743,
-      16485,
       17203,
-      18708
+      743,
+      311,
+      16485
     ],
     "need_quantities": [
+      5,
+      5,
       10,
-      5,
-      5,
-      5,
-      1
+      5
     ],
     "need_quests": [],
     "craft_targets": []
@@ -27946,14 +29025,20 @@
     "category_id": 40,
     "category_name": "Nimotopia",
     "need_items": [
-      18741,
-      18742,
-      18744,
-      18743
+      351,
+      7014,
+      361,
+      311,
+      16389,
+      7035,
+      17158
     ],
     "need_quantities": [
-      1,
-      1,
+      7,
+      7,
+      2,
+      10,
+      8,
       1,
       1
     ],
@@ -27970,8 +29055,14 @@
     "level_min": 190,
     "category_id": 40,
     "category_name": "Nimotopia",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      470,
+      7033
+    ],
+    "need_quantities": [
+      32,
+      16
+    ],
     "need_quests": [],
     "craft_targets": []
   },
@@ -27985,12 +29076,8 @@
     "level_min": 190,
     "category_id": 40,
     "category_name": "Nimotopia",
-    "need_items": [
-      18784
-    ],
-    "need_quantities": [
-      1
-    ],
+    "need_items": [],
+    "need_quantities": [],
     "need_quests": [
       1848
     ],
@@ -28068,8 +29155,12 @@
     "level_min": 190,
     "category_id": 40,
     "category_name": "Nimotopia",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      18770
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [],
     "craft_targets": []
   },
@@ -28147,8 +29238,16 @@
     "level_min": 50,
     "category_id": 41,
     "category_name": "Sidimote",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      16837,
+      13097,
+      395
+    ],
+    "need_quantities": [
+      3,
+      3,
+      15
+    ],
     "need_quests": [
       1858
     ],
@@ -28211,8 +29310,12 @@
     "level_min": 180,
     "category_id": 41,
     "category_name": "Sidimote",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      15990
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [],
     "craft_targets": []
   },
@@ -28248,8 +29351,12 @@
     "level_min": 180,
     "category_id": 41,
     "category_name": "Sidimote",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      15990
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       1864
     ],
@@ -28299,8 +29406,12 @@
     "level_min": 40,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      311
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       1867
     ],
@@ -28348,8 +29459,12 @@
     "level_min": 100,
     "category_id": 41,
     "category_name": "Sidimote",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      2578
+    ],
+    "need_quantities": [
+      2
+    ],
     "need_quests": [],
     "craft_targets": []
   },
@@ -28381,12 +29496,12 @@
     "category_id": 41,
     "category_name": "Sidimote",
     "need_items": [
-      446,
-      350
+      350,
+      446
     ],
     "need_quantities": [
-      30,
-      60
+      60,
+      30
     ],
     "need_quests": [],
     "craft_targets": []
@@ -28433,8 +29548,18 @@
     "level_min": 180,
     "category_id": 41,
     "category_name": "Sidimote",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      1468,
+      14275,
+      13502,
+      11226
+    ],
+    "need_quantities": [
+      1,
+      1,
+      1,
+      1
+    ],
     "need_quests": [],
     "craft_targets": []
   },
@@ -28449,26 +29574,26 @@
     "category_id": 41,
     "category_name": "Sidimote",
     "need_items": [
-      247,
-      2357,
-      445,
-      361,
-      1975,
-      537,
       2331,
       10831,
-      997
+      2357,
+      361,
+      445,
+      997,
+      1975,
+      247,
+      537
     ],
     "need_quantities": [
-      5,
-      25,
-      30,
-      5,
-      10,
-      10,
       10,
       1,
-      1
+      25,
+      5,
+      30,
+      1,
+      10,
+      5,
+      10
     ],
     "need_quests": [],
     "craft_targets": []
@@ -28671,16 +29796,16 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
-      15684,
       15686,
-      11102,
       17995,
+      15684,
+      11102,
       15691
     ],
     "need_quantities": [
       5,
-      5,
       3,
+      5,
       3,
       1
     ],
@@ -28700,16 +29825,16 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      15684,
       15686,
-      11102,
       17995,
+      15684,
+      11102,
       15691
     ],
     "need_quantities": [
       5,
-      5,
       3,
+      5,
       3,
       1
     ],
@@ -28762,8 +29887,18 @@
     "level_min": 195,
     "category_id": 9,
     "category_name": "Alignement Bonta",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      16837,
+      18836,
+      13097,
+      395
+    ],
+    "need_quantities": [
+      1,
+      1,
+      1,
+      5
+    ],
     "need_quests": [
       1891
     ],
@@ -28779,8 +29914,16 @@
     "level_min": 195,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      16837,
+      13097,
+      395
+    ],
+    "need_quantities": [
+      1,
+      1,
+      5
+    ],
     "need_quests": [
       1892
     ],
@@ -28797,10 +29940,10 @@
     "category_id": 9,
     "category_name": "Alignement Bonta",
     "need_items": [
-      7223,
       7222,
       7225,
-      7224
+      7224,
+      7223
     ],
     "need_quantities": [
       1,
@@ -28824,10 +29967,10 @@
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
     "need_items": [
-      7223,
       7222,
       7225,
-      7224
+      7224,
+      7223
     ],
     "need_quantities": [
       1,
@@ -28987,24 +30130,24 @@
     "category_id": 4,
     "category_name": "Quêtes principales",
     "need_items": [
-      1983,
-      11110,
-      13993,
-      8367,
+      1334,
       11310,
+      1983,
       17979,
+      11110,
+      8367,
       11102,
-      1334
+      13993
     ],
     "need_quantities": [
+      20,
+      1,
       50,
-      15,
-      1,
-      1,
-      1,
       5,
       15,
-      20
+      1,
+      15,
+      1
     ],
     "need_quests": [
       1462
@@ -29025,7 +30168,7 @@
     "category_id": 4,
     "category_name": "Quêtes principales",
     "need_items": [
-      19165
+      9935
     ],
     "need_quantities": [
       1
@@ -29113,8 +30256,12 @@
     "level_min": 200,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      15990
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       1909
     ],
@@ -29147,8 +30294,12 @@
     "level_min": 200,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      11109
+    ],
+    "need_quantities": [
+      50
+    ],
     "need_quests": [
       1909
     ],
@@ -29198,8 +30349,12 @@
     "level_min": 200,
     "category_id": 9,
     "category_name": "Alignement Bonta",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      17965
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       421
     ],
@@ -29215,8 +30370,12 @@
     "level_min": 200,
     "category_id": 9,
     "category_name": "Alignement Bonta",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      17965
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       423
     ],
@@ -29232,8 +30391,12 @@
     "level_min": 200,
     "category_id": 9,
     "category_name": "Alignement Bonta",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      17965
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       425
     ],
@@ -29249,8 +30412,12 @@
     "level_min": 200,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      17965
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       422
     ],
@@ -29266,8 +30433,12 @@
     "level_min": 200,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      17965
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       424
     ],
@@ -29283,8 +30454,12 @@
     "level_min": 200,
     "category_id": 10,
     "category_name": "Alignement Brâkmar",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      17965
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       426
     ],
@@ -29538,24 +30713,24 @@
     "category_id": 42,
     "category_name": "Tours de la Fratrie",
     "need_items": [
-      17995,
-      17992,
-      17994,
       17991,
-      17993,
+      17995,
+      15414,
+      17994,
       17988,
-      15691,
-      15414
+      17993,
+      17992,
+      15691
     ],
     "need_quantities": [
       5,
       5,
-      5,
-      5,
+      2,
       5,
       3,
-      3,
-      2
+      5,
+      5,
+      3
     ],
     "need_quests": [
       1938
@@ -29572,8 +30747,12 @@
     "level_min": 200,
     "category_id": 42,
     "category_name": "Tours de la Fratrie",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      9935
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       1954
     ],
@@ -29591,19 +30770,17 @@
     "category_name": "Tours de la Fratrie",
     "need_items": [
       17995,
-      17993,
-      17992,
-      11505,
       17994,
-      19414
+      11505,
+      17993,
+      17992
     ],
     "need_quantities": [
       3,
       3,
-      3,
       5,
       3,
-      1
+      3
     ],
     "need_quests": [],
     "craft_targets": [
@@ -29659,12 +30836,12 @@
     "category_id": 42,
     "category_name": "Tours de la Fratrie",
     "need_items": [
-      460,
-      16387
+      16387,
+      460
     ],
     "need_quantities": [
-      70,
-      45
+      45,
+      70
     ],
     "need_quests": [
       1944
@@ -29682,14 +30859,10 @@
     "category_id": 42,
     "category_name": "Tours de la Fratrie",
     "need_items": [
-      19423,
-      17991,
-      19482
+      17991
     ],
     "need_quantities": [
-      1,
-      3,
-      1
+      3
     ],
     "need_quests": [
       1944,
@@ -29788,12 +30961,12 @@
     "need_items": [
       465,
       315,
-      19482
+      9686
     ],
     "need_quantities": [
       4,
       1,
-      1
+      4
     ],
     "need_quests": [
       1939
@@ -29828,18 +31001,18 @@
     "category_id": 42,
     "category_name": "Tours de la Fratrie",
     "need_items": [
+      2044,
       11503,
       11510,
-      17205,
       11505,
-      2044
+      17205
     ],
     "need_quantities": [
+      10,
       2,
       2,
       2,
-      2,
-      10
+      2
     ],
     "need_quests": [],
     "craft_targets": []
@@ -30091,8 +31264,12 @@
     "level_min": 20,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      7113
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       2009
     ],
@@ -30340,8 +31517,12 @@
     "level_min": 40,
     "category_id": 3,
     "category_name": "Astrub",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      15990
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       1979
     ],
@@ -30393,20 +31574,12 @@
     "category_id": 3,
     "category_name": "Astrub",
     "need_items": [
-      19636,
-      16440,
-      19638,
       304,
-      19640,
-      13487,
-      19642,
-      16490
+      16440,
+      16490,
+      13487
     ],
     "need_quantities": [
-      1,
-      1,
-      1,
-      1,
       1,
       1,
       1,
@@ -30519,8 +31692,14 @@
     "level_min": 15,
     "category_id": 3,
     "category_name": "Astrub",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      1782,
+      6765
+    ],
+    "need_quantities": [
+      1,
+      1
+    ],
     "need_quests": [],
     "craft_targets": []
   },
@@ -30588,18 +31767,18 @@
     "category_id": 3,
     "category_name": "Astrub",
     "need_items": [
+      311,
       306,
-      309,
-      2659,
       374,
-      19656
+      309,
+      2659
     ],
     "need_quantities": [
-      3,
-      3,
-      3,
-      3,
-      2
+      5,
+      1,
+      1,
+      1,
+      1
     ],
     "need_quests": [],
     "craft_targets": [
@@ -30728,11 +31907,11 @@
     "category_id": 3,
     "category_name": "Astrub",
     "need_items": [
-      428,
-      395,
       311,
       421,
-      519
+      519,
+      428,
+      395
     ],
     "need_quantities": [
       3,
@@ -30823,10 +32002,10 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
-      11510,
+      11370,
       11503,
       11568,
-      11370
+      11510
     ],
     "need_quantities": [
       20,
@@ -30850,14 +32029,14 @@
     "category_id": 27,
     "category_name": "Île de Frigost",
     "need_items": [
+      19951,
       19950,
-      19952,
-      19951
+      19952
     ],
     "need_quantities": [
+      3,
       30,
-      12,
-      3
+      12
     ],
     "need_quests": [
       2010,
@@ -30983,8 +32162,12 @@
     "level_min": 100,
     "category_id": 28,
     "category_name": "Événements",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      8162
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       2033
     ],
@@ -31001,10 +32184,14 @@
     "category_id": 4,
     "category_name": "Quêtes principales",
     "need_items": [
-      20210
+      1730,
+      519,
+      532
     ],
     "need_quantities": [
-      1
+      18,
+      36,
+      18
     ],
     "need_quests": [
       1462
@@ -31077,9 +32264,9 @@
     "category_id": 4,
     "category_name": "Quêtes principales",
     "need_items": [
-      20162,
-      17995,
       7033,
+      17995,
+      20162,
       11110
     ],
     "need_quantities": [
@@ -31103,8 +32290,12 @@
     "level_min": 200,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      9935
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       2039
     ],
@@ -31121,12 +32312,14 @@
     "category_id": 4,
     "category_name": "Quêtes principales",
     "need_items": [
-      17205,
-      19954
+      19954,
+      11102,
+      17205
     ],
     "need_quantities": [
-      10,
-      5
+      5,
+      20,
+      10
     ],
     "need_quests": [
       2040
@@ -31196,11 +32389,13 @@
     "category_name": "Événements",
     "need_items": [
       8145,
-      1689
+      1689,
+      8162
     ],
     "need_quantities": [
       30,
-      10
+      10,
+      1
     ],
     "need_quests": [
       2034
@@ -31250,12 +32445,12 @@
     "category_id": 4,
     "category_name": "Quêtes principales",
     "need_items": [
+      7114,
       737,
-      694,
-      739,
-      7754,
       7115,
-      7114
+      7754,
+      694,
+      739
     ],
     "need_quantities": [
       1,
@@ -31279,20 +32474,20 @@
     "category_id": 4,
     "category_name": "Quêtes principales",
     "need_items": [
-      737,
-      694,
-      739,
-      7754,
-      7115,
-      7114
+      15990,
+      7147,
+      7149,
+      20231,
+      1975,
+      32079
     ],
     "need_quantities": [
       1,
+      10,
       1,
       1,
       1,
-      1,
-      1
+      600
     ],
     "need_quests": [
       2048
@@ -31310,19 +32505,9 @@
     "category_id": 4,
     "category_name": "Quêtes principales",
     "need_items": [
-      737,
-      694,
-      739,
-      7754,
-      7115,
-      7114
+      21414
     ],
     "need_quantities": [
-      1,
-      1,
-      1,
-      1,
-      1,
       1
     ],
     "need_quests": [
@@ -31362,23 +32547,39 @@
     "level_min": 150,
     "category_id": 26,
     "category_name": "Île de Nowel",
-    "need_items": [
-      11310,
-      20680,
-      12845,
-      643
-    ],
-    "need_quantities": [
-      1,
-      1,
-      20,
-      1
-    ],
+    "need_items": [],
+    "need_quantities": [],
     "need_quests": [
       877
     ],
     "craft_targets": [
       20436
+    ],
+    "need_item_groups": [
+      {
+        "key": "flocon-ou-kama-chocolat",
+        "label": "Pré requis Nowel",
+        "options": [
+          {
+            "label": "Flocons de Neige",
+            "items": [
+              {
+                "item_id": 12845,
+                "quantity": 20
+              }
+            ]
+          },
+          {
+            "label": "Kamas Bronzés en Chocolat",
+            "items": [
+              {
+                "item_id": 12838,
+                "quantity": 40
+              }
+            ]
+          }
+        ]
+      }
     ]
   },
   "2053": {
@@ -31391,24 +32592,86 @@
     "level_min": 150,
     "category_id": 26,
     "category_name": "Île de Nowel",
-    "need_items": [
-      6572,
-      6587,
-      6557,
-      6542,
-      12847
-    ],
-    "need_quantities": [
-      5,
-      5,
-      5,
-      5,
-      5
-    ],
+    "need_items": [],
+    "need_quantities": [],
     "need_quests": [
       2052
     ],
-    "craft_targets": []
+    "craft_targets": [],
+    "need_item_groups": [
+      {
+        "key": "sapik-decoration",
+        "label": "Décorations du Sapik",
+        "options": [
+          {
+            "label": "Fées d’artifice",
+            "items": [
+              {
+                "item_id": 6572,
+                "quantity": 5
+              },
+              {
+                "item_id": 6587,
+                "quantity": 5
+              },
+              {
+                "item_id": 6557,
+                "quantity": 5
+              },
+              {
+                "item_id": 6542,
+                "quantity": 5
+              },
+              {
+                "item_id": 12847,
+                "quantity": 5
+              }
+            ]
+          },
+          {
+            "label": "Craft complet",
+            "items": [
+              {
+                "item_id": 12845,
+                "quantity": 15
+              },
+              {
+                "item_id": 12838,
+                "quantity": 30
+              },
+              {
+                "item_id": 6601,
+                "quantity": 20
+              },
+              {
+                "item_id": 421,
+                "quantity": 5
+              },
+              {
+                "item_id": 289,
+                "quantity": 5
+              },
+              {
+                "item_id": 428,
+                "quantity": 5
+              },
+              {
+                "item_id": 395,
+                "quantity": 5
+              },
+              {
+                "item_id": 519,
+                "quantity": 20
+              },
+              {
+                "item_id": 2330,
+                "quantity": 25
+              }
+            ]
+          }
+        ]
+      }
+    ]
   },
   "2054": {
     "id": 2054,
@@ -31421,18 +32684,18 @@
     "category_id": 26,
     "category_name": "Île de Nowel",
     "need_items": [
-      17152,
       2331,
-      1975,
       361,
-      538
+      1975,
+      538,
+      13112
     ],
     "need_quantities": [
-      20,
       10,
-      5,
       20,
-      40
+      5,
+      40,
+      20
     ],
     "need_quests": [
       2053
@@ -31498,8 +32761,18 @@
     "level_min": 20,
     "category_id": 44,
     "category_name": "Île de Pwâk",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      7147,
+      7148,
+      7149,
+      6458
+    ],
+    "need_quantities": [
+      7,
+      7,
+      12,
+      5
+    ],
     "need_quests": [
       2057
     ],
@@ -31516,9 +32789,11 @@
     "category_id": 44,
     "category_name": "Île de Pwâk",
     "need_items": [
+      15990,
       394
     ],
     "need_quantities": [
+      1,
       20
     ],
     "need_quests": [
@@ -31537,18 +32812,22 @@
     "category_id": 44,
     "category_name": "Île de Pwâk",
     "need_items": [
-      2607,
-      421,
+      15990,
+      7149,
+      424,
       1782,
+      421,
       16495,
-      424
+      2607
     ],
     "need_quantities": [
-      6,
-      50,
-      50,
+      1,
+      1,
+      8,
+      25,
+      25,
       5,
-      8
+      3
     ],
     "need_quests": [
       2059
@@ -31771,8 +33050,12 @@
     "level_min": 200,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      351
+    ],
+    "need_quantities": [
+      10
+    ],
     "need_quests": [],
     "craft_targets": []
   },
@@ -31805,6 +33088,518 @@
     ],
     "craft_targets": [
       21007
+    ],
+    "need_item_groups": [
+      {
+        "key": "animaux-fantastiques-lot-recolte-1",
+        "label": "Lot de ressources récoltables 1",
+        "options": [
+          {
+            "label": "Perce-Neige",
+            "items": [
+              {
+                "item_id": 11102,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Frostiz",
+            "items": [
+              {
+                "item_id": 11109,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Poisskaille",
+            "items": [
+              {
+                "item_id": 11106,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Bois de Tremble",
+            "items": [
+              {
+                "item_id": 11107,
+                "quantity": 750
+              }
+            ]
+          },
+          {
+            "label": "Obsidienne",
+            "items": [
+              {
+                "item_id": 11110,
+                "quantity": 750
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "animaux-fantastiques-lot-recolte-2",
+        "label": "Lot de ressources récoltables 2",
+        "options": [
+          {
+            "label": "Perce-Neige",
+            "items": [
+              {
+                "item_id": 11102,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Frostiz",
+            "items": [
+              {
+                "item_id": 11109,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Poisskaille",
+            "items": [
+              {
+                "item_id": 11106,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Bois de Tremble",
+            "items": [
+              {
+                "item_id": 11107,
+                "quantity": 750
+              }
+            ]
+          },
+          {
+            "label": "Obsidienne",
+            "items": [
+              {
+                "item_id": 11110,
+                "quantity": 750
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "animaux-fantastiques-lot-recolte-3",
+        "label": "Lot de ressources récoltables 3",
+        "options": [
+          {
+            "label": "Perce-Neige",
+            "items": [
+              {
+                "item_id": 11102,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Frostiz",
+            "items": [
+              {
+                "item_id": 11109,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Poisskaille",
+            "items": [
+              {
+                "item_id": 11106,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Bois de Tremble",
+            "items": [
+              {
+                "item_id": 11107,
+                "quantity": 750
+              }
+            ]
+          },
+          {
+            "label": "Obsidienne",
+            "items": [
+              {
+                "item_id": 11110,
+                "quantity": 750
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "animaux-fantastiques-lot-recolte-4",
+        "label": "Lot de ressources récoltables 4",
+        "options": [
+          {
+            "label": "Perce-Neige",
+            "items": [
+              {
+                "item_id": 11102,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Frostiz",
+            "items": [
+              {
+                "item_id": 11109,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Poisskaille",
+            "items": [
+              {
+                "item_id": 11106,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Bois de Tremble",
+            "items": [
+              {
+                "item_id": 11107,
+                "quantity": 750
+              }
+            ]
+          },
+          {
+            "label": "Obsidienne",
+            "items": [
+              {
+                "item_id": 11110,
+                "quantity": 750
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "animaux-fantastiques-lot-recolte-5",
+        "label": "Lot de ressources récoltables 5",
+        "options": [
+          {
+            "label": "Perce-Neige",
+            "items": [
+              {
+                "item_id": 11102,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Frostiz",
+            "items": [
+              {
+                "item_id": 11109,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Poisskaille",
+            "items": [
+              {
+                "item_id": 11106,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Bois de Tremble",
+            "items": [
+              {
+                "item_id": 11107,
+                "quantity": 750
+              }
+            ]
+          },
+          {
+            "label": "Obsidienne",
+            "items": [
+              {
+                "item_id": 11110,
+                "quantity": 750
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "animaux-fantastiques-lot-recolte-6",
+        "label": "Lot de ressources récoltables 6",
+        "options": [
+          {
+            "label": "Perce-Neige",
+            "items": [
+              {
+                "item_id": 11102,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Frostiz",
+            "items": [
+              {
+                "item_id": 11109,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Poisskaille",
+            "items": [
+              {
+                "item_id": 11106,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Bois de Tremble",
+            "items": [
+              {
+                "item_id": 11107,
+                "quantity": 750
+              }
+            ]
+          },
+          {
+            "label": "Obsidienne",
+            "items": [
+              {
+                "item_id": 11110,
+                "quantity": 750
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "animaux-fantastiques-lot-recolte-7",
+        "label": "Lot de ressources récoltables 7",
+        "options": [
+          {
+            "label": "Perce-Neige",
+            "items": [
+              {
+                "item_id": 11102,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Frostiz",
+            "items": [
+              {
+                "item_id": 11109,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Poisskaille",
+            "items": [
+              {
+                "item_id": 11106,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Bois de Tremble",
+            "items": [
+              {
+                "item_id": 11107,
+                "quantity": 750
+              }
+            ]
+          },
+          {
+            "label": "Obsidienne",
+            "items": [
+              {
+                "item_id": 11110,
+                "quantity": 750
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "animaux-fantastiques-lot-recolte-8",
+        "label": "Lot de ressources récoltables 8",
+        "options": [
+          {
+            "label": "Perce-Neige",
+            "items": [
+              {
+                "item_id": 11102,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Frostiz",
+            "items": [
+              {
+                "item_id": 11109,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Poisskaille",
+            "items": [
+              {
+                "item_id": 11106,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Bois de Tremble",
+            "items": [
+              {
+                "item_id": 11107,
+                "quantity": 750
+              }
+            ]
+          },
+          {
+            "label": "Obsidienne",
+            "items": [
+              {
+                "item_id": 11110,
+                "quantity": 750
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "animaux-fantastiques-lot-recolte-9",
+        "label": "Lot de ressources récoltables 9",
+        "options": [
+          {
+            "label": "Perce-Neige",
+            "items": [
+              {
+                "item_id": 11102,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Frostiz",
+            "items": [
+              {
+                "item_id": 11109,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Poisskaille",
+            "items": [
+              {
+                "item_id": 11106,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Bois de Tremble",
+            "items": [
+              {
+                "item_id": 11107,
+                "quantity": 750
+              }
+            ]
+          },
+          {
+            "label": "Obsidienne",
+            "items": [
+              {
+                "item_id": 11110,
+                "quantity": 750
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "animaux-fantastiques-lot-recolte-10",
+        "label": "Lot de ressources récoltables 10",
+        "options": [
+          {
+            "label": "Perce-Neige",
+            "items": [
+              {
+                "item_id": 11102,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Frostiz",
+            "items": [
+              {
+                "item_id": 11109,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Poisskaille",
+            "items": [
+              {
+                "item_id": 11106,
+                "quantity": 100
+              }
+            ]
+          },
+          {
+            "label": "Bois de Tremble",
+            "items": [
+              {
+                "item_id": 11107,
+                "quantity": 750
+              }
+            ]
+          },
+          {
+            "label": "Obsidienne",
+            "items": [
+              {
+                "item_id": 11110,
+                "quantity": 750
+              }
+            ]
+          }
+        ]
+      }
     ]
   },
   "2075": {
@@ -31852,16 +33647,16 @@
     "category_id": 44,
     "category_name": "Île de Pwâk",
     "need_items": [
-      20853,
+      7149,
       6765,
-      395,
-      1634
+      1634,
+      395
     ],
     "need_quantities": [
-      7,
-      35,
-      21,
-      7
+      3,
+      15,
+      3,
+      9
     ],
     "need_quests": [
       2066
@@ -31935,8 +33730,16 @@
     "level_min": 200,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      17161,
+      17993,
+      17992
+    ],
+    "need_quantities": [
+      2,
+      10,
+      10
+    ],
     "need_quests": [
       2080
     ],
@@ -31971,11 +33774,23 @@
     "category_name": "Quêtes principales",
     "need_items": [
       8365,
-      21205
+      15734,
+      14705,
+      13367,
+      14145,
+      14635,
+      32079,
+      15733
     ],
     "need_quantities": [
       1,
-      1
+      1,
+      1,
+      3,
+      2,
+      789,
+      500,
+      42
     ],
     "need_quests": [
       2082
@@ -32094,8 +33909,20 @@
     "level_min": 200,
     "category_id": 45,
     "category_name": "Archipel des Écailles",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      13942,
+      15076,
+      17995,
+      2318,
+      17992
+    ],
+    "need_quantities": [
+      2,
+      4,
+      15,
+      5,
+      20
+    ],
     "need_quests": [],
     "craft_targets": []
   },
@@ -32125,9 +33952,27 @@
     "category_id": 28,
     "category_name": "Événements",
     "need_items": [
-      30071
+      461,
+      11475,
+      377,
+      1983,
+      1975,
+      8682,
+      519,
+      2455,
+      14944,
+      2282
     ],
     "need_quantities": [
+      2,
+      20,
+      5,
+      10,
+      30,
+      2,
+      20,
+      1,
+      1,
       1
     ],
     "need_quests": [
@@ -32189,22 +34034,20 @@
     "need_items": [
       476,
       643,
-      547,
-      545,
-      21948,
+      14635,
       544,
-      546,
-      14635
+      545,
+      547,
+      546
     ],
     "need_quantities": [
       20,
       6,
+      100,
       1,
       1,
       1,
-      1,
-      1,
-      100
+      1
     ],
     "need_quests": [
       2098
@@ -32246,16 +34089,34 @@
     "category_id": 28,
     "category_name": "Événements",
     "need_items": [
-      643,
-      16489,
-      312,
+      2331,
+      8145,
+      16487,
       641,
-      16487
+      312,
+      643,
+      21449,
+      23543,
+      14635,
+      16489,
+      428,
+      21445,
+      1459,
+      23150
     ],
     "need_quantities": [
+      20,
       1,
+      3,
+      3,
+      36,
+      3,
+      6,
       1,
-      12,
+      10,
+      3,
+      4,
+      1,
       1,
       1
     ],
@@ -32359,16 +34220,14 @@
     "category_id": 28,
     "category_name": "Événements",
     "need_items": [
-      1528,
       1527,
-      1526,
-      21681
+      1528,
+      1526
     ],
     "need_quantities": [
-      7,
-      7,
-      7,
-      5
+      21,
+      27,
+      12
     ],
     "need_quests": [
       2091
@@ -32399,16 +34258,16 @@
     "category_id": 28,
     "category_name": "Événements",
     "need_items": [
+      10831,
       425,
       311,
-      381,
-      10831
+      381
     ],
     "need_quantities": [
       5,
-      4,
-      7,
-      1
+      25,
+      20,
+      35
     ],
     "need_quests": [
       2091
@@ -32438,20 +34297,11 @@
       13140,
       16492,
       7036,
-      1773,
-      1324,
-      351,
+      2632,
       8394,
       431,
       9941,
-      14635,
-      1775,
-      1339,
-      2044,
-      1770,
-      2090,
-      1777,
-      6857
+      14635
     ],
     "need_quantities": [
       1,
@@ -32464,20 +34314,11 @@
       1,
       2,
       1,
-      10,
-      4,
-      1,
-      4,
-      40,
-      4,
-      40,
-      10,
-      4,
+      5,
       1,
       10,
       1,
-      10,
-      1
+      10
     ],
     "need_quests": [
       2091
@@ -32490,6 +34331,116 @@
       21754,
       21755,
       21756
+    ],
+    "need_item_groups": [
+      {
+        "key": "en-manque-inspiration-herbe-ou-clochettes",
+        "label": "Herbe ou clochettes",
+        "options": [
+          {
+            "label": "Herbe à chacha",
+            "items": [
+              {
+                "item_id": 1324,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "Clochettes",
+            "items": [
+              {
+                "item_id": 1339,
+                "quantity": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "en-manque-inspiration-bout-blop",
+        "label": "Bout de Blop",
+        "options": [
+          {
+            "label": "Bout de Blop Reinette",
+            "items": [
+              {
+                "item_id": 1773,
+                "quantity": 5
+              }
+            ]
+          },
+          {
+            "label": "Bout de Blop Griotte",
+            "items": [
+              {
+                "item_id": 1775,
+                "quantity": 5
+              }
+            ]
+          },
+          {
+            "label": "Bout de Blop Coco",
+            "items": [
+              {
+                "item_id": 1770,
+                "quantity": 5
+              }
+            ]
+          },
+          {
+            "label": "Bout de Blop Indigo",
+            "items": [
+              {
+                "item_id": 1777,
+                "quantity": 5
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "en-manque-inspiration-biere",
+        "label": "Bière",
+        "options": [
+          {
+            "label": "Bière d'Amakna",
+            "items": [
+              {
+                "item_id": 351,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "Bière du Chabrûlé",
+            "items": [
+              {
+                "item_id": 2044,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "Bière du Ferayeur",
+            "items": [
+              {
+                "item_id": 2090,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "Bière d'Astrub",
+            "items": [
+              {
+                "item_id": 6857,
+                "quantity": 1
+              }
+            ]
+          }
+        ]
+      }
     ]
   },
   "2109": {
@@ -32564,16 +34515,16 @@
     "category_id": 46,
     "category_name": "Eliocalypse",
     "need_items": [
-      1460,
       1334,
-      16460,
-      147
+      1460,
+      147,
+      16460
     ],
     "need_quantities": [
-      1,
       10,
-      2,
-      1
+      1,
+      1,
+      2
     ],
     "need_quests": [
       2112
@@ -32608,16 +34559,14 @@
     "category_id": 46,
     "category_name": "Eliocalypse",
     "need_items": [
-      21982,
-      8364,
+      425,
       11497,
-      425
+      8364
     ],
     "need_quantities": [
-      2,
-      20,
-      10,
-      100
+      50,
+      5,
+      10
     ],
     "need_quests": [
       2111
@@ -32637,19 +34586,19 @@
     "category_id": 46,
     "category_name": "Eliocalypse",
     "need_items": [
+      31517,
+      31522,
       12740,
       13367,
-      31522,
       14635,
-      31517,
       12734
     ],
     "need_quantities": [
+      20,
+      100,
       1,
       3,
       100,
-      100,
-      20,
       20
     ],
     "need_quests": [
@@ -32670,10 +34619,16 @@
     "category_id": 46,
     "category_name": "Eliocalypse",
     "need_items": [
-      22105
+      16496,
+      16499,
+      16492,
+      16494
     ],
     "need_quantities": [
-      4
+      16,
+      16,
+      16,
+      16
     ],
     "need_quests": [
       2122
@@ -32715,8 +34670,12 @@
     "level_min": 200,
     "category_id": 46,
     "category_name": "Eliocalypse",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      9935
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       2118
     ],
@@ -32733,17 +34692,17 @@
     "category_id": 4,
     "category_name": "Quêtes principales",
     "need_items": [
-      397,
       447,
-      13365,
       311,
+      13365,
+      397,
       428
     ],
     "need_quantities": [
-      2,
       8,
-      2,
       4,
+      2,
+      2,
       10
     ],
     "need_quests": [
@@ -32763,8 +34722,12 @@
     "level_min": 200,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      30328
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       2120
     ],
@@ -32798,12 +34761,14 @@
     "category_id": 46,
     "category_name": "Eliocalypse",
     "need_items": [
-      22211,
-      22203
+      19629,
+      22203,
+      22211
     ],
     "need_quantities": [
-      5,
-      10
+      1,
+      10,
+      5
     ],
     "need_quests": [
       2122
@@ -32821,25 +34786,25 @@
     "category_id": 46,
     "category_name": "Eliocalypse",
     "need_items": [
-      7904,
-      20962,
-      1986,
-      2542,
-      22210,
       7014,
+      20962,
+      7904,
+      14144,
+      22210,
       22208,
       22212,
-      14144
+      2542,
+      1986
     ],
     "need_quantities": [
+      10,
+      1,
       20,
+      10,
+      10,
+      10,
+      10,
       1,
-      10,
-      1,
-      10,
-      10,
-      10,
-      10,
       10
     ],
     "need_quests": [
@@ -32859,8 +34824,12 @@
     "level_min": 200,
     "category_id": 46,
     "category_name": "Eliocalypse",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      311
+    ],
+    "need_quantities": [
+      80
+    ],
     "need_quests": [
       2131
     ],
@@ -32974,14 +34943,12 @@
     "category_id": 11,
     "category_name": "Île de Pandala",
     "need_items": [
-      421,
       885,
-      23038
+      421
     ],
     "need_quantities": [
-      50,
       5,
-      1
+      50
     ],
     "need_quests": [],
     "craft_targets": [
@@ -33021,6 +34988,32 @@
     ],
     "craft_targets": [
       23094
+    ],
+    "need_item_groups": [
+      {
+        "key": "biere-pandala",
+        "label": "Bière de Pandala",
+        "options": [
+          {
+            "label": "Pandazahi",
+            "items": [
+              {
+                "item_id": 23179,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "Pandaporo",
+            "items": [
+              {
+                "item_id": 23180,
+                "quantity": 1
+              }
+            ]
+          }
+        ]
+      }
     ]
   },
   "2151": {
@@ -33051,16 +35044,12 @@
     "category_id": 11,
     "category_name": "Île de Pandala",
     "need_items": [
-      23481,
       23480,
-      23482,
       7305
     ],
     "need_quantities": [
-      4,
-      2,
-      2,
-      6
+      1,
+      3
     ],
     "need_quests": [
       2151
@@ -33097,16 +35086,16 @@
     "category_id": 11,
     "category_name": "Île de Pandala",
     "need_items": [
-      7018,
       311,
       287,
-      6671
+      6671,
+      7018
     ],
     "need_quantities": [
-      10,
-      2,
-      10,
-      5
+      20,
+      100,
+      50,
+      100
     ],
     "need_quests": [
       2153
@@ -33128,8 +35117,8 @@
     "category_name": "Île de Pandala",
     "need_items": [
       10831,
-      2294,
-      381
+      381,
+      2294
     ],
     "need_quantities": [
       8,
@@ -33154,12 +35143,14 @@
     "category_id": 11,
     "category_name": "Île de Pandala",
     "need_items": [
-      23248,
       7271,
-      7270
+      7270,
+      7272,
+      7290
     ],
     "need_quantities": [
-      1,
+      10,
+      10,
       10,
       10
     ],
@@ -33179,8 +35170,30 @@
     "level_min": 100,
     "category_id": 11,
     "category_name": "Île de Pandala",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      23311,
+      7222,
+      7225,
+      7224,
+      7223,
+      10831,
+      381,
+      23208,
+      7018,
+      2294
+    ],
+    "need_quantities": [
+      5,
+      5,
+      5,
+      10,
+      5,
+      8,
+      3,
+      10,
+      200,
+      3
+    ],
     "need_quests": [
       2150,
       2150
@@ -33198,10 +35211,10 @@
     "category_id": 11,
     "category_name": "Île de Pandala",
     "need_items": [
-      23735
+      13729
     ],
     "need_quantities": [
-      1
+      5
     ],
     "need_quests": [
       2149
@@ -33219,15 +35232,19 @@
     "category_id": 11,
     "category_name": "Île de Pandala",
     "need_items": [
-      7018,
-      7059,
       7014,
-      7016
+      7016,
+      7059,
+      7045,
+      153,
+      7018
     ],
     "need_quantities": [
+      5,
       20,
       15,
-      5,
+      1,
+      1,
       20
     ],
     "need_quests": [
@@ -33246,18 +35263,22 @@
     "category_id": 11,
     "category_name": "Île de Pandala",
     "need_items": [
-      7112,
+      24021,
       7147,
-      25097,
+      7112,
+      7291,
       23972,
-      7291
+      7018,
+      25097
     ],
     "need_quantities": [
       1,
       1,
       1,
+      5,
       1,
-      5
+      50,
+      1
     ],
     "need_quests": [
       2406
@@ -33275,12 +35296,10 @@
     "category_id": 11,
     "category_name": "Île de Pandala",
     "need_items": [
-      23345,
       311,
       397
     ],
     "need_quantities": [
-      10,
       5,
       1
     ],
@@ -33301,8 +35320,20 @@
     "level_min": 170,
     "category_id": 11,
     "category_name": "Île de Pandala",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      15167,
+      8769,
+      15457,
+      8315,
+      12744
+    ],
+    "need_quantities": [
+      10,
+      3,
+      1,
+      10,
+      5
+    ],
     "need_quests": [
       2149,
       2164,
@@ -33372,22 +35403,22 @@
     "category_id": 11,
     "category_name": "Île de Pandala",
     "need_items": [
-      7018,
       7013,
-      7016,
       7014,
+      7016,
       7033,
+      16463,
       7059,
-      16463
+      7018
     ],
     "need_quantities": [
-      200,
+      80,
       80,
       40,
-      80,
       40,
+      50,
       80,
-      50
+      200
     ],
     "need_quests": [
       2149
@@ -33455,8 +35486,12 @@
     "level_min": 130,
     "category_id": 11,
     "category_name": "Île de Pandala",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      7018
+    ],
+    "need_quantities": [
+      50
+    ],
     "need_quests": [
       2149
     ],
@@ -33490,16 +35525,16 @@
     "category_id": 11,
     "category_name": "Île de Pandala",
     "need_items": [
-      17152,
       1984,
       11340,
-      7410
+      7410,
+      13112
     ],
     "need_quantities": [
-      10,
       100,
       10,
-      5
+      5,
+      10
     ],
     "need_quests": [
       2149
@@ -33516,8 +35551,20 @@
     "level_min": 170,
     "category_id": 11,
     "category_name": "Île de Pandala",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      23595,
+      7384,
+      16385,
+      405,
+      23593
+    ],
+    "need_quantities": [
+      1,
+      4,
+      12,
+      2,
+      5
+    ],
     "need_quests": [
       2149
     ],
@@ -33569,13 +35616,23 @@
     "category_name": "Île de Pandala",
     "need_items": [
       1334,
-      23693,
-      23694
+      7407,
+      16463,
+      7379,
+      16465,
+      7404,
+      7405,
+      1784
     ],
     "need_quantities": [
       30,
       30,
-      30
+      90,
+      30,
+      90,
+      30,
+      30,
+      90
     ],
     "need_quests": [
       2149
@@ -33593,16 +35650,16 @@
     "category_id": 11,
     "category_name": "Île de Pandala",
     "need_items": [
-      6480,
-      13497,
+      7013,
       424,
-      7013
+      6480,
+      13497
     ],
     "need_quantities": [
+      2,
       10,
-      5,
       10,
-      2
+      5
     ],
     "need_quests": [
       2149
@@ -33638,12 +35695,44 @@
     "level_min": 160,
     "category_id": 11,
     "category_name": "Île de Pandala",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      7384,
+      23094
+    ],
+    "need_quantities": [
+      4,
+      1
+    ],
     "need_quests": [
       2197
     ],
-    "craft_targets": []
+    "craft_targets": [],
+    "need_item_groups": [
+      {
+        "key": "biere-pandala",
+        "label": "Bière de Pandala",
+        "options": [
+          {
+            "label": "Pandazahi",
+            "items": [
+              {
+                "item_id": 23179,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "Pandaporo",
+            "items": [
+              {
+                "item_id": 23180,
+                "quantity": 1
+              }
+            ]
+          }
+        ]
+      }
+    ]
   },
   "2180": {
     "id": 2180,
@@ -33656,10 +35745,14 @@
     "category_id": 11,
     "category_name": "Île de Pandala",
     "need_items": [
-      23578
+      446,
+      315,
+      16496
     ],
     "need_quantities": [
-      1
+      5,
+      1,
+      3
     ],
     "need_quests": [
       2179
@@ -33694,30 +35787,28 @@
     "category_id": 11,
     "category_name": "Île de Pandala",
     "need_items": [
-      395,
-      380,
-      593,
+      16211,
       594,
       16385,
       16389,
-      23523,
-      16211,
-      7290,
+      380,
       7291,
-      16212
+      593,
+      16212,
+      7290,
+      395
     ],
     "need_quantities": [
-      30,
-      25,
-      20,
+      1,
       15,
       10,
       5,
-      1,
+      25,
+      6,
+      20,
       1,
       15,
-      6,
-      1
+      30
     ],
     "need_quests": [
       2181
@@ -33753,6 +35844,59 @@
     ],
     "craft_targets": [
       23104
+    ],
+    "need_item_groups": [
+      {
+        "key": "artefact-pandawushu-element",
+        "label": "Artefact Pandawushu au choix",
+        "options": [
+          {
+            "label": "Bois",
+            "items": [
+              {
+                "item_id": 23311,
+                "quantity": 50
+              }
+            ]
+          },
+          {
+            "label": "Eau",
+            "items": [
+              {
+                "item_id": 7222,
+                "quantity": 50
+              }
+            ]
+          },
+          {
+            "label": "Feu",
+            "items": [
+              {
+                "item_id": 7225,
+                "quantity": 50
+              }
+            ]
+          },
+          {
+            "label": "Roc",
+            "items": [
+              {
+                "item_id": 7224,
+                "quantity": 50
+              }
+            ]
+          },
+          {
+            "label": "Vent",
+            "items": [
+              {
+                "item_id": 7223,
+                "quantity": 50
+              }
+            ]
+          }
+        ]
+      }
     ]
   },
   "2184": {
@@ -33766,12 +35910,12 @@
     "category_id": 11,
     "category_name": "Île de Pandala",
     "need_items": [
-      7305,
-      7033
+      7033,
+      7305
     ],
     "need_quantities": [
-      20,
-      15
+      15,
+      20
     ],
     "need_quests": [
       2183
@@ -33788,8 +35932,12 @@
     "level_min": 140,
     "category_id": 11,
     "category_name": "Île de Pandala",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      7045
+    ],
+    "need_quantities": [
+      5
+    ],
     "need_quests": [
       2184
     ],
@@ -33822,8 +35970,26 @@
     "level_min": 160,
     "category_id": 11,
     "category_name": "Île de Pandala",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      31517,
+      7033,
+      7406,
+      7384,
+      8490,
+      17620,
+      7393,
+      7405
+    ],
+    "need_quantities": [
+      10,
+      30,
+      7,
+      8,
+      2,
+      3,
+      4,
+      29
+    ],
     "need_quests": [
       2186
     ],
@@ -33840,22 +36006,22 @@
     "category_id": 11,
     "category_name": "Île de Pandala",
     "need_items": [
-      425,
-      16385,
-      1688,
-      2656,
       23626,
       16387,
-      7393
+      425,
+      16385,
+      7393,
+      2656,
+      1688
     ],
     "need_quantities": [
+      1,
+      30,
       30,
       20,
-      1,
+      3,
       10,
-      1,
-      30,
-      3
+      1
     ],
     "need_quests": [
       2187
@@ -33876,14 +36042,16 @@
     "category_name": "Île de Pandala",
     "need_items": [
       7014,
-      313,
       7033,
+      13157,
+      313,
       7383
     ],
     "need_quantities": [
       30,
-      10,
       5,
+      2,
+      10,
       10
     ],
     "need_quests": [
@@ -34010,7 +36178,33 @@
     "need_quests": [
       2155
     ],
-    "craft_targets": []
+    "craft_targets": [],
+    "need_item_groups": [
+      {
+        "key": "biere-pandala",
+        "label": "Bière de Pandala",
+        "options": [
+          {
+            "label": "Pandazahi",
+            "items": [
+              {
+                "item_id": 23179,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "Pandaporo",
+            "items": [
+              {
+                "item_id": 23180,
+                "quantity": 1
+              }
+            ]
+          }
+        ]
+      }
+    ]
   },
   "2198": {
     "id": 2198,
@@ -34022,8 +36216,24 @@
     "level_min": 170,
     "category_id": 11,
     "category_name": "Île de Pandala",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      10831,
+      23595,
+      7384,
+      381,
+      16385,
+      405,
+      2294
+    ],
+    "need_quantities": [
+      8,
+      1,
+      4,
+      3,
+      12,
+      2,
+      3
+    ],
     "need_quests": [
       2180
     ],
@@ -34059,20 +36269,18 @@
     "category_id": 11,
     "category_name": "Île de Pandala",
     "need_items": [
+      1977,
+      23731,
       23179,
       7055,
-      1977,
-      23482,
-      23237,
-      23408
+      23972
     ],
     "need_quantities": [
-      2,
-      2,
-      2,
-      2,
       1,
-      1
+      1,
+      1,
+      1,
+      2
     ],
     "need_quests": [
       2180
@@ -34093,16 +36301,454 @@
     "category_name": "Île de Pandala",
     "need_items": [
       23237,
-      23408
+      23408,
+      7018,
+      7014,
+      24056,
+      23311,
+      7225,
+      7222,
+      7223,
+      7224,
+      24007,
+      23957,
+      23965,
+      23150,
+      23806,
+      24021
     ],
     "need_quantities": [
+      1,
+      1,
+      100,
+      20,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      5,
+      1,
+      1,
+      1,
       1,
       1
     ],
     "need_quests": [
       2200
     ],
-    "craft_targets": []
+    "craft_targets": [],
+    "need_item_groups": [
+      {
+        "key": "deux-souffles-lot-recoltable-1",
+        "label": "Lot de ressources récoltables 1",
+        "options": [
+          {
+            "label": "Pichon d'encre",
+            "items": [
+              {
+                "item_id": 23825,
+                "quantity": 5
+              }
+            ]
+          },
+          {
+            "label": "Cristal liquide",
+            "items": [
+              {
+                "item_id": 23902,
+                "quantity": 5
+              }
+            ]
+          },
+          {
+            "label": "Tulipe en papier",
+            "items": [
+              {
+                "item_id": 23824,
+                "quantity": 5
+              }
+            ]
+          },
+          {
+            "label": "Cristal pliable",
+            "items": [
+              {
+                "item_id": 23903,
+                "quantity": 5
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "deux-souffles-lot-recoltable-2",
+        "label": "Lot de ressources récoltables 2",
+        "options": [
+          {
+            "label": "Pichon d'encre",
+            "items": [
+              {
+                "item_id": 23825,
+                "quantity": 5
+              }
+            ]
+          },
+          {
+            "label": "Cristal liquide",
+            "items": [
+              {
+                "item_id": 23902,
+                "quantity": 5
+              }
+            ]
+          },
+          {
+            "label": "Tulipe en papier",
+            "items": [
+              {
+                "item_id": 23824,
+                "quantity": 5
+              }
+            ]
+          },
+          {
+            "label": "Cristal pliable",
+            "items": [
+              {
+                "item_id": 23903,
+                "quantity": 5
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "deux-souffles-lot-recoltable-3",
+        "label": "Lot de ressources récoltables 3",
+        "options": [
+          {
+            "label": "Pichon d'encre",
+            "items": [
+              {
+                "item_id": 23825,
+                "quantity": 5
+              }
+            ]
+          },
+          {
+            "label": "Cristal liquide",
+            "items": [
+              {
+                "item_id": 23902,
+                "quantity": 5
+              }
+            ]
+          },
+          {
+            "label": "Tulipe en papier",
+            "items": [
+              {
+                "item_id": 23824,
+                "quantity": 5
+              }
+            ]
+          },
+          {
+            "label": "Cristal pliable",
+            "items": [
+              {
+                "item_id": 23903,
+                "quantity": 5
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "deux-souffles-lot-recoltable-4",
+        "label": "Lot de ressources récoltables 4",
+        "options": [
+          {
+            "label": "Pichon d'encre",
+            "items": [
+              {
+                "item_id": 23825,
+                "quantity": 5
+              }
+            ]
+          },
+          {
+            "label": "Cristal liquide",
+            "items": [
+              {
+                "item_id": 23902,
+                "quantity": 5
+              }
+            ]
+          },
+          {
+            "label": "Tulipe en papier",
+            "items": [
+              {
+                "item_id": 23824,
+                "quantity": 5
+              }
+            ]
+          },
+          {
+            "label": "Cristal pliable",
+            "items": [
+              {
+                "item_id": 23903,
+                "quantity": 5
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "deux-souffles-lot-recoltable-5",
+        "label": "Lot de ressources récoltables 5",
+        "options": [
+          {
+            "label": "Pichon d'encre",
+            "items": [
+              {
+                "item_id": 23825,
+                "quantity": 5
+              }
+            ]
+          },
+          {
+            "label": "Cristal liquide",
+            "items": [
+              {
+                "item_id": 23902,
+                "quantity": 5
+              }
+            ]
+          },
+          {
+            "label": "Tulipe en papier",
+            "items": [
+              {
+                "item_id": 23824,
+                "quantity": 5
+              }
+            ]
+          },
+          {
+            "label": "Cristal pliable",
+            "items": [
+              {
+                "item_id": 23903,
+                "quantity": 5
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "deux-souffles-lot-recoltable-6",
+        "label": "Lot de ressources récoltables 6",
+        "options": [
+          {
+            "label": "Pichon d'encre",
+            "items": [
+              {
+                "item_id": 23825,
+                "quantity": 5
+              }
+            ]
+          },
+          {
+            "label": "Cristal liquide",
+            "items": [
+              {
+                "item_id": 23902,
+                "quantity": 5
+              }
+            ]
+          },
+          {
+            "label": "Tulipe en papier",
+            "items": [
+              {
+                "item_id": 23824,
+                "quantity": 5
+              }
+            ]
+          },
+          {
+            "label": "Cristal pliable",
+            "items": [
+              {
+                "item_id": 23903,
+                "quantity": 5
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "deux-souffles-ressource-yokianzhi-1",
+        "label": "Ressources de Yokianzhi 1",
+        "options": [
+          {
+            "label": "Poing-virgule d'Imushin",
+            "items": [
+              {
+                "item_id": 23958,
+                "quantity": 2
+              }
+            ]
+          },
+          {
+            "label": "Carapace circonflexe d'Imorok",
+            "items": [
+              {
+                "item_id": 23959,
+                "quantity": 2
+              }
+            ]
+          },
+          {
+            "label": "Guillemets d'Imiyama",
+            "items": [
+              {
+                "item_id": 23960,
+                "quantity": 2
+              }
+            ]
+          },
+          {
+            "label": "Cédille d'Imetsu",
+            "items": [
+              {
+                "item_id": 23961,
+                "quantity": 2
+              }
+            ]
+          },
+          {
+            "label": "Poing-virgule de Shinlam",
+            "items": [
+              {
+                "item_id": 23966,
+                "quantity": 2
+              }
+            ]
+          },
+          {
+            "label": "Carapace circonflexe de Rokoram",
+            "items": [
+              {
+                "item_id": 23967,
+                "quantity": 2
+              }
+            ]
+          },
+          {
+            "label": "Guillemets de Mabram",
+            "items": [
+              {
+                "item_id": 23968,
+                "quantity": 2
+              }
+            ]
+          },
+          {
+            "label": "Cédille de Tsunam",
+            "items": [
+              {
+                "item_id": 23969,
+                "quantity": 2
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "deux-souffles-ressource-yokianzhi-2",
+        "label": "Ressources de Yokianzhi 2",
+        "options": [
+          {
+            "label": "Poing-virgule d'Imushin",
+            "items": [
+              {
+                "item_id": 23958,
+                "quantity": 2
+              }
+            ]
+          },
+          {
+            "label": "Carapace circonflexe d'Imorok",
+            "items": [
+              {
+                "item_id": 23959,
+                "quantity": 2
+              }
+            ]
+          },
+          {
+            "label": "Guillemets d'Imiyama",
+            "items": [
+              {
+                "item_id": 23960,
+                "quantity": 2
+              }
+            ]
+          },
+          {
+            "label": "Cédille d'Imetsu",
+            "items": [
+              {
+                "item_id": 23961,
+                "quantity": 2
+              }
+            ]
+          },
+          {
+            "label": "Poing-virgule de Shinlam",
+            "items": [
+              {
+                "item_id": 23966,
+                "quantity": 2
+              }
+            ]
+          },
+          {
+            "label": "Carapace circonflexe de Rokoram",
+            "items": [
+              {
+                "item_id": 23967,
+                "quantity": 2
+              }
+            ]
+          },
+          {
+            "label": "Guillemets de Mabram",
+            "items": [
+              {
+                "item_id": 23968,
+                "quantity": 2
+              }
+            ]
+          },
+          {
+            "label": "Cédille de Tsunam",
+            "items": [
+              {
+                "item_id": 23969,
+                "quantity": 2
+              }
+            ]
+          }
+        ]
+      }
+    ]
   },
   "2202": {
     "id": 2202,
@@ -34114,8 +36760,14 @@
     "level_min": 200,
     "category_id": 11,
     "category_name": "Île de Pandala",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      23237,
+      23408
+    ],
+    "need_quantities": [
+      1,
+      1
+    ],
     "need_quests": [
       2200
     ],
@@ -34132,10 +36784,34 @@
     "category_id": 11,
     "category_name": "Île de Pandala",
     "need_items": [
-      23556
+      23902,
+      23903,
+      23595,
+      7384,
+      16385,
+      24145,
+      405,
+      23965,
+      23957,
+      23825,
+      23592,
+      23593,
+      23824
     ],
     "need_quantities": [
-      1
+      5,
+      5,
+      1,
+      4,
+      12,
+      1,
+      2,
+      1,
+      1,
+      5,
+      4,
+      5,
+      5
     ],
     "need_quests": [
       2149,
@@ -34154,15 +36830,15 @@
     "category_id": 11,
     "category_name": "Île de Pandala",
     "need_items": [
-      23825,
-      312,
       444,
+      312,
+      23825,
       16494
     ],
     "need_quantities": [
-      10,
-      12,
       5,
+      12,
+      10,
       2
     ],
     "need_quests": [
@@ -34183,16 +36859,18 @@
     "category_id": 11,
     "category_name": "Île de Pandala",
     "need_items": [
-      24056,
-      7018,
+      24007,
       1977,
-      23735
+      23972,
+      24056,
+      7018
     ],
     "need_quantities": [
-      20,
-      4,
-      20,
-      1
+      1,
+      10,
+      1,
+      10,
+      2
     ],
     "need_quests": [],
     "craft_targets": [
@@ -34227,8 +36905,12 @@
     "level_min": 200,
     "category_id": 11,
     "category_name": "Île de Pandala",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      23150
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       2406
     ],
@@ -34244,12 +36926,88 @@
     "level_min": 200,
     "category_id": 11,
     "category_name": "Île de Pandala",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      24021,
+      7014,
+      23971,
+      23963,
+      7033,
+      23806,
+      14635,
+      23965,
+      23957,
+      7383
+    ],
+    "need_quantities": [
+      5,
+      40,
+      1,
+      1,
+      20,
+      1,
+      200,
+      5,
+      5,
+      5
+    ],
     "need_quests": [
       2406
     ],
-    "craft_targets": []
+    "craft_targets": [],
+    "need_item_groups": [
+      {
+        "key": "bois-bambou",
+        "label": "Bois de Bambou",
+        "options": [
+          {
+            "label": "Bambou",
+            "items": [
+              {
+                "item_id": 7013,
+                "quantity": 10
+              }
+            ]
+          },
+          {
+            "label": "Bambou Sombre",
+            "items": [
+              {
+                "item_id": 7016,
+                "quantity": 10
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "cristaux-ou-biere",
+        "label": "Cristaux ou bière",
+        "options": [
+          {
+            "label": "Cristaux",
+            "items": [
+              {
+                "item_id": 23903,
+                "quantity": 1
+              },
+              {
+                "item_id": 23902,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "Bière du Grand Pouddah",
+            "items": [
+              {
+                "item_id": 23844,
+                "quantity": 1
+              }
+            ]
+          }
+        ]
+      }
+    ]
   },
   "2409": {
     "id": 2409,
@@ -34262,12 +37020,12 @@
     "category_id": 4,
     "category_name": "Quêtes principales",
     "need_items": [
+      7114,
       737,
-      694,
-      739,
-      7754,
       7115,
-      7114
+      7754,
+      694,
+      739
     ],
     "need_quantities": [
       1,
@@ -34292,8 +37050,12 @@
     "level_min": 200,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      25305
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       2406
     ],
@@ -34309,12 +37071,62 @@
     "level_min": 200,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      15690,
+      23150,
+      7053
+    ],
+    "need_quantities": [
+      1,
+      6,
+      6
+    ],
     "need_quests": [
       2411
     ],
-    "craft_targets": []
+    "craft_targets": [],
+    "need_item_groups": [
+      {
+        "key": "shake-ou-artefacts",
+        "label": "Shaké ou artefacts",
+        "options": [
+          {
+            "label": "Shaké à haute fermentation",
+            "items": [
+              {
+                "item_id": 23554,
+                "quantity": 6
+              }
+            ]
+          },
+          {
+            "label": "Artefacts Pandawushu",
+            "items": [
+              {
+                "item_id": 23311,
+                "quantity": 6
+              },
+              {
+                "item_id": 7222,
+                "quantity": 6
+              },
+              {
+                "item_id": 7225,
+                "quantity": 6
+              },
+              {
+                "item_id": 7224,
+                "quantity": 6
+              },
+              {
+                "item_id": 7223,
+                "quantity": 6
+              }
+            ]
+          }
+        ]
+      }
+    ]
   },
   "2413": {
     "id": 2413,
@@ -34359,18 +37171,18 @@
     "category_id": 49,
     "category_name": "Atoll des Possédés",
     "need_items": [
-      16499,
       350,
       23903,
+      17995,
       480,
-      17995
+      16499
     ],
     "need_quantities": [
-      3,
       2,
       2,
       2,
-      2
+      2,
+      3
     ],
     "need_quests": [],
     "craft_targets": []
@@ -34401,9 +37213,11 @@
     "category_id": 49,
     "category_name": "Atoll des Possédés",
     "need_items": [
-      25281
+      25281,
+      2553
     ],
     "need_quantities": [
+      1,
       1
     ],
     "need_quests": [],
@@ -34419,8 +37233,12 @@
     "level_min": 200,
     "category_id": 49,
     "category_name": "Atoll des Possédés",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      25181
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       2411
     ],
@@ -34437,12 +37255,12 @@
     "category_id": 4,
     "category_name": "Quêtes principales",
     "need_items": [
+      7114,
       737,
-      694,
-      739,
-      7754,
       7115,
-      7114
+      7754,
+      694,
+      739
     ],
     "need_quantities": [
       1,
@@ -34470,12 +37288,70 @@
     "level_min": 200,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      2151,
+      26059,
+      26061
+    ],
+    "need_quantities": [
+      1,
+      1,
+      1
+    ],
     "need_quests": [
       2413
     ],
-    "craft_targets": []
+    "craft_targets": [],
+    "need_item_groups": [
+      {
+        "key": "pain",
+        "label": "Pain",
+        "options": [
+          {
+            "label": "Pain de Frostiz",
+            "items": [
+              {
+                "item_id": 11503,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "Pain Tahde",
+            "items": [
+              {
+                "item_id": 2636,
+                "quantity": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "boisson",
+        "label": "Boisson",
+        "options": [
+          {
+            "label": "Eau Potable",
+            "items": [
+              {
+                "item_id": 311,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "Lailait",
+            "items": [
+              {
+                "item_id": 6765,
+                "quantity": 1
+              }
+            ]
+          }
+        ]
+      }
+    ]
   },
   "2422": {
     "id": 2422,
@@ -34505,23 +37381,33 @@
     "category_id": 4,
     "category_name": "Quêtes principales",
     "need_items": [
+      23311,
+      7222,
+      7225,
+      7224,
+      7223,
+      1478,
       1536,
       1538,
       1535,
       1537,
       14635,
       21966,
-      1478,
-      26159
+      26058
     ],
     "need_quantities": [
+      5,
+      5,
+      5,
+      10,
+      5,
+      1,
       4,
       4,
       4,
       4,
       200,
       2,
-      1,
       1
     ],
     "need_quests": [
@@ -34598,8 +37484,12 @@
     "level_min": 200,
     "category_id": 50,
     "category_name": "Cauchemar des Ravageurs",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      470
+    ],
+    "need_quantities": [
+      10
+    ],
     "need_quests": [
       2424
     ],
@@ -34663,16 +37553,16 @@
     "category_id": 16,
     "category_name": "Bonta",
     "need_items": [
-      1018,
-      16825,
-      1975,
       2331,
-      1732
+      1732,
+      1018,
+      1975,
+      16825
     ],
     "need_quantities": [
-      5,
-      1,
       10,
+      1,
+      5,
       10,
       1
     ],
@@ -34689,12 +37579,8 @@
     "level_min": 110,
     "category_id": 17,
     "category_name": "Brâkmar",
-    "need_items": [
-      26166
-    ],
-    "need_quantities": [
-      1
-    ],
+    "need_items": [],
+    "need_quantities": [],
     "need_quests": [],
     "craft_targets": []
   },
@@ -34739,18 +37625,18 @@
     "category_id": 17,
     "category_name": "Brâkmar",
     "need_items": [
-      17130,
       1674,
-      757,
       1974,
-      1975
+      757,
+      1975,
+      17130
     ],
     "need_quantities": [
-      3,
-      10,
       10,
       5,
-      5
+      10,
+      5,
+      3
     ],
     "need_quests": [],
     "craft_targets": []
@@ -34766,9 +37652,13 @@
     "category_id": 17,
     "category_name": "Brâkmar",
     "need_items": [
-      26198
+      473,
+      16440,
+      2305
     ],
     "need_quantities": [
+      1,
+      1,
       1
     ],
     "need_quests": [],
@@ -34898,11 +37788,11 @@
       2540
     ],
     "need_quantities": [
-      60,
-      12,
-      12,
-      12,
-      2
+      30,
+      6,
+      6,
+      6,
+      1
     ],
     "need_quests": [
       2443
@@ -34938,8 +37828,12 @@
     "level_min": 150,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      26710
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       2445
     ],
@@ -34955,8 +37849,18 @@
     "level_min": 170,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      26710,
+      1977,
+      7018,
+      17144
+    ],
+    "need_quantities": [
+      1,
+      12,
+      12,
+      12
+    ],
     "need_quests": [
       2446
     ],
@@ -34972,8 +37876,12 @@
     "level_min": 180,
     "category_id": 4,
     "category_name": "Quêtes principales",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      26710
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       2447
     ],
@@ -34990,18 +37898,10 @@
     "category_id": 4,
     "category_name": "Quêtes principales",
     "need_items": [
-      737,
-      694,
-      739,
-      7754,
-      7115,
-      7114
+      26710,
+      16460
     ],
     "need_quantities": [
-      1,
-      1,
-      1,
-      1,
       1,
       1
     ],
@@ -35044,8 +37944,12 @@
     "level_min": 150,
     "category_id": 52,
     "category_name": "Forêt Maléfique",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      32521
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [],
     "craft_targets": []
   },
@@ -35404,8 +38308,12 @@
     "level_min": 190,
     "category_id": 53,
     "category_name": "Archipel de Valonia",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      27643
+    ],
+    "need_quantities": [
+      10
+    ],
     "need_quests": [
       2472
     ],
@@ -35456,24 +38364,24 @@
     "category_id": 53,
     "category_name": "Archipel de Valonia",
     "need_items": [
+      16387,
+      27401,
+      27621,
+      27399,
       27403,
       27397,
-      27401,
-      27400,
-      27399,
       27398,
-      16387,
-      27621
+      27400
     ],
     "need_quantities": [
-      2,
-      2,
-      2,
-      2,
-      2,
-      2,
-      14,
-      14
+      7,
+      1,
+      7,
+      1,
+      1,
+      1,
+      1,
+      1
     ],
     "need_quests": [
       2475
@@ -35610,8 +38518,12 @@
     "level_min": 150,
     "category_id": 5,
     "category_name": "Cania",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      26870
+    ],
+    "need_quantities": [
+      500
+    ],
     "need_quests": [],
     "craft_targets": []
   },
@@ -35625,8 +38537,22 @@
     "level_min": 180,
     "category_id": 55,
     "category_name": "Royaume d'Amakna",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      11475,
+      11891,
+      11885,
+      11893,
+      11888,
+      11890
+    ],
+    "need_quantities": [
+      20,
+      4,
+      4,
+      4,
+      4,
+      4
+    ],
     "need_quests": [
       2445,
       1621
@@ -35643,8 +38569,12 @@
     "level_min": 200,
     "category_id": 55,
     "category_name": "Royaume d'Amakna",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      28342
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       2486,
       2408
@@ -35661,13 +38591,111 @@
     "level_min": 200,
     "category_id": 55,
     "category_name": "Royaume d'Amakna",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      307,
+      12728,
+      2330,
+      1736,
+      8436,
+      19916,
+      21217,
+      16219,
+      26870,
+      13366,
+      13367,
+      19074,
+      397,
+      750,
+      13988,
+      14635,
+      6601,
+      519,
+      17973,
+      1985,
+      14963,
+      16459,
+      15271
+    ],
+    "need_quantities": [
+      31,
+      2,
+      12,
+      6,
+      1,
+      1,
+      1,
+      6,
+      2,
+      1,
+      2,
+      12,
+      3,
+      6,
+      4,
+      500,
+      12,
+      12,
+      2,
+      6,
+      1,
+      1,
+      4
+    ],
     "need_quests": [
       2487,
       2423
     ],
-    "craft_targets": []
+    "craft_targets": [],
+    "need_item_groups": [
+      {
+        "key": "metronome-ou-orichor",
+        "label": "Métronome ou Orichor",
+        "options": [
+          {
+            "label": "Métronome du Début-Temps",
+            "items": [
+              {
+                "item_id": 29379,
+                "quantity": 24
+              }
+            ]
+          },
+          {
+            "label": "Orichor",
+            "items": [
+              {
+                "item_id": 15206,
+                "quantity": 24
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "dague-ou-kamas-glace",
+        "label": "Dague ou Kamas de glace",
+        "options": [
+          {
+            "label": "Dague de Will Killson",
+            "items": [
+              {
+                "item_id": 28248,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "Kamas de glace",
+            "items": [
+              {
+                "item_id": 11196,
+                "quantity": 20
+              }
+            ]
+          }
+        ]
+      }
+    ]
   },
   "2489": {
     "id": 2489,
@@ -35848,15 +38876,9 @@
     "category_id": 28,
     "category_name": "Événements",
     "need_items": [
-      30068,
-      30070,
-      30069,
-      30067
+      467
     ],
     "need_quantities": [
-      2,
-      2,
-      2,
       1
     ],
     "need_quests": [
@@ -35930,8 +38952,8 @@
       289,
       303,
       312,
-      421,
-      1782
+      1782,
+      421
     ],
     "need_quantities": [
       1,
@@ -36113,18 +39135,18 @@
     "category_id": 19,
     "category_name": "Incarnam",
     "need_items": [
-      16489,
-      16663,
+      1984,
       16440,
+      16489,
       16524,
-      1984
+      16663
     ],
     "need_quantities": [
+      5,
       1,
-      4,
       1,
       3,
-      5
+      4
     ],
     "need_quests": [
       1651
@@ -36279,8 +39301,12 @@
     "level_min": 170,
     "category_id": 57,
     "category_name": "Osavora",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      31649
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       2516
     ],
@@ -36296,8 +39322,12 @@
     "level_min": 170,
     "category_id": 57,
     "category_name": "Osavora",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      31584
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       2516
     ],
@@ -36329,17 +39359,11 @@
     "category_id": 57,
     "category_name": "Osavora",
     "need_items": [
-      31624,
-      31630,
-      31629,
       31747,
       31754,
       31748
     ],
     "need_quantities": [
-      1,
-      1,
-      1,
       6,
       40,
       6
@@ -36351,6 +39375,41 @@
       31609,
       31610,
       31611
+    ],
+    "need_item_groups": [
+      {
+        "key": "instinct-equipement",
+        "label": "Objet de pistage",
+        "options": [
+          {
+            "label": "Os Divinatoire de Voracle",
+            "items": [
+              {
+                "item_id": 31624,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "Daguosseuse de Domptueuse",
+            "items": [
+              {
+                "item_id": 31630,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "Bandeau d’Ébourifauve",
+            "items": [
+              {
+                "item_id": 31629,
+                "quantity": 1
+              }
+            ]
+          }
+        ]
+      }
     ]
   },
   "2526": {
@@ -36399,44 +39458,14 @@
     "category_id": 57,
     "category_name": "Osavora",
     "need_items": [
-      31822,
-      31829,
-      31869,
-      31830,
-      31828,
-      1730,
-      31825,
-      31823,
-      31820,
-      31826,
-      31827,
       1977,
-      31831,
-      31834,
-      31821,
-      31832,
-      31819,
-      1974
+      1974,
+      1730
     ],
     "need_quantities": [
-      2,
-      2,
-      2,
       10,
-      4,
-      20,
-      2,
-      2,
-      2,
       10,
-      4,
-      20,
-      2,
-      2,
-      2,
-      10,
-      2,
-      20
+      10
     ],
     "need_quests": [
       2515
@@ -36491,8 +39520,12 @@
     "level_min": 200,
     "category_id": 57,
     "category_name": "Osavora",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      31650
+    ],
+    "need_quantities": [
+      1
+    ],
     "need_quests": [
       2517
     ],
@@ -36508,12 +39541,70 @@
     "level_min": 200,
     "category_id": 57,
     "category_name": "Osavora",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      31651,
+      1977,
+      31624
+    ],
+    "need_quantities": [
+      1,
+      3,
+      3
+    ],
     "need_quests": [
       2518
     ],
-    "craft_targets": []
+    "craft_targets": [],
+    "need_item_groups": [
+      {
+        "key": "dent-ou-orichor",
+        "label": "Dent ou Orichor",
+        "options": [
+          {
+            "label": "Dents de zarbivore",
+            "items": [
+              {
+                "item_id": 31653,
+                "quantity": 3
+              }
+            ]
+          },
+          {
+            "label": "Orichor",
+            "items": [
+              {
+                "item_id": 15206,
+                "quantity": 6
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "signe-ou-eklame",
+        "label": "Signe ou Éklâme",
+        "options": [
+          {
+            "label": "Signe de Mirh",
+            "items": [
+              {
+                "item_id": 27610,
+                "quantity": 1
+              }
+            ]
+          },
+          {
+            "label": "Éklâme suprême",
+            "items": [
+              {
+                "item_id": 31522,
+                "quantity": 10
+              }
+            ]
+          }
+        ]
+      }
+    ]
   },
   "2533": {
     "id": 2533,
@@ -36525,8 +39616,12 @@
     "level_min": 200,
     "category_id": 57,
     "category_name": "Osavora",
-    "need_items": [],
-    "need_quantities": [],
+    "need_items": [
+      31655
+    ],
+    "need_quantities": [
+      3
+    ],
     "need_quests": [
       2518
     ],
@@ -36578,27 +39673,27 @@
     "category_id": 57,
     "category_name": "Osavora",
     "need_items": [
-      16467,
-      16465,
-      16469,
-      281,
-      381,
-      1734,
-      15455,
       14479,
+      1734,
       19406,
-      9267
+      381,
+      16465,
+      16467,
+      281,
+      16469,
+      9267,
+      15455
     ],
     "need_quantities": [
       3,
-      3,
-      3,
       5,
-      5,
-      5,
-      3,
-      3,
       2,
+      5,
+      3,
+      3,
+      5,
+      3,
+      3,
       3
     ],
     "need_quests": [
