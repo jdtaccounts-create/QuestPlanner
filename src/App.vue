@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, shallowRef, watch } from 'vue'
 import {
   achievementChoiceRulesFor,
   alternativeGroupItemIds,
@@ -45,12 +45,12 @@ type DownloadEvent = {
 const data = ref<QuestPlannerData | null>(null)
 const loading = ref(true)
 const syncing = ref(false)
-const updateAvailable = ref(false)
 const status = ref('Chargement des données locales...')
 const themeMode = ref<'dark' | 'light'>('dark')
 const questQuery = ref('')
 const selectedQuests = ref<QuestInfo[]>([])
 const pendingAchievement = ref<AchievementInfo | null>(null)
+const pendingAchievementQueue = ref<AchievementInfo[]>([])
 const pendingChoiceRules = ref<AchievementChoiceRule[]>([])
 const pendingChoiceValues = ref<Record<number, string>>({})
 const currentEntries = ref<ItemEntry[]>([])
@@ -61,13 +61,13 @@ const craftPlan = ref<CraftPlan | null>(null)
 const craftCheckedKeys = ref<Set<string>>(new Set())
 const craftOpen = ref(false)
 const choiceOpen = ref(false)
-const showSyncConfirm = ref(false)
 const appUpdate = shallowRef<AppUpdate | null>(null)
 const showAppUpdatePrompt = ref(false)
 const checkingAppUpdate = ref(false)
 const installingAppUpdate = ref(false)
 const appUpdateProgress = ref('')
 let autoComputeTimer: number | undefined
+let overflowUpdateFrame: number | undefined
 
 const questCount = computed(() => Object.keys(data.value?.quests || {}).length)
 const achievementCount = computed(() => Object.keys(data.value?.achievements || {}).length)
@@ -81,13 +81,7 @@ const searchResults = computed(() => {
 
 const selectedQuestIds = computed(() => new Set(selectedQuests.value.map((quest) => quest.questId)))
 const activeChoiceRule = computed(() => pendingChoiceRules.value.find((rule) => !pendingChoiceValues.value[rule.achievementId]) || null)
-
-const questSidebarWidth = computed(() => {
-  const longestSelectedName = selectedQuests.value.reduce((longest, quest) => Math.max(longest, quest.name.length), 0)
-  const longestSearchName = searchResults.value.reduce((longest, result) => Math.max(longest, result.name.length), 0)
-  const longestName = Math.max(24, longestSelectedName, longestSearchName)
-  return `${Math.min(430, Math.max(322, 150 + longestName * 6.8))}px`
-})
+const questSidebarWidth = '430px'
 
 const displayedEntries = computed(() => mergeItemEntries([...currentEntries.value, ...selectedAlternativeEntries()]))
 
@@ -114,17 +108,6 @@ const choiceTotalCount = computed(() => currentAlternativeGroups.value.length)
 const choiceResolvedCount = computed(() =>
   currentAlternativeGroups.value.filter((group) => selectedAlternativeOptionKeys.value[group.group_key]).length,
 )
-
-const craftSections = computed(() => {
-  const plan = craftPlan.value
-  if (!plan) return []
-  return [
-    { key: 'direct_crafts', title: 'Base à craft', lines: plan.direct_crafts },
-    { key: 'sub_crafts', title: 'Sous-crafts', lines: plan.sub_crafts },
-    { key: 'craft_resources', title: 'Ressources craft', lines: plan.craft_resources },
-    { key: 'base_direct', title: 'Base à obtenir', lines: [...plan.base_direct, ...plan.excluded] },
-  ]
-})
 
 const craftPanels = computed(() => {
   const plan = craftPlan.value
@@ -269,8 +252,7 @@ function isChecked(itemId: number): boolean {
 }
 
 function isEntryDone(entry: ItemEntry): boolean {
-  const covered = coveredByItemId.value.get(entry.item_id) || 0
-  return isChecked(entry.item_id) || covered >= entry.quantity
+  return isChecked(entry.item_id)
 }
 
 function isAlternativeOptionSelected(group: AlternativeItemGroupEntry, optionKey: string): boolean {
@@ -369,9 +351,6 @@ function craftMeta(line: CraftLine): string {
 }
 
 function craftLineCompletesBaseItem(line: CraftLine): boolean {
-  if (line.line_key.startsWith('ingredients:')) {
-    return displayedEntries.value.some((entry) => entry.item_id === line.item_id)
-  }
   const isBaseLine = line.line_key.startsWith('direct_crafts:')
     || line.line_key.startsWith('base_direct:')
     || line.line_key.startsWith('excluded:')
@@ -447,18 +426,31 @@ function addQuests(quests: QuestInfo[], sourceLabel: string): void {
     : `Toutes les quêtes de ${sourceLabel} sont déjà dans la liste`
 }
 
-function addAchievement(achievement: AchievementInfo): void {
+function startAchievementChoice(
+  achievement: AchievementInfo,
+  queuedAchievements: AchievementInfo[] = [],
+  inheritedChoices: Record<number, string> = {},
+): void {
   if (!data.value) return
-  const requiredRules = achievementChoiceRulesFor(data.value, achievement.achievementId)
-  if (requiredRules.length) {
-    pendingAchievement.value = achievement
-    pendingChoiceRules.value = requiredRules
-    pendingChoiceValues.value = {}
-    status.value = `Choix requis pour ${achievement.name}`
+  const requiredRules = achievementChoiceRulesFor(data.value, achievement.achievementId, inheritedChoices)
+  if (!requiredRules.length) {
+    addQuests(expandAchievementToQuests(data.value, achievement.achievementId, inheritedChoices), achievement.name)
+    const nextAchievement = queuedAchievements[0]
+    if (nextAchievement) startAchievementChoice(nextAchievement, queuedAchievements.slice(1), inheritedChoices)
     return
   }
 
-  addQuests(expandAchievementToQuests(data.value, achievement.achievementId), achievement.name)
+  pendingAchievement.value = achievement
+  pendingAchievementQueue.value = queuedAchievements
+  pendingChoiceRules.value = requiredRules
+  pendingChoiceValues.value = { ...inheritedChoices }
+  const queuedSuffix = queuedAchievements.length ? ` (+${queuedAchievements.length} succès en attente)` : ''
+  status.value = `Choix requis pour ${achievement.name}${queuedSuffix}`
+}
+
+function addAchievement(achievement: AchievementInfo): void {
+  if (!data.value) return
+  startAchievementChoice(achievement)
 }
 
 function addSearchResult(result: SearchResult): void {
@@ -496,27 +488,32 @@ function selectAchievementOption(option: AchievementChoiceOption): void {
   const rule = activeChoiceRule.value
   if (!rule || !pendingAchievement.value || !data.value) return
 
-  pendingChoiceValues.value = {
+  const nextChoices = {
     ...pendingChoiceValues.value,
     [rule.achievementId]: option.key,
   }
+  pendingChoiceValues.value = nextChoices
 
-  const remainingRules = achievementChoiceRulesFor(data.value, pendingAchievement.value.achievementId, pendingChoiceValues.value)
+  const remainingRules = achievementChoiceRulesFor(data.value, pendingAchievement.value.achievementId, nextChoices)
   if (remainingRules.length) {
     pendingChoiceRules.value = remainingRules
     return
   }
 
   const achievement = pendingAchievement.value
-  const choices = pendingChoiceValues.value
+  const nextAchievement = pendingAchievementQueue.value[0]
+  const remainingQueuedAchievements = pendingAchievementQueue.value.slice(1)
   pendingAchievement.value = null
+  pendingAchievementQueue.value = []
   pendingChoiceRules.value = []
   pendingChoiceValues.value = {}
-  addQuests(expandAchievementToQuests(data.value, achievement.achievementId, choices), achievement.name)
+  addQuests(expandAchievementToQuests(data.value, achievement.achievementId, nextChoices), achievement.name)
+  if (nextAchievement) startAchievementChoice(nextAchievement, remainingQueuedAchievements, nextChoices)
 }
 
 function cancelAchievementChoice(): void {
   pendingAchievement.value = null
+  pendingAchievementQueue.value = []
   pendingChoiceRules.value = []
   pendingChoiceValues.value = {}
   status.value = 'Ajout du succès annulé'
@@ -552,11 +549,47 @@ async function parseClipboard(): Promise<void> {
     }
     const { found, missed } = parseClipboardQuests(data.value, text)
     const existing = new Set(selectedQuests.value.map((quest) => quest.questId))
-    const additions = found.filter((quest) => !existing.has(quest.questId))
+    const parsedQuests = found.filter((result): result is { kind: 'quest' } & QuestInfo => result.kind === 'quest')
+    const parsedAchievements = found.filter((result): result is AchievementInfo => result.kind === 'achievement')
+    const additions: QuestInfo[] = []
+    const choiceAchievements: AchievementInfo[] = []
+
+    parsedQuests.forEach((quest) => {
+      if (existing.has(quest.questId)) return
+      additions.push(quest)
+      existing.add(quest.questId)
+    })
+
+    parsedAchievements.forEach((achievement) => {
+      const requiredRules = achievementChoiceRulesFor(data.value!, achievement.achievementId)
+      if (requiredRules.length) {
+        choiceAchievements.push(achievement)
+        return
+      }
+
+      expandAchievementToQuests(data.value!, achievement.achievementId).forEach((quest) => {
+        if (existing.has(quest.questId)) return
+        additions.push(quest)
+        existing.add(quest.questId)
+      })
+    })
+
     selectedQuests.value = [...selectedQuests.value, ...additions]
-    status.value = missed.length
-      ? `${additions.length} quêtes ajoutées, ${missed.length} lignes ignorées`
+    questQuery.value = ''
+
+    if (choiceAchievements.length) {
+      if (activeChoiceRule.value) {
+        pendingAchievementQueue.value = [...pendingAchievementQueue.value, ...choiceAchievements]
+      } else {
+        startAchievementChoice(choiceAchievements[0], choiceAchievements.slice(1))
+      }
+      return
+    }
+
+    const sourceSummary = parsedAchievements.length
+      ? `${additions.length} quêtes ajoutées depuis ${parsedQuests.length} quête(s) et ${parsedAchievements.length} succès`
       : `${additions.length} quêtes ajoutées depuis le presse-papier`
+    status.value = missed.length ? `${sourceSummary}, ${missed.length} lignes ignorées` : sourceSummary
   } catch {
     status.value = 'Lecture du presse-papier indisponible'
   }
@@ -639,7 +672,7 @@ async function prepareCraftPlan(): Promise<void> {
     craftCheckedKeys.value = new Set()
     craftOpen.value = true
     choiceOpen.value = false
-    const totalLines = craftSections.value.reduce((total, section) => total + section.lines.length, 0)
+    const totalLines = displayedCraftLines.value.length
     status.value = `Plan craft prêt : ${totalLines} lignes`
   } catch (error) {
     status.value = error instanceof Error ? `Erreur plan craft : ${error.message}` : 'Erreur plan craft'
@@ -689,7 +722,6 @@ async function checkLocalDataStatus(): Promise<void> {
   if (!data.value) return
   try {
     const info = await checkQuestPlannerDataStatus(data.value)
-    updateAvailable.value = info.needsSync
     if (info.needsSync) {
       status.value = `Mise à jour disponible (${info.missingLabels.join(', ')})`
       if (isTauriRuntime()) await syncDatabases()
@@ -697,7 +729,6 @@ async function checkLocalDataStatus(): Promise<void> {
     }
     status.value = `Données locales à jour : ${info.localQuestTotal} quêtes, ${info.localAchievementTotal} succès, ${info.localItemTotal} items, ${info.localRecipeTotal} recettes`
   } catch {
-    updateAvailable.value = false
     status.value = `Données locales chargées : ${questCount.value} quêtes, ${achievementCount.value} succès, ${itemCount.value} items, ${recipeCount.value} recettes`
   }
 }
@@ -709,9 +740,8 @@ async function syncDatabases(): Promise<void> {
   try {
     const synced = await syncQuestPlannerData((message) => {
       status.value = message
-    })
+    }, data.value || undefined)
     data.value = synced
-    updateAvailable.value = false
     currentEntries.value = []
     currentAlternativeGroups.value = []
     checkedItemIds.value = new Set()
@@ -731,11 +761,6 @@ async function syncDatabases(): Promise<void> {
   }
 }
 
-async function forceSyncDatabases(): Promise<void> {
-  showSyncConfirm.value = false
-  await syncDatabases()
-}
-
 function applyTheme(mode: 'dark' | 'light'): void {
   themeMode.value = mode
   document.documentElement.dataset.theme = mode
@@ -744,6 +769,23 @@ function applyTheme(mode: 'dark' | 'light'): void {
 
 function toggleTheme(): void {
   applyTheme(themeMode.value === 'dark' ? 'light' : 'dark')
+}
+
+function updateScrollableListClasses(): void {
+  document.querySelectorAll<HTMLElement>('.quest-list, .item-list, .choice-list, .craft-list').forEach((list) => {
+    const hasScroll = list.scrollHeight > list.clientHeight + 1
+    list.classList.toggle('has-scroll', hasScroll)
+  })
+}
+
+function scheduleScrollableListUpdate(): void {
+  if (overflowUpdateFrame) window.cancelAnimationFrame(overflowUpdateFrame)
+  void nextTick(() => {
+    overflowUpdateFrame = window.requestAnimationFrame(() => {
+      overflowUpdateFrame = undefined
+      updateScrollableListClasses()
+    })
+  })
 }
 
 function scheduleComputeItems(): void {
@@ -762,11 +804,25 @@ watch(
   },
 )
 
+watch(
+  [
+    () => selectedQuests.value.length,
+    () => displayedEntries.value.length,
+    () => currentAlternativeGroups.value.length,
+    () => displayedCraftLines.value.length,
+    () => craftOpen.value,
+    () => choiceOpen.value,
+  ],
+  scheduleScrollableListUpdate,
+  { flush: 'post' },
+)
+
 onMounted(async () => {
   const savedTheme = localStorage.getItem('questplanner-theme')
   applyTheme(savedTheme === 'light' ? 'light' : 'dark')
   await reloadData()
   await checkAppUpdate()
+  scheduleScrollableListUpdate()
 })
 </script>
 
@@ -778,66 +834,81 @@ onMounted(async () => {
       :style="{ '--quest-sidebar-width': questSidebarWidth }"
     >
       <aside class="quest-sidebar glass-surface">
-        <section class="search-block">
-          <q-input
-            v-model="questQuery"
-            dense
-            standout
-            clearable
-            placeholder="Rechercher une quête ou un succès..."
-            :disable="loading"
-            @keyup.enter="addFirstSearchResult"
-          >
-            <template #prepend>
-              <button
-                class="theme-search-button"
-                type="button"
-                @click.stop="toggleTheme"
-              >
-                <q-icon :name="themeMode === 'dark' ? 'light_mode' : 'dark_mode'" />
-              </button>
-              <q-icon name="search" />
-            </template>
-          </q-input>
-
-          <div v-if="questQuery && searchResults.length" class="search-results">
-            <button
-              v-for="result in searchResults"
-              :key="`${result.kind}:${result.kind === 'quest' ? result.questId : result.achievementId}`"
-              class="result-row"
-              :class="{ selected: searchResultSelected(result), achievement: result.kind === 'achievement' }"
-              type="button"
-              @click="addSearchResult(result)"
+        <section class="quest-top">
+          <section class="search-block">
+            <q-input
+              v-model="questQuery"
+              dense
+              standout
+              clearable
+              placeholder="Rechercher une quête ou un succès..."
+              :disable="loading"
+              @keyup.enter="addFirstSearchResult"
             >
-              <q-icon :name="result.kind === 'quest' ? 'assignment' : 'emoji_events'" />
-              <span>{{ result.name }}</span>
-              <small>{{ searchResultMeta(result) }}</small>
-            </button>
-          </div>
-        </section>
+              <template #prepend>
+                <button
+                  class="search-icon-button"
+                  type="button"
+                  :aria-label="themeMode === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'"
+                  @click.stop="toggleTheme"
+                >
+                  <q-icon :name="themeMode === 'dark' ? 'light_mode' : 'dark_mode'" />
+                </button>
+                <q-icon name="search" />
+              </template>
 
-        <section class="selected-block">
+              <template #append>
+                <button
+                  class="search-icon-button"
+                  type="button"
+                  aria-label="Parser"
+                  @click.stop="parseClipboard"
+                >
+                  <q-icon name="content_paste" />
+                </button>
+                <button
+                  class="search-icon-button"
+                  type="button"
+                  aria-label="Vider"
+                  @click.stop="clearQuests"
+                >
+                  <q-icon name="delete_sweep" />
+                </button>
+              </template>
+            </q-input>
+
+            <div v-if="questQuery && searchResults.length" class="search-results">
+              <button
+                v-for="result in searchResults"
+                :key="`${result.kind}:${result.kind === 'quest' ? result.questId : result.achievementId}`"
+                class="result-row"
+                :class="{ selected: searchResultSelected(result), achievement: result.kind === 'achievement' }"
+                type="button"
+                @click="addSearchResult(result)"
+              >
+                <q-icon :name="result.kind === 'quest' ? 'assignment' : 'emoji_events'" />
+                <span>{{ result.name }}</span>
+                <small>{{ searchResultMeta(result) }}</small>
+              </button>
+            </div>
+          </section>
+
           <div class="panel-heading">
             <h2>Quêtes sélectionnées</h2>
             <q-badge rounded>{{ selectedQuests.length }}</q-badge>
           </div>
-
-          <div class="selected-actions">
-            <q-btn dense flat icon="content_paste" label="Parser" @click="parseClipboard" />
-            <q-btn dense flat icon="delete_sweep" label="Vider" @click="clearQuests" />
-          </div>
-
-          <div class="quest-list">
-            <p v-if="!selectedQuests.length" class="empty-state">Aucune quête sélectionnée</p>
-            <article v-for="quest in selectedQuests" :key="quest.questId" class="quest-chip">
-              <button class="quest-link" type="button" @click="openDofusDb('quest', quest.questId)">
-                <span>{{ quest.name }}</span>
-                <small>niv. {{ quest.levelMin }} · {{ quest.categoryName || 'Sans catégorie' }}</small>
-              </button>
-              <q-btn dense round flat icon="close" @click="removeQuest(quest.questId)" />
-            </article>
-          </div>
         </section>
+
+        <div class="quest-list">
+          <p v-if="!selectedQuests.length" class="empty-state">Aucune quête sélectionnée</p>
+          <article v-for="quest in selectedQuests" :key="quest.questId" class="quest-chip">
+            <button class="quest-link" type="button" @click="openDofusDb('quest', quest.questId)">
+              <span>{{ quest.name }}</span>
+              <small>niv. {{ quest.levelMin }} · {{ quest.categoryName || 'Sans catégorie' }}</small>
+            </button>
+            <q-btn dense round flat icon="close" @click="removeQuest(quest.questId)" />
+          </article>
+        </div>
       </aside>
 
       <section class="main-board">
@@ -890,7 +961,7 @@ onMounted(async () => {
 
           <div v-else class="choice-expanded">
             <header class="craft-heading">
-              <q-btn dense round flat icon="close" title="Fermer les choix" @click="choiceOpen = false" />
+              <q-btn dense round flat icon="close" @click="choiceOpen = false" />
               <h2>Items à choisir</h2>
               <q-badge rounded color="primary">{{ choiceResolvedCount }}/{{ choiceTotalCount }}</q-badge>
             </header>
@@ -928,7 +999,7 @@ onMounted(async () => {
                               :aria-pressed="isAlternativeOptionSelected(group, option.option_key)"
                               @click="selectAlternativeOption(group.group_key, option.option_key)"
                             >
-                              <q-icon :name="isAlternativeOptionSelected(group, option.option_key) ? 'radio_button_checked' : 'radio_button_unchecked'" />
+                              <span aria-hidden="true"></span>
                             </button>
                             <button
                               v-for="item in option.items"
@@ -969,7 +1040,7 @@ onMounted(async () => {
 
           <div v-else class="craft-expanded">
             <header class="craft-heading">
-              <q-btn dense round flat icon="close" title="Fermer le plan craft" @click="craftOpen = false" />
+              <q-btn dense round flat icon="close" @click="craftOpen = false" />
               <h2>Plan de craft</h2>
               <q-badge rounded color="primary">{{ craftCheckedCount }}/{{ displayedCraftLines.length }}</q-badge>
             </header>
@@ -1014,20 +1085,6 @@ onMounted(async () => {
         </aside>
       </section>
     </main>
-
-    <div v-if="showSyncConfirm" class="sync-dialog">
-      <div class="sync-card glass-surface">
-        <h2>Synchronisation déjà à jour</h2>
-        <p>
-          La base locale contient déjà autant d'items, recettes et quêtes que DofusDB.
-          Relancer une synchronisation complète peut prendre du temps.
-        </p>
-        <div class="sync-actions">
-          <q-btn flat label="Annuler" @click="showSyncConfirm = false" />
-          <q-btn color="primary" unelevated label="Forcer la sync" :loading="syncing" @click="forceSyncDatabases" />
-        </div>
-      </div>
-    </div>
 
     <div v-if="showAppUpdatePrompt && appUpdate" class="sync-dialog">
       <div class="sync-card glass-surface">

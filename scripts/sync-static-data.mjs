@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs'
-import { writeFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -139,6 +139,9 @@ function normalizeApiItem(rawItem) {
     type_name_en: extractItemTypeName(rawItem, 'en'),
     item_type_category_id: extractItemTypeCategoryId(rawItem),
     item_type_in_encyclopedia: Boolean(rawItem?.type?.isInEncyclopedia),
+    criterions: rawItem.criterions || '',
+    quests_that_use: (rawItem.questsThatUse || []).map(Number),
+    quests_that_reward: (rawItem.questsThatReward || []).map(Number),
     image_url: imageUrl,
     image_path: itemImagePath(Number(id), imageUrl),
   }
@@ -205,6 +208,32 @@ function normalizeQuest(rawQuest, categories) {
   }
 }
 
+async function loadExistingQuests() {
+  try {
+    return JSON.parse(await readFile(join(dataDir, 'quests.json'), 'utf8'))
+  } catch {
+    return {}
+  }
+}
+
+function questNeedFieldsFromCurated(quest) {
+  return {
+    need_items: (quest?.need_items || []).map(Number),
+    need_quantities: (quest?.need_quantities || []).map(Number),
+    need_item_groups: quest?.need_item_groups || [],
+    need_quests: (quest?.need_quests || []).map(Number),
+    craft_targets: (quest?.craft_targets || []).map(Number),
+  }
+}
+
+function preserveCuratedQuestNeeds(quest, curatedQuests) {
+  if (!quest) return null
+  return {
+    ...quest,
+    ...questNeedFieldsFromCurated(curatedQuests[String(quest.id)]),
+  }
+}
+
 function normalizeAchievement(rawAchievement) {
   const id = rawAchievement?.id
   if (id == null) return null
@@ -230,7 +259,8 @@ function normalizeAchievement(rawAchievement) {
   }
 }
 
-const [rawCategories, rawItems, rawRecipes, rawAchievements] = await Promise.all([
+const [existingQuests, rawCategories, rawItems, rawRecipes, rawAchievements] = await Promise.all([
+  loadExistingQuests(),
   fetchPaginated('/quest-categories', 'Categories'),
   fetchPaginated('/items', 'Items'),
   fetchPaginated('/recipes', 'Recettes'),
@@ -242,13 +272,13 @@ const rawQuests = await fetchPaginated('/quests', 'Quetes')
 const items = byId(rawItems.map(normalizeApiItem))
 const recipes = byId(rawRecipes.map(normalizeRecipe), 'result_id')
 const achievements = byId(rawAchievements.map(normalizeAchievement))
-const quests = byId(rawQuests.map((rawQuest) => normalizeQuest(rawQuest, categories)))
+const quests = byId(rawQuests.map((rawQuest) => preserveCuratedQuestNeeds(normalizeQuest(rawQuest, categories), existingQuests)))
 
 const exclusions = {
   item_type_category_ids: [4],
   item_type_ids: [80],
   raw_types: ['Bénédiction', 'Bonus de jeu de rôle', 'Malédiction', 'Mutation', 'Suiveur'],
-  item_ids: [],
+  item_ids: [15990],
 }
 
 const metadata = {
@@ -264,6 +294,7 @@ const metadata = {
   achievement_ids_checksum: idsChecksum(Object.keys(achievements)),
   last_static_sync: new Date().toISOString(),
   item_schema_version: 2,
+  quest_need_schema_version: 3,
 }
 
 await Promise.all([

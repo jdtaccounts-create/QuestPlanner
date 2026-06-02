@@ -1,6 +1,6 @@
 :root {
   color-scheme: dark;
-  --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font: Roboto, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
   --window: #08090b;
   --bg-a: #131417;
   --bg-b: #070708;
@@ -10,17 +10,15 @@
   --panel: rgba(28, 28, 30, .74);
   --panel-strong: rgba(38, 38, 41, .86);
   --panel-soft: rgba(255, 255, 255, .055);
-  --item: rgba(62, 62, 66, .70);
-  --item-hover: rgba(78, 78, 84, .78);
+  --item: rgba(36, 36, 40, .78);
+  --item-hover: rgba(48, 48, 54, .84);
   --stroke: rgba(255, 255, 255, .105);
   --stroke-strong: rgba(255, 255, 255, .17);
   --text: #f5f5f7;
   --muted: #a1a1a6;
-  --subtle: #74747b;
   --accent: #0a84ff;
   --success: #34c759;
   --count: #ffd60a;
-  --danger: #ff453a;
   --button: rgba(255, 255, 255, .07);
   --search: rgba(255, 255, 255, .08);
   --glass: blur(24px) saturate(1.24);
@@ -29,8 +27,20 @@
   --radius-sm: 10px;
   --shadow: 0 18px 44px rgba(0, 0, 0, .28);
   --inner: inset 0 1px 0 rgba(255, 255, 255, .08);
-  --chromatic-frame: 1px 0 0 rgba(70, 170, 255, .34), -1px 0 0 rgba(154, 86, 255, .32), 0 1px 0 rgba(255, 72, 96, .20);
+  --chromatic-frame: -1px -1px 0 rgba(70, 170, 255, .42), 1px -1px 0 rgba(154, 86, 255, .32), 0 1px 0 rgba(255, 72, 96, .30);
   --chromatic-control: 1px 0 0 rgba(70, 170, 255, .42), -1px 0 0 rgba(154, 86, 255, .38), 0 1px 0 rgba(255, 72, 96, .25);
+  --large-surface-border: rgba(255, 255, 255, .17);
+  --large-surface-rim: inset 0 0 0 1px rgba(255, 255, 255, .045), -1px -1px 0 rgba(70, 170, 255, .40), 1px -1px 0 rgba(154, 86, 255, .28), 0 1px 0 rgba(255, 72, 96, .26);
+  --large-surface-halo: -12px -10px 34px rgba(70, 170, 255, .34), 12px -10px 42px rgba(154, 86, 255, .24), 0 18px 60px rgba(255, 72, 96, .25), 0 18px 44px rgba(0, 0, 0, .34);
+  --scroll-edge: 14px;
+  --scrollbar-size: 14px;
+  --scrollbar-thumb-inset: 4px;
+  --scroll-content-gap: -8px;
+  --scroll-content-pad: calc(var(--scrollbar-size) - var(--scrollbar-thumb-inset) + var(--scroll-content-gap));
+  --scroll-right-offset: 2px;
+  --scrollbar-visual-offset: 3px;
+  --scroll-list-edge: calc(var(--scroll-edge) - var(--scrollbar-visual-offset));
+  --scroll-bottom-offset: var(--scroll-list-edge);
   color: var(--text);
   background: var(--window);
   font-family: var(--font);
@@ -57,18 +67,19 @@
   --stroke-strong: rgba(17, 24, 39, .16);
   --text: #1d1d1f;
   --muted: #6e6e73;
-  --subtle: #92929a;
   --accent: #007aff;
   --success: #34c759;
   --count: #b56a00;
-  --danger: #ff3b30;
   --button: rgba(0, 122, 255, .08);
   --search: rgba(0, 0, 0, .045);
   --shadow: 0 18px 44px rgba(32, 42, 54, .12);
   --inner: inset 0 1px 0 rgba(255, 255, 255, .8);
   --glass: blur(24px) saturate(1.12);
-  --chromatic-frame: 1px 0 0 rgba(0, 122, 255, .32), -1px 0 0 rgba(255, 86, 176, .28), 0 1px 0 rgba(255, 199, 64, .32);
+  --chromatic-frame: -1px -1px 0 rgba(0, 122, 255, .50), 1px -1px 0 rgba(255, 86, 176, .38), 0 1px 0 rgba(255, 199, 64, .46);
   --chromatic-control: 1px 0 0 rgba(0, 122, 255, .38), -1px 0 0 rgba(255, 86, 176, .34), 0 1px 0 rgba(255, 199, 64, .38);
+  --large-surface-border: rgba(17, 24, 39, .18);
+  --large-surface-rim: inset 0 0 0 1px rgba(255, 255, 255, .62), -1px -1px 0 rgba(0, 122, 255, .42), 1px -1px 0 rgba(255, 86, 176, .30), 0 1px 0 rgba(255, 199, 64, .34);
+  --large-surface-halo: -12px -10px 34px rgba(0, 122, 255, .28), 12px -10px 44px rgba(255, 86, 176, .22), 0 18px 62px rgba(255, 199, 64, .24), 0 18px 44px rgba(32, 42, 54, .17);
   color: var(--text);
   background: var(--window);
 }
@@ -76,6 +87,8 @@
 * {
   box-sizing: border-box;
 }
+
+/* Base layout */
 
 html,
 body,
@@ -122,69 +135,16 @@ button {
   box-shadow: var(--inner), var(--chromatic-frame);
 }
 
-.topbar {
-  min-height: 68px;
-  border-radius: var(--radius-lg);
-  padding: 0 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  box-shadow: var(--inner), var(--chromatic-frame), var(--shadow);
-}
-
-.topbar h1,
 .panel-heading h2,
 .column-heading h2,
 .craft-heading h2,
+.choice-section h3,
 .craft-section h3 {
   margin: 0;
   letter-spacing: 0;
 }
 
-.topbar h1 {
-  color: var(--text);
-  font-size: 28px;
-  line-height: 1;
-  font-weight: 650;
-}
-
-.topbar p {
-  max-width: 780px;
-  margin: 5px 0 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 620;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.status-dot {
-  width: 6px;
-  height: 6px;
-  margin-left: 4px;
-  border-radius: 999px;
-  flex: 0 0 auto;
-  background: var(--success);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--success) 18%, transparent);
-}
-
-.status-dot.warn {
-  background: var(--count);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--count) 18%, transparent);
-}
-
-.toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: 9px;
-}
+/* Workspace shells */
 
 .workspace {
   min-height: 0;
@@ -203,10 +163,26 @@ button {
 }
 
 .quest-sidebar {
-  padding: 14px;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  gap: 8px;
+}
+
+.quest-sidebar.glass-surface,
+.item-column.glass-surface,
+.choice-panel.glass-surface,
+.craft-panel.glass-surface {
+  border-color: var(--large-surface-border);
+  box-shadow: var(--inner), var(--chromatic-frame), var(--large-surface-rim), var(--large-surface-halo);
+}
+
+/* Quest sidebar */
+
+.quest-top {
+  min-height: 0;
+  padding: var(--scroll-edge) var(--scroll-edge) 0;
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 0;
 }
 
 .search-block {
@@ -240,7 +216,13 @@ button {
   padding-right: 6px;
 }
 
-.theme-search-button {
+.search-block .q-field__append {
+  padding-left: 6px;
+  padding-right: 0;
+  gap: 0;
+}
+
+.search-icon-button {
   appearance: none;
   width: 30px;
   height: 30px;
@@ -256,11 +238,11 @@ button {
   cursor: pointer;
 }
 
-.theme-search-button .q-icon {
+.search-icon-button .q-icon {
   font-size: 21px;
 }
 
-.theme-search-button:hover {
+.search-icon-button:hover {
   color: var(--text);
   background: var(--button);
 }
@@ -281,45 +263,29 @@ button {
   backdrop-filter: var(--glass);
 }
 
-.selected-block {
-  min-height: 0;
-  display: grid;
-  grid-template-rows: 24px auto minmax(0, 1fr);
-  row-gap: 8px;
-  align-content: start;
-}
-
-.panel-heading,
-.column-heading,
-.craft-heading,
-.craft-section header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
 .panel-heading {
-  min-height: 24px;
-  height: 24px;
+  min-height: 64px;
+  height: 64px;
+  margin: 0 calc(var(--scroll-edge) * -1);
+  padding: 0 15px;
+  border-bottom: 1px solid var(--stroke);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
 }
 
 .panel-heading h2 {
+  grid-column: 2;
+  text-align: center;
   color: var(--text);
-  font-size: 14px;
-  font-weight: 780;
+  font-size: 20px;
+  font-weight: 520;
+  line-height: 1;
 }
 
-.selected-actions {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  margin: 0;
-}
-
-.selected-actions .q-btn {
-  min-height: 38px;
-}
+/* Scroll containers */
 
 .quest-list,
 .item-list,
@@ -335,8 +301,8 @@ button {
 .choice-list::-webkit-scrollbar,
 .craft-list::-webkit-scrollbar,
 .search-results::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
+  width: var(--scrollbar-size);
+  height: var(--scrollbar-size);
 }
 
 .quest-list::-webkit-scrollbar-track,
@@ -353,7 +319,9 @@ button {
 .craft-list::-webkit-scrollbar-thumb,
 .search-results::-webkit-scrollbar-thumb {
   min-height: 48px;
-  border: 3px solid transparent;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 0 var(--scrollbar-thumb-inset);
   border-radius: 999px;
   background-clip: content-box;
   background-color: color-mix(in srgb, var(--text) 38%, transparent);
@@ -369,21 +337,31 @@ button {
 
 .quest-list {
   min-height: 0;
-  padding-top: 8px;
-  padding-right: 6px;
+  margin: var(--scroll-list-edge) var(--scroll-edge) var(--scroll-bottom-offset) var(--scroll-edge);
+  padding-top: var(--scrollbar-visual-offset);
+  padding-right: 0;
+  padding-bottom: var(--scrollbar-visual-offset);
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 8px;
   overflow-x: hidden;
   overflow-y: auto;
+}
+
+.quest-list.has-scroll {
+  margin-right: var(--scroll-right-offset);
+  padding-right: var(--scroll-content-pad);
 }
 
 .quest-list > .empty-state {
   margin: 0;
 }
 
+/* Selected quests */
+
 .quest-chip {
-  min-height: 54px;
+  flex: none;
+  min-height: 47px;
   position: relative;
   padding: 0;
   border: 1px solid var(--stroke);
@@ -458,6 +436,7 @@ button {
 
 .result-row:hover,
 .result-row.selected,
+.quest-chip:hover,
 .item-card:hover,
 .alternative-item:hover,
 .alternative-select:hover {
@@ -468,11 +447,11 @@ button {
 .quest-link {
   min-width: 0;
   width: 100%;
-  min-height: 54px;
+  min-height: 45px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 9px 48px 9px 12px;
+  padding: 6px 48px 6px 12px;
   border-radius: inherit;
 }
 
@@ -480,10 +459,20 @@ button {
 .quest-link span {
   min-width: 0;
   overflow: hidden;
-  font-size: 13px;
-  font-weight: 780;
+  font-weight: 520;
+}
+
+.result-row span {
+  font-size: 14px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.quest-link span {
+  font-size: 14px;
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .result-row small,
@@ -492,7 +481,7 @@ button {
   color: var(--muted);
   font-size: 11px;
   line-height: 1.25;
-  font-weight: 620;
+  font-weight: 520;
 }
 
 .result-row small {
@@ -501,6 +490,8 @@ button {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Main item columns */
 
 .main-board {
   min-width: 0;
@@ -546,7 +537,9 @@ button {
   border-bottom: 1px solid var(--stroke);
   display: grid;
   grid-template-columns: 1fr auto 1fr;
-  background: linear-gradient(180deg, rgba(255, 255, 255, .045), transparent);
+  align-items: center;
+  gap: 10px;
+  background: transparent;
 }
 
 .craft-heading .q-btn {
@@ -573,7 +566,7 @@ button {
   height: 26px;
   padding: 0 9px;
   font-size: 12px;
-  font-weight: 560;
+  font-weight: 520;
   background: var(--accent) !important;
   box-shadow: 0 8px 18px color-mix(in srgb, var(--accent) 34%, transparent);
 }
@@ -582,21 +575,31 @@ button {
   min-width: 26px;
 }
 
+/* Item cards and checkboxes */
+
 .item-list {
   min-height: 0;
-  padding: 12px 9px 12px 12px;
+  margin-top: var(--scroll-list-edge);
+  margin-right: var(--scroll-edge);
+  margin-bottom: var(--scroll-bottom-offset);
+  padding: var(--scrollbar-visual-offset) 0 var(--scrollbar-visual-offset) 2px;
   display: flex;
   flex-direction: column;
   gap: 8px;
   overflow: auto;
 }
 
+.item-list.has-scroll {
+  margin-right: var(--scroll-right-offset);
+  padding-right: var(--scroll-content-pad);
+}
+
 .item-row,
 .craft-row {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
+  grid-template-columns: 29px minmax(0, 1fr);
   align-items: start;
-  gap: 8px;
+  gap: 2px;
 }
 
 .alternative-row {
@@ -622,9 +625,9 @@ button {
   transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
 }
 
-:root[data-theme='light'] .item-row input[type='checkbox'],
-:root[data-theme='light'] .alternative-row input[type='checkbox'],
-:root[data-theme='light'] .craft-row input[type='checkbox'] {
+:root[data-theme='light'] .item-row:not(.done) input[type='checkbox']:not(:checked),
+:root[data-theme='light'] .alternative-row:not(.done) input[type='checkbox']:not(:checked),
+:root[data-theme='light'] .craft-row:not(.done) input[type='checkbox']:not(:checked) {
   border-color: rgba(123, 132, 146, .76);
   background: rgba(255, 255, 255, .72);
 }
@@ -647,6 +650,17 @@ button {
 .item-row.done input[type='checkbox'],
 .alternative-row.done input[type='checkbox'],
 .craft-row.done input[type='checkbox'] {
+  border-color: var(--success);
+  background: var(--success);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 20%, transparent);
+}
+
+:root[data-theme='light'] .item-row input[type='checkbox']:checked,
+:root[data-theme='light'] .alternative-row input[type='checkbox']:checked,
+:root[data-theme='light'] .craft-row input[type='checkbox']:checked,
+:root[data-theme='light'] .item-row.done input[type='checkbox'],
+:root[data-theme='light'] .alternative-row.done input[type='checkbox'],
+:root[data-theme='light'] .craft-row.done input[type='checkbox'] {
   border-color: var(--success);
   background: var(--success);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 20%, transparent);
@@ -685,6 +699,8 @@ button {
   gap: 7px;
 }
 
+/* Alternative choice rows */
+
 .alternative-card header {
   min-width: 0;
   display: grid;
@@ -693,7 +709,7 @@ button {
 .alternative-card header span {
   color: var(--text);
   font-size: 12px;
-  font-weight: 560;
+  font-weight: 520;
   line-height: 1.25;
   overflow-wrap: anywhere;
   white-space: normal;
@@ -705,7 +721,7 @@ button {
   overflow: hidden;
   color: var(--muted);
   font-size: 10px;
-  font-weight: 560;
+  font-weight: 520;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -716,45 +732,67 @@ button {
 }
 
 .alternative-option {
-  padding: 4px;
-  border: 1px solid transparent;
+  padding: 0;
+  border: 0;
   border-radius: 10px;
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr);
-  gap: 5px;
+  grid-template-columns: 17px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
 }
 
 .alternative-option.selected {
-  border-color: color-mix(in srgb, var(--accent) 56%, transparent);
-  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  border-color: transparent;
+  background: transparent;
 }
 
 .alternative-select {
+  -webkit-appearance: none;
+  appearance: none;
   min-width: 0;
-  width: 40px;
-  min-height: 40px;
+  width: 17px;
+  height: 17px;
+  min-height: 17px;
   padding: 0;
-  border: 1px solid var(--stroke);
-  border-radius: 9px;
-  display: inline-flex;
+  border: 2px solid rgba(245, 245, 247, .46);
+  border-radius: 5px;
+  display: grid;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  color: var(--muted);
-  background: color-mix(in srgb, var(--panel-soft) 72%, transparent);
-  font-size: 11px;
-  font-weight: 560;
-  line-height: 1;
+  background: rgba(255, 255, 255, .075);
+  transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
 }
 
-.alternative-select .q-icon {
-  font-size: 18px;
+.alternative-select span {
+  width: 7px;
+  height: 4px;
+  border-left: 2px solid white;
+  border-bottom: 2px solid white;
+  opacity: 0;
+  transform: rotate(-45deg) translateY(-1px);
 }
 
 .alternative-option.selected .alternative-select {
-  color: var(--text);
-  border-color: color-mix(in srgb, var(--accent) 62%, transparent);
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  border-color: var(--success);
+  background: var(--success);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 20%, transparent);
+  transition-property: box-shadow;
+}
+
+.alternative-option.selected .alternative-select span {
+  opacity: 1;
+}
+
+:root[data-theme='light'] .alternative-select {
+  border-color: rgba(123, 132, 146, .76);
+  background: rgba(255, 255, 255, .72);
+}
+
+:root[data-theme='light'] .alternative-option.selected .alternative-select {
+  border-color: var(--success);
+  background: var(--success);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 20%, transparent);
+  transition-property: box-shadow;
 }
 
 .alternative-item {
@@ -772,6 +810,11 @@ button {
   box-shadow: var(--inner);
 }
 
+.alternative-option.selected .alternative-item {
+  border-color: color-mix(in srgb, var(--success) 46%, transparent);
+  background: color-mix(in srgb, var(--success) 12%, var(--panel-soft));
+}
+
 .alternative-separator {
   display: grid;
   grid-template-columns: minmax(16px, 1fr) auto minmax(16px, 1fr);
@@ -779,7 +822,7 @@ button {
   gap: 7px;
   color: var(--muted);
   font-size: 10px;
-  font-weight: 560;
+  font-weight: 520;
   text-transform: uppercase;
 }
 
@@ -809,7 +852,7 @@ button {
   place-items: center;
   background: var(--panel-soft);
   color: var(--accent);
-  font-weight: 800;
+  font-weight: 520;
 }
 
 .item-copy {
@@ -822,9 +865,9 @@ button {
 .item-copy strong {
   overflow: hidden;
   color: var(--text);
-  font-size: 13px;
-  font-weight: 780;
-  line-height: 1.18;
+  font-size: 14px;
+  font-weight: 520;
+  line-height: 1.08;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -834,6 +877,8 @@ button {
   opacity: .52;
   text-decoration: line-through;
 }
+
+/* Folded and expanded right panels */
 
 .choice-panel,
 .craft-panel {
@@ -860,8 +905,9 @@ button {
   overflow: hidden;
   width: 100%;
   height: 100%;
-  padding: 12px 0;
-  display: block;
+  padding: 46px 0 12px;
+  display: grid;
+  place-items: center;
 }
 
 .choice-rail:disabled,
@@ -871,35 +917,33 @@ button {
 }
 
 .rail-title {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  min-width: max-content;
-  transform: translate(-50%, -50%) rotate(-90deg);
-  transform-origin: center;
+  max-width: 44px;
   color: var(--muted);
   font-size: 12px;
-  font-weight: 620;
+  font-weight: 520;
   letter-spacing: 0;
-  line-height: 1;
+  line-height: 1.08;
+  text-align: center;
   text-transform: uppercase;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .rail-badge {
   position: absolute;
-  top: 12px;
+  top: 18px;
   left: 50%;
   transform: translateX(-50%);
-  width: 30px;
-  height: 30px;
-  border-radius: 999px;
+  width: auto;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 9px;
+  border-radius: 12px;
   display: grid;
   place-items: center;
   color: white;
   background: var(--accent);
   font-size: 12px;
-  font-weight: 560;
+  font-weight: 520;
   box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 36%, transparent);
 }
 
@@ -956,7 +1000,7 @@ button {
   color: var(--muted);
   font-size: 14px;
   text-align: center;
-  font-weight: 560;
+  font-weight: 520;
   line-height: 1;
 }
 
@@ -973,24 +1017,39 @@ button {
   color: white;
   background: var(--accent);
   font-size: 12px;
-  font-weight: 560;
+  font-weight: 520;
   box-shadow: 0 8px 18px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 .choice-list,
 .craft-list {
   min-height: 0;
-  padding: 10px 7px 10px 10px;
+  margin-top: var(--scroll-list-edge);
+  margin-right: var(--scroll-edge);
+  margin-bottom: var(--scroll-bottom-offset);
+  padding: var(--scrollbar-visual-offset) 0 var(--scrollbar-visual-offset) 2px;
   display: flex;
   flex-direction: column;
   gap: 8px;
   overflow: auto;
 }
 
+.choice-list {
+  margin-right: 0;
+  padding-right: var(--scroll-edge);
+  padding-left: var(--scroll-edge);
+}
+
+.choice-list.has-scroll,
+.craft-list.has-scroll {
+  margin-right: var(--scroll-right-offset);
+  padding-right: var(--scroll-content-pad);
+}
+
 .empty-state {
   display: grid;
   min-height: 74px;
-  margin: 12px;
+  margin: var(--scroll-edge);
   place-items: center;
   border: 1px dashed var(--stroke-strong);
   border-radius: var(--radius-sm);
@@ -1002,6 +1061,12 @@ button {
   min-height: 62px;
   margin: 0;
 }
+
+.craft-list > .empty-state.compact {
+  margin-left: calc(var(--scroll-edge) - 2px);
+}
+
+/* Modal dialogs */
 
 .sync-dialog,
 .choice-dialog {
@@ -1029,26 +1094,20 @@ button {
   margin: 0;
   color: var(--text);
   font-size: 22px;
-  font-weight: 650;
+  font-weight: 520;
 }
 
 .sync-card p {
   margin: 10px 0 18px;
   color: var(--muted);
   font-size: 14px;
-  font-weight: 560;
+  font-weight: 520;
   line-height: 1.45;
 }
 
 .sync-card .update-progress {
   color: var(--text);
-  font-weight: 760;
-}
-
-.sync-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 9px;
+  font-weight: 520;
 }
 
 .choice-card {
@@ -1073,7 +1132,7 @@ button {
   margin-bottom: 4px;
   color: var(--accent);
   font-size: 11px;
-  font-weight: 850;
+  font-weight: 520;
   text-transform: uppercase;
 }
 
@@ -1081,7 +1140,7 @@ button {
   margin: 0;
   color: var(--text);
   font-size: 24px;
-  font-weight: 680;
+  font-weight: 520;
   line-height: 1.08;
 }
 
@@ -1089,7 +1148,7 @@ button {
   margin: 0;
   color: var(--muted);
   font-size: 14px;
-  font-weight: 560;
+  font-weight: 520;
   line-height: 1.42;
 }
 
@@ -1169,14 +1228,14 @@ button {
 .choice-copy strong {
   color: var(--text);
   font-size: 14px;
-  font-weight: 820;
+  font-weight: 520;
   white-space: nowrap;
 }
 
 .choice-copy small {
   color: var(--muted);
   font-size: 12px;
-  font-weight: 620;
+  font-weight: 520;
   line-height: 1.2;
 }
 
@@ -1189,7 +1248,7 @@ button {
   background: color-mix(in srgb, var(--accent) 78%, transparent);
   font-size: 11px;
   font-style: normal;
-  font-weight: 850;
+  font-weight: 520;
   white-space: nowrap;
 }
 
@@ -1240,6 +1299,8 @@ button {
   opacity: .78;
 }
 
+/* Quasar overrides */
+
 .q-btn {
   min-height: 42px;
   border: 1px solid var(--stroke);
@@ -1248,15 +1309,18 @@ button {
   color: var(--text);
   background: var(--button);
   box-shadow: var(--inner), var(--chromatic-control);
-  font-weight: 700;
+  font-weight: 520;
   letter-spacing: 0;
   text-transform: none;
 }
 
 .q-btn.q-btn--round {
-  width: 42px;
-  min-width: 42px;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  min-height: 30px;
   padding: 0;
+  border-radius: 11px;
 }
 
 .q-btn.bg-primary {
@@ -1334,36 +1398,7 @@ button {
   color: var(--muted) !important;
 }
 
-.q-checkbox__bg {
-  border-radius: 5px;
-  border: 2px solid color-mix(in srgb, var(--text) 42%, transparent);
-  background: color-mix(in srgb, var(--panel-strong) 54%, transparent);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
-}
-
-:root[data-theme='dark'] .q-checkbox__bg {
-  border-color: rgba(245, 245, 247, .46);
-  background: rgba(255, 255, 255, .075);
-}
-
-.q-checkbox__inner:hover .q-checkbox__bg {
-  border-color: color-mix(in srgb, var(--accent) 70%, var(--text) 20%);
-}
-
-.q-checkbox__inner--truthy .q-checkbox__bg {
-  border-color: var(--success) !important;
-  background: var(--success) !important;
-  background-color: var(--success) !important;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 20%, transparent) !important;
-}
-
-.q-checkbox__inner--truthy .q-checkbox__svg {
-  color: white !important;
-}
-
-.q-checkbox__inner--truthy {
-  color: var(--success) !important;
-}
+/* Responsive */
 
 @media (max-width: 1180px) {
   body {
@@ -1392,19 +1427,8 @@ button {
 
 @media (max-width: 820px) {
   .app-shell,
-  .topbar,
   .workspace {
     display: flex;
     flex-direction: column;
-  }
-
-  .topbar {
-    align-items: stretch;
-    height: auto;
-    padding: 16px;
-  }
-
-  .toolbar {
-    justify-content: flex-start;
   }
 }

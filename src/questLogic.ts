@@ -114,6 +114,9 @@ export interface CachedItem {
   type_id?: number | null
   type_name?: string
   item_type_category_id?: number | null
+  criterions?: string
+  quests_that_use?: number[]
+  quests_that_reward?: number[]
   image_url?: string
   image_path?: string
 }
@@ -563,19 +566,18 @@ export function splitQuestLines(text: string): string[] {
     })
 }
 
-export function parseClipboardQuests(data: QuestPlannerData, text: string): { found: QuestInfo[]; missed: string[] } {
-  const found: QuestInfo[] = []
+export function parseClipboardQuests(data: QuestPlannerData, text: string): { found: SearchResult[]; missed: string[] } {
+  const found: SearchResult[] = []
   const missed: string[] = []
-  const seen = new Set<number>()
+  const seen = new Set<string>()
 
   splitQuestLines(text).forEach((line) => {
-    const quest = searchQuestsAndCategories(data, line, 4).find(
-      (result): result is { kind: 'quest' } & QuestInfo => result.kind === 'quest',
-    )
-    if (quest && quest.score >= 0.7 && !seen.has(quest.questId)) {
-      found.push(quest)
-      seen.add(quest.questId)
-    } else if (!quest) {
+    const result = searchQuestsAndCategories(data, line, 4).find((candidate) => candidate.score >= 0.7)
+    const resultKey = result?.kind === 'quest' ? `quest:${result.questId}` : `achievement:${result?.achievementId}`
+    if (result && !seen.has(resultKey)) {
+      found.push(result)
+      seen.add(resultKey)
+    } else if (!result) {
       missed.push(line)
     }
   })
@@ -706,6 +708,11 @@ export function isItemExcluded(item: CachedItem | undefined, data: QuestPlannerD
   const typeIds = new Set([...EXCLUDED_ITEM_TYPE_IDS, ...exclusionNumberSet(data.exclusions.item_type_ids)])
   if (item.type_id != null && typeIds.has(Number(item.type_id))) return true
 
+  const isNormalEquipment = Number(item.item_type_category_id) === 0
+  const hasRecipe = Boolean(data.recipes[String(item.id)])
+  const isQuestStartedCondition = /\bQa[=<>]/.test(item.criterions || '')
+  if (isNormalEquipment && !hasRecipe && isQuestStartedCondition) return true
+
   const rawTypes = new Set([...EXCLUDED_LEGACY_RAW_TYPES, ...(data.exclusions.raw_types || [])])
   return rawTypes.has(item.raw_type || '')
 }
@@ -722,9 +729,16 @@ export function buildBaseEntries(data: QuestPlannerData, quests: QuestInfo[]): I
   const totals = new Map<number, number>()
   const sources = new Map<number, string[]>()
   const firstOrder = new Map<number, number>()
+  const selectedEquipmentCraftTargets = new Set(
+    quests
+      .flatMap((quest) => quest.craftTargets)
+      .filter((itemId) => Number(data.items[String(itemId)]?.item_type_category_id) === 0),
+  )
 
   quests.forEach((quest, questIndex) => {
     quest.needItems.forEach((itemId, index) => {
+      if (selectedEquipmentCraftTargets.has(Number(itemId))) return
+
       const quantity = Number(quest.needQuantities[index] || 0)
       const item = data.items[String(itemId)]
       const existing = totals.get(itemId) || 0
@@ -1131,6 +1145,24 @@ function normalizeQuest(rawQuest: any, categories: Record<string, { name?: strin
   }
 }
 
+function questNeedFieldsFromCurated(quest: CachedQuest | undefined): Pick<CachedQuest, 'need_items' | 'need_quantities' | 'need_item_groups' | 'need_quests' | 'craft_targets'> {
+  return {
+    need_items: (quest?.need_items || []).map(Number),
+    need_quantities: (quest?.need_quantities || []).map(Number),
+    need_item_groups: quest?.need_item_groups || [],
+    need_quests: (quest?.need_quests || []).map(Number),
+    craft_targets: (quest?.craft_targets || []).map(Number),
+  }
+}
+
+function preserveCuratedQuestNeeds(quest: CachedQuest | null, curatedQuests: Record<string, CachedQuest>): CachedQuest | null {
+  if (!quest) return null
+  return {
+    ...quest,
+    ...questNeedFieldsFromCurated(curatedQuests[String(quest.id)]),
+  }
+}
+
 function normalizeAchievement(rawAchievement: any): CachedAchievement | null {
   const id = rawAchievement?.id
   if (id == null) return null
@@ -1191,8 +1223,24 @@ function normalizeApiItem(rawItem: any): CachedItem | null {
     type_id: extractItemTypeId(rawItem),
     type_name: typeName,
     item_type_category_id: extractItemTypeCategoryId(rawItem),
+    criterions: rawItem.criterions || '',
+    quests_that_use: (rawItem.questsThatUse || []).map(Number),
+    quests_that_reward: (rawItem.questsThatReward || []).map(Number),
     image_url: imageUrl,
     image_path: imageUrl,
+  }
+}
+
+function preserveCachedItemImage(item: CachedItem | null, curatedItems: Record<string, CachedItem>): CachedItem | null {
+  if (!item) return null
+  const curatedImagePath = curatedItems[String(item.id)]?.image_path || ''
+  if (!curatedImagePath || curatedImagePath.startsWith('http://') || curatedImagePath.startsWith('https://')) {
+    return item
+  }
+
+  return {
+    ...item,
+    image_path: curatedImagePath,
   }
 }
 
@@ -1223,7 +1271,10 @@ function idsChecksum(ids: Iterable<string>): string {
   return String(hash >>> 0)
 }
 
-export async function syncQuestPlannerData(progress?: (message: string) => void): Promise<QuestPlannerData> {
+export async function syncQuestPlannerData(
+  progress?: (message: string) => void,
+  curatedData?: QuestPlannerData,
+): Promise<QuestPlannerData> {
   progress?.('Synchronisation DofusDB : catégories...')
   const rawCategoriesPromise = fetchPaginated('/quest-categories', PAGE_LIMIT, 'Catégories', progress)
   const rawAchievementsPromise = fetchPaginated('/achievements', PAGE_LIMIT, 'Succès', progress)
@@ -1241,9 +1292,14 @@ export async function syncQuestPlannerData(progress?: (message: string) => void)
     rawItemsPromise,
     rawRecipesPromise,
   ])
-  const quests = byId(rawQuests.map((rawQuest) => normalizeQuest(rawQuest, categories)), 'id')
+  const curatedQuests = curatedData?.quests || {}
+  const quests = byId(
+    rawQuests.map((rawQuest) => preserveCuratedQuestNeeds(normalizeQuest(rawQuest, categories), curatedQuests)),
+    'id',
+  )
   const achievements = byId(rawAchievements.map(normalizeAchievement), 'id')
-  const items = byId(rawItems.map(normalizeApiItem), 'id')
+  const curatedItems = curatedData?.items || {}
+  const items = byId(rawItems.map((rawItem) => preserveCachedItemImage(normalizeApiItem(rawItem), curatedItems)), 'id')
   const recipes = byId(rawRecipes.map(normalizeRecipe), 'result_id')
 
   const metadata = {
@@ -1258,6 +1314,7 @@ export async function syncQuestPlannerData(progress?: (message: string) => void)
     achievement_ids_checksum: idsChecksum(Object.keys(achievements)),
     quest_category_ids_checksum: idsChecksum(Object.keys(categories)),
     item_schema_version: 2,
+    quest_need_schema_version: Number(curatedData?.metadata?.quest_need_schema_version || 2),
     last_sync: new Date().toISOString(),
   }
 

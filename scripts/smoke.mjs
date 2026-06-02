@@ -20,7 +20,10 @@ function trackErrors(page) {
 }
 
 try {
-  const resetPage = await browser.newPage()
+  const context = await browser.newContext({ viewport: { width: 1440, height: 950 } })
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: url })
+
+  const resetPage = await context.newPage()
   await resetPage.goto(url, { waitUntil: 'domcontentloaded' })
   await resetPage.evaluate(
     () =>
@@ -33,13 +36,37 @@ try {
   )
   await resetPage.close()
 
-  const page = await browser.newPage({ viewport: { width: 1440, height: 950 } })
+  const page = await context.newPage()
   trackErrors(page)
   await page.goto(url, { waitUntil: 'networkidle' })
-  await page.locator('.theme-search-button').click()
+  await page.getByLabel('Passer en mode clair').click()
   await page.waitForFunction(() => document.documentElement.dataset.theme === 'light')
-  await page.locator('.theme-search-button').click()
+  await page.getByLabel('Passer en mode sombre').click()
   await page.waitForFunction(() => document.documentElement.dataset.theme === 'dark')
+
+  await page.evaluate(() => navigator.clipboard.writeText('Abysses'))
+  await page.getByLabel('Parser').click()
+  await page.waitForFunction(() => document.querySelectorAll('.quest-chip').length > 1)
+  const parsedAchievementQuestCount = await page.locator('.quest-chip').count()
+  if (parsedAchievementQuestCount < 10) {
+    throw new Error(`Achievement parser added too few quests: ${parsedAchievementQuestCount}`)
+  }
+  await page.getByLabel('Vider').click()
+
+  await page.evaluate(() => navigator.clipboard.writeText("Un citoyen modèle\nSix sur six\nL'âme de glace"))
+  await page.getByLabel('Parser').click()
+  await page.waitForSelector('.choice-card h2')
+  const firstChoiceTitle = await page.locator('.choice-card h2').textContent()
+  if (firstChoiceTitle !== 'Un citoyen modèle') {
+    throw new Error(`Unexpected first choice dialog: ${firstChoiceTitle}`)
+  }
+  await page.locator('.choice-option').filter({ hasText: 'Féca' }).first().click()
+  await page.waitForFunction(() => document.querySelector('.choice-card h2')?.textContent === "L'âme de glace")
+  if (await page.locator('.choice-option').filter({ hasText: 'Féca' }).count()) {
+    throw new Error('Regression: class choice was requested twice in the same parse queue')
+  }
+  await page.locator('.choice-card .q-btn').first().click()
+  await page.getByLabel('Vider').click()
 
   await page.getByPlaceholder('Rechercher une quête ou un succès...').fill('Hôtel de glace')
   await page.locator('.result-row').filter({ hasText: 'Hôtel de glace' }).first().click()
@@ -48,7 +75,33 @@ try {
   if (await page.locator('.item-card').filter({ hasText: 'Item 11279' }).count()) {
     throw new Error('Regression: Hôtel de glace still shows Item 11279 fallback')
   }
-  await page.getByRole('button', { name: /Vider/i }).click()
+  await page.getByLabel('Vider').click()
+
+  await page.getByPlaceholder('Rechercher une quête ou un succès...').fill("Wogew l'hewmite")
+  await page.locator('.result-row').filter({ hasText: "Wogew l'hewmite" }).first().click()
+  await page.waitForFunction(() => document.querySelectorAll('.quest-chip').length === 1)
+  if (await page.locator('.item-row').filter({ hasText: 'Crocobur' }).count()) {
+    throw new Error('Regression: quest-gated equipment still shows as a preparable item')
+  }
+  await page.getByLabel('Vider').click()
+
+  await page.getByPlaceholder('Rechercher une quête ou un succès...').fill('Aventure miniature')
+  await page.locator('.result-row').filter({ hasText: 'Aventure miniature' }).first().click()
+  await page.waitForFunction(() => document.querySelectorAll('.quest-chip').length === 1)
+  if (await page.locator('.item-row').filter({ hasText: 'Baguette Rikiki' }).count()) {
+    throw new Error('Regression: Baguette Rikiki still shows as a preparable item')
+  }
+  await page.getByLabel('Vider').click()
+
+  await page.getByPlaceholder('Rechercher une quête ou un succès...').fill('À la croisée des mondes')
+  await page.locator('.result-row').filter({ hasText: 'À la croisée des mondes' }).first().click()
+  await page.getByPlaceholder('Rechercher une quête ou un succès...').fill('Maudite disparition')
+  await page.locator('.result-row').filter({ hasText: 'Maudite disparition' }).first().click()
+  await page.waitForFunction(() => document.querySelectorAll('.quest-chip').length === 2)
+  if (await page.locator('.item-row').filter({ hasText: 'Pandaclier' }).count()) {
+    throw new Error('Regression: selected craft target still shows as a duplicated quest prerequisite')
+  }
+  await page.getByLabel('Vider').click()
 
   await page.getByPlaceholder('Rechercher une quête ou un succès...').fill('Du pain pour les braves')
   await page.locator('.result-row').filter({ hasText: 'Du pain pour les braves' }).first().click()
@@ -70,6 +123,29 @@ try {
     (id) => document.querySelector(`.item-row[data-item-id="${id}"]`)?.classList.contains('done'),
     itemId,
   )
+
+  await page.getByLabel('Vider').click()
+  await page.getByPlaceholder('Rechercher une quête ou un succès...').fill('Sur fond de crise')
+  await page.locator('.result-row').filter({ hasText: 'Sur fond de crise' }).first().click()
+  await page.getByPlaceholder('Rechercher une quête ou un succès...').fill("L'odeur devant le seuil")
+  await page.locator('.result-row').filter({ hasText: "L'odeur devant le seuil" }).first().click()
+  await page.waitForFunction(
+    () => document.body.innerText.includes("Bois d'Aquajou")
+      && document.body.innerText.includes('Accélérateur de propulsion'),
+  )
+
+  await page.locator('.craft-rail').click()
+  await page.waitForFunction(() => document.body.innerText.includes('Plan de craft'))
+  await page.locator('.craft-row').filter({ hasText: 'Accélérateur de propulsion' }).first().locator('input[type="checkbox"]').click()
+  await page.waitForFunction(
+    () => document.querySelector('.craft-row[data-item-id="17991"]')?.textContent?.includes('20/23'),
+  )
+  await page.locator('.craft-heading .q-btn').first().click()
+
+  const aquajouRow = page.locator('.item-row').filter({ hasText: "Bois d'Aquajou" }).first()
+  if (await aquajouRow.evaluate((row) => row.classList.contains('done'))) {
+    throw new Error('Regression: craft ingredient coverage checked direct quest resource')
+  }
 
   const screenshotPath = path.join(os.tmpdir(), 'questplanner-smoke.png')
   await page.screenshot({ path: screenshotPath, fullPage: false })
