@@ -373,15 +373,42 @@ async function checkAppUpdate(): Promise<void> {
   }
 }
 
+async function acquireAppUpdateLock(): Promise<() => void> {
+  let heartbeatTimer: number | undefined
+  while (true) {
+    try {
+      const lockStatus = await acquireSharedSyncLock('QuestPlanner', 'app-update')
+      if (lockStatus.acquired) {
+        heartbeatTimer = window.setInterval(() => {
+          void heartbeatSharedSyncLock('QuestPlanner', 'app-update').catch(() => {})
+        }, 1000)
+        return () => {
+          if (heartbeatTimer) window.clearInterval(heartbeatTimer)
+          void releaseSharedSyncLock().catch(() => {})
+        }
+      }
+      const owner = lockStatus.lock?.app || 'Une autre app'
+      appUpdateProgress.value = `${owner} termine une opération commune. QuestPlanner attend son tour...`
+      await sleep(1500)
+    } catch {
+      // If the shared lock is unavailable, keep the updater usable.
+      return () => {}
+    }
+  }
+}
+
 async function installAppUpdate(): Promise<void> {
   if (installingAppUpdate.value) return
   if (!appUpdate.value) return
   installingAppUpdate.value = true
   showAppUpdatePrompt.value = true
-  appUpdateProgress.value = 'Téléchargement de la mise à jour...'
+  appUpdateProgress.value = 'Préparation de la mise à jour...'
   let downloaded = 0
   let total: number | undefined
+  let releaseAppUpdateLock: (() => void) | null = null
   try {
+    releaseAppUpdateLock = await acquireAppUpdateLock()
+    appUpdateProgress.value = 'Téléchargement de la mise à jour...'
     await appUpdate.value.downloadAndInstall((event) => {
       if (event.event === 'Started') {
         downloaded = 0
@@ -396,12 +423,15 @@ async function installAppUpdate(): Promise<void> {
         appUpdateProgress.value = 'Installation terminée, redémarrage...'
       }
     })
+    releaseAppUpdateLock()
+    releaseAppUpdateLock = null
     const { relaunch } = await import('@tauri-apps/plugin-process')
     await relaunch()
   } catch (error) {
     appUpdateProgress.value = `Mise à jour impossible : ${String(error)}`
     status.value = appUpdateProgress.value
   } finally {
+    if (releaseAppUpdateLock) releaseAppUpdateLock()
     installingAppUpdate.value = false
   }
 }
