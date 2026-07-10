@@ -961,7 +961,19 @@ function normalizeSharedItems(items: Record<string, CachedItem> | undefined): Re
 
 function applySharedCatalog(data: QuestPlannerData, shared: SharedCatalogData | null): QuestPlannerData {
   const items = normalizeSharedItems(shared?.items)
-  if (!items || !shared?.recipes || !Object.keys(shared.recipes).length) return data
+  if (shared?.metadata?.shared_sync_state !== 'complete' || !items || !shared?.recipes || !Object.keys(shared.recipes).length) return {
+    ...data,
+    items: {},
+    recipes: {},
+    itemSets: {},
+    metadata: {
+      ...data.metadata,
+      shared_sync_state: 'bootstrap',
+      dofusdb_item_total: 0,
+      dofusdb_recipe_total: 0,
+      dofusdb_item_set_total: 0,
+    },
+  }
   return {
     ...data,
     items,
@@ -1019,7 +1031,6 @@ export async function loadQuestPlannerData(): Promise<QuestPlannerData> {
 
       if (!bundledIsNewer) {
         if (normalizedStored.changed) void saveStoredQuestPlannerData(storedWithAchievements).catch(() => {})
-        if (!sharedCatalog) void saveSharedCatalog(toSharedCatalog(storedWithAchievements, sharedCatalog)).catch(() => {})
         return storedWithAchievements
       }
 
@@ -1050,7 +1061,6 @@ export async function loadQuestPlannerData(): Promise<QuestPlannerData> {
           ...sortMetadata,
         }
         await saveStoredQuestPlannerData(merged).catch(() => {})
-        if (!sharedCatalog) void saveSharedCatalog(toSharedCatalog(merged, sharedCatalog)).catch(() => {})
         return merged
       }
     } catch {
@@ -1062,18 +1072,31 @@ export async function loadQuestPlannerData(): Promise<QuestPlannerData> {
     }
   }
 
-  const [quests, achievements, categories, items, recipes, exclusions, metadata] = await Promise.all([
+  const [quests, achievements, categories, exclusions, metadata] = await Promise.all([
     fetch('/data/quests.json').then((response) => response.json()),
     fetch('/data/achievements.json').then((response) => response.json()).catch(() => ({})),
     fetch('/data/quest_categories.json').then((response) => response.json()),
-    fetch('/data/items.json').then((response) => response.json()),
-    fetch('/data/recipes.json').then((response) => response.json()),
     fetch('/data/item_exclusions.json').then((response) => response.json()),
     fetch('/data/metadata.json').then((response) => response.json()),
   ])
 
-  const bundled = stripBundledImagePaths({ quests, achievements, categories, items, recipes, exclusions, metadata, ...sortMetadata }).data
-  if (!sharedCatalog) void saveSharedCatalog(toSharedCatalog(bundled, sharedCatalog)).catch(() => {})
+  const bundled = stripBundledImagePaths({
+    quests,
+    achievements,
+    categories,
+    items: {},
+    recipes: {},
+    itemSets: {},
+    exclusions,
+    metadata: {
+      ...metadata,
+      shared_sync_state: 'bootstrap',
+      dofusdb_item_total: 0,
+      dofusdb_recipe_total: 0,
+      dofusdb_item_set_total: 0,
+    },
+    ...sortMetadata,
+  }).data
   return applySharedCatalog(bundled, sharedCatalog)
 }
 
@@ -1290,11 +1313,7 @@ function itemNeedsRepair(item: CachedItem | undefined, itemId: number): boolean 
 
 async function loadBundledItems(): Promise<Record<string, CachedItem>> {
   if (bundledItemsCache) return bundledItemsCache
-  try {
-    bundledItemsCache = await fetch('/data/items.json').then((response) => response.json())
-  } catch {
-    bundledItemsCache = {}
-  }
+  bundledItemsCache = {}
   return bundledItemsCache || {}
 }
 
