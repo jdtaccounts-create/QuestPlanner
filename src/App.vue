@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import {
   achievementChoiceRulesFor,
   alternativeGroupItemIds,
@@ -13,6 +13,7 @@ import {
   loadQuestPlannerData,
   parseClipboardQuests,
   searchQuestsAndCategories,
+  syncQuestPlannerImages,
   syncQuestPlannerData,
   type AchievementChoiceOption,
   type AchievementChoiceRule,
@@ -20,12 +21,26 @@ import {
   type AlternativeItemGroupEntry,
   type AlternativeItemLine,
   type CraftLine,
+  type DatabaseStatus,
   type CraftPlan,
   type ItemEntry,
   type QuestInfo,
   type QuestPlannerData,
+  type QuestSyncProgressEvent,
   type SearchResult,
 } from './questLogic'
+import { allocateOwned, setCraftLineAllocation, type OwnedQuantities } from './possession'
+import { compareItemIds } from './resourceSort'
+import {
+  acquireSharedSyncLock,
+  clearCachedImages,
+  heartbeatSharedSyncLock,
+  loadCachedImagesForIds,
+  readSharedSyncLock,
+  releaseSharedSyncLock,
+  saveFailedCachedImages,
+  type SharedSyncLock,
+} from './questStorage'
 
 type AppUpdate = {
   currentVersion: string
@@ -48,6 +63,7 @@ const syncing = ref(false)
 const status = ref('Chargement des données locales...')
 const themeMode = ref<'dark' | 'light'>('dark')
 const questQuery = ref('')
+const questSearchOpen = ref(false)
 const selectedQuests = ref<QuestInfo[]>([])
 const pendingAchievement = ref<AchievementInfo | null>(null)
 const pendingAchievementQueue = ref<AchievementInfo[]>([])
@@ -56,28 +72,128 @@ const pendingChoiceValues = ref<Record<number, string>>({})
 const currentEntries = ref<ItemEntry[]>([])
 const currentAlternativeGroups = ref<AlternativeItemGroupEntry[]>([])
 const checkedItemIds = ref<Set<number>>(new Set())
+const ownedQuantities = ref<OwnedQuantities>({})
 const selectedAlternativeOptionKeys = ref<Record<string, string>>({})
 const craftPlan = ref<CraftPlan | null>(null)
 const craftCheckedKeys = ref<Set<string>>(new Set())
 const craftOpen = ref(false)
 const choiceOpen = ref(false)
 const appUpdate = shallowRef<AppUpdate | null>(null)
+const cachedImageUrls = ref<Map<number, string>>(new Map())
 const showAppUpdatePrompt = ref(false)
 const checkingAppUpdate = ref(false)
 const installingAppUpdate = ref(false)
 const appUpdateProgress = ref('')
 let autoComputeTimer: number | undefined
 let overflowUpdateFrame: number | undefined
+let wheelQuantityLockUntil = 0
+const WHEEL_QUANTITY_LOCK_MS = 650
+const quantityFormatter = new Intl.NumberFormat('fr-FR')
+const byteFormatter = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 })
+const FORCE_FULL_SYNC_KEY = 'questplanner-force-full-sync'
+const FORCE_FULL_SYNC_PARAM = 'forceFullSync'
+const EXTERNAL_SYNC_IDLE_CONFIRM_MS = 3500
+const ESTIMATED_IMAGE_BYTES = 40 * 1024
+
+type SyncTaskKey = 'items' | 'recipes' | 'itemSets' | 'images'
+
+interface SyncTaskState {
+  key: SyncTaskKey
+  label: string
+  done: number
+  total: number
+  bytesDone: number
+  bytesTotal?: number
+}
+
+const syncTaskOrder: SyncTaskKey[] = ['items', 'recipes', 'itemSets', 'images']
+const syncTaskLabels: Record<SyncTaskKey, string> = {
+  items: 'Items',
+  recipes: 'Recettes',
+  itemSets: 'Panoplies',
+  images: 'Images',
+}
+
+function createSyncTasks(): Record<SyncTaskKey, SyncTaskState> {
+  return Object.fromEntries(syncTaskOrder.map((key) => [key, {
+    key,
+    label: syncTaskLabels[key],
+    done: 0,
+    total: 0,
+    bytesDone: 0,
+  }])) as Record<SyncTaskKey, SyncTaskState>
+}
+
+const syncVisible = ref(false)
+const syncExternalWait = ref(false)
+const syncPhase = ref('Vérification des données DofusDB...')
+const syncStartedAt = ref(Date.now())
+const syncUpdatedAt = ref(Date.now())
+const syncMeasuredSpeed = ref(0)
+const syncTasks = ref<Record<SyncTaskKey, SyncTaskState>>(createSyncTasks())
+let syncSpeedSamples: Array<{ at: number; bytesDone: number }> = []
+let syncHideTimer: number | undefined
 
 const questCount = computed(() => Object.keys(data.value?.quests || {}).length)
 const achievementCount = computed(() => Object.keys(data.value?.achievements || {}).length)
 const itemCount = computed(() => Object.keys(data.value?.items || {}).length)
 const recipeCount = computed(() => Object.keys(data.value?.recipes || {}).length)
+const syncRows = computed(() => {
+  const rows = syncTaskOrder.map((key) => syncTasks.value[key])
+  return syncVisible.value ? rows : rows.filter((task) => task.total > 0 || task.done > 0)
+})
+const syncTotals = computed(() => {
+  const rows = syncRows.value
+  const estimatedBytesTotal = rows.reduce((total, task) => total + estimatedTaskBytesTotal(task), 0)
+  return {
+    done: rows.reduce((total, task) => total + task.done, 0),
+    total: rows.reduce((total, task) => total + task.total, 0),
+    bytesDone: rows.reduce((total, task) => total + task.bytesDone, 0),
+    estimatedBytesTotal,
+  }
+})
+const syncPercent = computed(() => {
+  const countPercent = syncTotals.value.total > 0
+    ? Math.min(100, Math.round((syncTotals.value.done / syncTotals.value.total) * 100))
+    : 0
+  if (syncTotals.value.estimatedBytesTotal > 0) {
+    const bytePercent = Math.min(100, Math.round((syncTotals.value.bytesDone / syncTotals.value.estimatedBytesTotal) * 100))
+    return Math.max(bytePercent, countPercent)
+  }
+  return countPercent
+})
+const syncEta = computed(() => {
+  syncUpdatedAt.value
+  if (syncTotals.value.total > 0 && syncTotals.value.done >= syncTotals.value.total) return ''
+  const speed = syncMeasuredSpeed.value
+  const remainingBytes = Math.max(0, syncTotals.value.estimatedBytesTotal - syncTotals.value.bytesDone)
+  if (speed > 0 && remainingBytes > 0) return formatDuration(remainingBytes / speed)
+  const { done, total } = syncTotals.value
+  if (!done || !total || done >= total) return ''
+  const elapsedSeconds = Math.max(1, (Date.now() - syncStartedAt.value) / 1000)
+  return formatDuration((elapsedSeconds / done) * (total - done))
+})
+const syncDownloadDetails = computed(() => {
+  const bytesDone = syncTotals.value.bytesDone
+  const estimatedTotal = syncTotals.value.estimatedBytesTotal
+  const allProcessed = syncTotals.value.total > 0 && syncTotals.value.done >= syncTotals.value.total
+  const remaining = Math.max(0, estimatedTotal - bytesDone)
+  const totalText = estimatedTotal
+    ? `${allProcessed || estimatedTotal <= bytesDone ? '' : '~'}${formatBytes(Math.max(estimatedTotal, bytesDone))}`
+    : 'en estimation'
+  return [
+    { label: 'Total', value: totalText },
+    { label: 'Restant', value: allProcessed ? '0 o' : (estimatedTotal ? `~${formatBytes(remaining)}` : 'en estimation') },
+    { label: 'Vitesse', value: syncMeasuredSpeed.value > 0 ? `${formatBytes(syncMeasuredSpeed.value)}/s` : 'en estimation' },
+    { label: 'Temps restant', value: syncEta.value ? `~${syncEta.value}` : (allProcessed ? '0 s' : 'en estimation') },
+  ]
+})
 
 const searchResults = computed(() => {
   if (!data.value) return []
   return searchQuestsAndCategories(data.value, questQuery.value, 40)
 })
+const showSearchResults = computed(() => questSearchOpen.value && questQuery.value && searchResults.value.length)
 
 const selectedQuestIds = computed(() => new Set(selectedQuests.value.map((quest) => quest.questId)))
 const activeChoiceRule = computed(() => pendingChoiceRules.value.find((rule) => !pendingChoiceValues.value[rule.achievementId]) || null)
@@ -119,32 +235,104 @@ const craftPanels = computed(() => {
   ]
 })
 
+const rawCraftLines = computed(() => {
+  const plan = craftPlan.value
+  if (!plan) return []
+  return [
+    ...plan.direct_crafts,
+    ...plan.sub_crafts,
+    ...mergeCraftLines('ingredients', [...plan.craft_resources, ...plan.base_direct, ...plan.excluded]),
+  ]
+})
 const displayedCraftLines = computed(() => craftPanels.value.flatMap((section) => section.lines))
 const craftCheckedCount = computed(() => displayedCraftLines.value.filter((line) => craftRowState(line).done).length)
+const entryLines = computed(() => displayedEntries.value.map(entryToCraftLine))
+const allocatableLines = computed(() => {
+  if (!rawCraftLines.value.length) return entryLines.value
+  const lines = [...rawCraftLines.value]
+  entryLines.value.forEach((entryLine) => {
+    if (!lines.some((line) => line.item_id === entryLine.item_id && craftLineCompletesBaseItem(line))) {
+      lines.unshift(entryLine)
+    }
+  })
+  return lines
+})
+const ownedAllocations = computed(() => allocateOwned(allocatableLines.value, ownedQuantities.value))
+
+function addCoveredDependencies(covered: Map<number, number>, line: CraftLine, progress: number): void {
+  const plan = craftPlan.value
+  if (!plan || progress <= 0 || line.quantity <= 0) return
+  Object.entries(plan.dependencies[line.line_key] || {}).forEach(([childId, childQuantity]) => {
+    const coveredQuantity = Math.round((Number(childQuantity) * progress) / line.quantity)
+    if (!coveredQuantity) return
+    covered.set(Number(childId), (covered.get(Number(childId)) || 0) + coveredQuantity)
+  })
+}
 
 const coveredByItemId = computed(() => {
   const covered = new Map<number, number>()
   const plan = craftPlan.value
   if (!plan) return covered
 
-  craftCheckedKeys.value.forEach((lineKey) => {
-    const dependencies = plan.dependencies[lineKey] || {}
-    Object.entries(dependencies).forEach(([childId, childQuantity]) => {
-      covered.set(Number(childId), (covered.get(Number(childId)) || 0) + Number(childQuantity))
-    })
+  rawCraftLines.value.forEach((line) => {
+    if (!craftLineCanCoverDependencies(line)) return
+    addCoveredDependencies(covered, line, ownedAllocations.value[line.line_key] || 0)
   })
 
   return covered
 })
 
-function imageUrl(path: string): string {
-  if (path.startsWith('http://') || path.startsWith('https://')) return path
+function imageUrl(path: string | undefined, itemId?: number): string {
+  if (itemId && cachedImageUrls.value.has(itemId)) return cachedImageUrls.value.get(itemId)!
+  if (!path) return ''
+  if (path.startsWith('http://') || path.startsWith('https://')) return ''
   if (path.startsWith('/')) return path
   return path ? `/${path.replace(/\\/g, '/')}` : ''
 }
 
+function visibleImageIds(): number[] {
+  const ids = [
+    ...displayedEntries.value.map((entry) => entry.item_id),
+    ...displayedCraftLines.value.map((line) => line.item_id),
+    ...currentAlternativeGroups.value.flatMap((group) =>
+      group.options.flatMap((option) => option.items.map((item) => item.item_id))),
+  ]
+  return ids.filter((id): id is number => Number.isFinite(id))
+}
+
+async function ensureCachedImageUrlsForIds(itemIds: Iterable<number>): Promise<void> {
+  const source = data.value
+  if (!source) return
+  const ids = [...new Set([...itemIds].map((id) => Number(id)).filter(Number.isFinite))]
+    .filter((itemId) => !cachedImageUrls.value.has(itemId))
+    .filter((itemId) => {
+      const item = source.items[String(itemId)]
+      return item && !item.image_path && item.image_url
+    })
+  if (!ids.length) return
+  const cached = await loadCachedImagesForIds(ids).catch(() => [])
+  if (!cached.length) return
+  const next = new Map(cachedImageUrls.value)
+  cached.forEach(({ itemId, blob }) => {
+    if (!next.has(itemId)) next.set(itemId, URL.createObjectURL(blob))
+  })
+  cachedImageUrls.value = next
+}
+
+async function ensureVisibleCachedImageUrls(): Promise<void> {
+  await ensureCachedImageUrlsForIds(visibleImageIds())
+}
+
 function isTauriRuntime(): boolean {
   return '__TAURI_INTERNALS__' in window
+}
+
+function isSmokeMode(): boolean {
+  try {
+    return sessionStorage.getItem('questplanner-smoke-mode') === '1'
+  } catch {
+    return false
+  }
 }
 
 async function openDofusDb(kind: 'object' | 'quest' | 'achievement', id: number): Promise<void> {
@@ -223,6 +411,10 @@ function setItemChecked(itemId: number, checked: boolean): void {
   if (checked) next.add(itemId)
   else next.delete(itemId)
   checkedItemIds.value = next
+
+  const entry = displayedEntries.value.find((candidate) => candidate.item_id === itemId)
+  if (!entry) return
+  changeEntryOwned(entry, checked ? entry.quantity : 0)
 }
 
 function selectAlternativeOption(groupKey: string, optionKey: string): void {
@@ -239,20 +431,24 @@ function selectAlternativeOption(groupKey: string, optionKey: string): void {
 
 function setCraftChecked(line: CraftLine, checked: boolean): void {
   const next = new Set(craftCheckedKeys.value)
-  if (checked) next.add(line.line_key)
+  if (checked && craftLineCanCoverDependencies(line)) next.add(line.line_key)
   else next.delete(line.line_key)
   craftCheckedKeys.value = next
-  if (craftLineCompletesBaseItem(line)) {
-    setItemChecked(line.item_id, checked)
+
+  const desiredOwned = checked ? line.quantity : 0
+  ownedQuantities.value = setCraftLineAllocation(ownedQuantities.value, allocatableLines.value, line.line_key, desiredOwned)
+
+  if (craftLineCompletesBaseItem(line) && checked) {
+    checkedItemIds.value = new Set([...checkedItemIds.value, line.item_id])
+  } else if (craftLineCompletesBaseItem(line) && !checked) {
+    const nextItems = new Set(checkedItemIds.value)
+    nextItems.delete(line.item_id)
+    checkedItemIds.value = nextItems
   }
 }
 
-function isChecked(itemId: number): boolean {
-  return checkedItemIds.value.has(itemId)
-}
-
 function isEntryDone(entry: ItemEntry): boolean {
-  return isChecked(entry.item_id)
+  return entryOwned(entry) >= entry.quantity
 }
 
 function isAlternativeOptionSelected(group: AlternativeItemGroupEntry, optionKey: string): boolean {
@@ -275,18 +471,74 @@ function categoryTitle(category: string): string {
 function categoryProgress(category: string): string {
   const entries = groupedEntries.value[category] || []
   const checked = entries.filter((entry) => isEntryDone(entry)).length
-  return `${checked}/${entries.length}`
+  return `${formatQuantity(checked)}/${formatQuantity(entries.length)}`
+}
+
+function formatQuantity(value: number): string {
+  return quantityFormatter.format(Math.max(0, Math.floor(Number(value) || 0)))
+}
+
+function formatBytes(value: number): string {
+  const bytes = Math.max(0, Number(value) || 0)
+  if (bytes < 1024) return `${formatQuantity(bytes)} o`
+  const kilobytes = bytes / 1024
+  if (kilobytes < 1024) return `${byteFormatter.format(kilobytes)} Ko`
+  const megabytes = kilobytes / 1024
+  if (megabytes < 1024) return `${byteFormatter.format(megabytes)} Mo`
+  return `${byteFormatter.format(megabytes / 1024)} Go`
+}
+
+function formatDuration(seconds: number): string {
+  const rounded = Math.max(1, Math.round(seconds))
+  const minutes = Math.floor(rounded / 60)
+  const remainingSeconds = rounded % 60
+  if (!minutes) return `${remainingSeconds} s`
+  if (!remainingSeconds) return `${minutes} min`
+  return `${minutes} min ${remainingSeconds} s`
+}
+
+function estimatedTaskBytesTotal(task: SyncTaskState): number {
+  if (task.done > 0 && task.total > 0) {
+    const averageEstimate = (task.bytesDone / task.done) * task.total
+    return Math.max(task.bytesDone, task.bytesTotal || 0, averageEstimate)
+  }
+  return Math.max(task.bytesDone, task.bytesTotal || 0)
+}
+
+function quantityTotalWidth(category: string): string {
+  const entries = groupedEntries.value[category] || []
+  const chars = entries.reduce((maximum, entry) => Math.max(maximum, formatQuantity(entry.quantity).length), 1)
+  return `${10 + chars * 8}px`
+}
+
+function quantityInputWidthForValues(values: number[]): string {
+  const chars = values.reduce((maximum, value) => Math.max(maximum, String(Math.max(0, Math.floor(value))).length), 1)
+  return `${Math.max(42, 14 + chars * 8)}px`
+}
+
+function quantityInputWidth(category: string): string {
+  const entries = groupedEntries.value[category] || []
+  return quantityInputWidthForValues(entries.map((entry) => entry.quantity))
+}
+
+function craftQuantityTotalWidth(lines: CraftLine[]): string {
+  const chars = lines.reduce((maximum, line) => Math.max(maximum, formatQuantity(line.quantity).length), 1)
+  return `${10 + chars * 8}px`
+}
+
+function craftQuantityInputWidth(lines: CraftLine[]): string {
+  return quantityInputWidthForValues(lines.map((line) => line.quantity))
 }
 
 function choicePanelProgress(category: string): string {
   const alternatives = groupedAlternativeGroups.value[category] || []
   const resolved = alternatives.filter((group) => selectedAlternativeOptionKeys.value[group.group_key]).length
-  return `${resolved}/${alternatives.length}`
+  return `${formatQuantity(resolved)}/${formatQuantity(alternatives.length)}`
 }
 
 function craftPanelProgress(section: { lines: CraftLine[] }): string {
   const checked = section.lines.filter((line) => craftRowState(line).done).length
-  return `${checked}/${section.lines.length}`
+  return `${formatQuantity(checked)}/${formatQuantity(section.lines.length)}`
 }
 
 function itemSubtype(itemId: number, fallback = ''): string {
@@ -351,10 +603,112 @@ function craftMeta(line: CraftLine): string {
 }
 
 function craftLineCompletesBaseItem(line: CraftLine): boolean {
-  const isBaseLine = line.line_key.startsWith('direct_crafts:')
-    || line.line_key.startsWith('base_direct:')
-    || line.line_key.startsWith('excluded:')
-  return isBaseLine && displayedEntries.value.some((entry) => entry.item_id === line.item_id)
+  return displayedEntries.value.some((entry) => entry.item_id === line.item_id)
+    && (line.line_key.startsWith('direct_crafts:')
+      || line.line_key.startsWith('base_direct:')
+      || line.line_key.startsWith('excluded:')
+      || line.line_key.startsWith('entry:'))
+}
+
+function craftLineCanCoverDependencies(line: CraftLine): boolean {
+  return line.line_key.startsWith('direct_crafts:') || line.line_key.startsWith('sub_crafts:')
+}
+
+function entryToCraftLine(entry: ItemEntry): CraftLine {
+  return {
+    line_key: `entry:${entry.item_id}`,
+    item_id: entry.item_id,
+    quantity: entry.quantity,
+    name: entry.name,
+    raw_type: entry.raw_type,
+    image_path: entry.image_path,
+    meta: entry.source,
+  }
+}
+
+function allocationLineForEntry(entry: ItemEntry): CraftLine {
+  return allocatableLines.value.find((line) => line.item_id === entry.item_id && craftLineCompletesBaseItem(line))
+    || entryToCraftLine(entry)
+}
+
+function entryOwned(entry: ItemEntry): number {
+  return Math.min(ownedAllocations.value[allocationLineForEntry(entry).line_key] || 0, entry.quantity)
+}
+
+function changeEntryOwned(entry: ItemEntry, quantity: number): void {
+  const line = allocationLineForEntry(entry)
+  ownedQuantities.value = setCraftLineAllocation(ownedQuantities.value, allocatableLines.value, line.line_key, quantity)
+  const next = new Set(checkedItemIds.value)
+  if (quantity >= entry.quantity) next.add(entry.item_id)
+  else next.delete(entry.item_id)
+  checkedItemIds.value = next
+}
+
+function craftLineOwned(line: CraftLine): number {
+  return ownedAllocations.value[line.line_key] || 0
+}
+
+function craftLineCovered(line: CraftLine): number {
+  return Math.min(coveredByItemId.value.get(line.item_id) || 0, line.quantity)
+}
+
+function craftLineProgress(line: CraftLine): number {
+  if (craftCheckedKeys.value.has(line.line_key)) return line.quantity
+  return Math.min(line.quantity, craftLineOwned(line) + craftLineCovered(line))
+}
+
+function craftLineChecked(line: CraftLine): boolean {
+  return craftLineProgress(line) >= line.quantity
+}
+
+function changeCraftOwned(line: CraftLine, quantity: number): void {
+  const desiredProgress = Math.max(0, Math.min(Math.floor(Number(quantity) || 0), line.quantity))
+  const desiredOwned = Math.max(0, desiredProgress - craftLineCovered(line))
+  const nextOwned = setCraftLineAllocation(ownedQuantities.value, allocatableLines.value, line.line_key, desiredOwned)
+  const nextAllocation = allocateOwned(allocatableLines.value, nextOwned)[line.line_key] || 0
+  const nextProgress = Math.min(line.quantity, nextAllocation + craftLineCovered(line))
+  ownedQuantities.value = nextOwned
+  const nextCraft = new Set(craftCheckedKeys.value)
+  if (craftLineCanCoverDependencies(line) && nextProgress >= line.quantity) {
+    nextCraft.add(line.line_key)
+  } else {
+    nextCraft.delete(line.line_key)
+  }
+  craftCheckedKeys.value = nextCraft
+
+  if (!craftLineCompletesBaseItem(line)) return
+  const nextItems = new Set(checkedItemIds.value)
+  if (nextProgress >= line.quantity) nextItems.add(line.item_id)
+  else nextItems.delete(line.item_id)
+  checkedItemIds.value = nextItems
+}
+
+function handleOwnedInputWheel(event: WheelEvent): void {
+  const input = (event.target as HTMLElement | null)?.closest<HTMLInputElement>('.owned-input[data-wheel-kind]')
+  if (!input) return
+  event.preventDefault()
+  event.stopPropagation()
+  if (Date.now() < wheelQuantityLockUntil) return
+  const delta = event.deltaY < 0 ? 1 : -1
+  if (input.dataset.wheelKind === 'entry') {
+    const itemId = Number(input.dataset.itemId)
+    const entry = displayedEntries.value.find((candidate) => candidate.item_id === itemId)
+    if (entry) {
+      const wasDone = isEntryDone(entry)
+      changeEntryOwned(entry, entryOwned(entry) + delta)
+      if (wasDone !== isEntryDone(entry)) wheelQuantityLockUntil = Date.now() + WHEEL_QUANTITY_LOCK_MS
+    }
+    return
+  }
+  if (input.dataset.wheelKind === 'craft') {
+    const lineKey = input.dataset.lineKey
+    const line = displayedCraftLines.value.find((candidate) => candidate.line_key === lineKey)
+    if (line) {
+      const wasDone = craftLineChecked(line)
+      changeCraftOwned(line, craftLineProgress(line) + delta)
+      if (wasDone !== craftLineChecked(line)) wheelQuantityLockUntil = Date.now() + WHEEL_QUANTITY_LOCK_MS
+    }
+  }
 }
 
 function sortKey(value: string): string {
@@ -370,6 +724,7 @@ function compareText(a: string, b: string): number {
 
 function compareEntries(a: ItemEntry, b: ItemEntry): number {
   return Number(isEntryDone(a)) - Number(isEntryDone(b))
+    || (data.value ? compareItemIds(data.value, a.item_id, b.item_id) : compareText(entryMeta(a), entryMeta(b)))
     || compareText(entryMeta(a), entryMeta(b))
     || compareText(a.name, b.name)
     || a.order - b.order
@@ -383,6 +738,7 @@ function compareAlternativeGroups(a: AlternativeItemGroupEntry, b: AlternativeIt
 
 function compareCraftLines(a: CraftLine, b: CraftLine): number {
   return Number(craftRowState(a).done) - Number(craftRowState(b).done)
+    || (data.value ? compareItemIds(data.value, a.item_id, b.item_id) : compareText(craftMeta(a), craftMeta(b)))
     || compareText(craftMeta(a), craftMeta(b))
     || compareText(a.name, b.name)
     || a.item_id - b.item_id
@@ -412,6 +768,7 @@ function addQuest(quest: QuestInfo): boolean {
   }
   selectedQuests.value = [...selectedQuests.value, quest]
   questQuery.value = ''
+  questSearchOpen.value = false
   status.value = `Ajouté : ${quest.name}`
   return true
 }
@@ -421,6 +778,7 @@ function addQuests(quests: QuestInfo[], sourceLabel: string): void {
   const additions = quests.filter((quest) => !existing.has(quest.questId))
   selectedQuests.value = [...selectedQuests.value, ...additions]
   questQuery.value = ''
+  questSearchOpen.value = false
   status.value = additions.length
     ? `${additions.length} quêtes ajoutées depuis ${sourceLabel}`
     : `Toutes les quêtes de ${sourceLabel} sont déjà dans la liste`
@@ -529,6 +887,7 @@ function clearQuests(): void {
   currentEntries.value = []
   currentAlternativeGroups.value = []
   checkedItemIds.value = new Set()
+  ownedQuantities.value = {}
   selectedAlternativeOptionKeys.value = {}
   craftPlan.value = null
   craftCheckedKeys.value = new Set()
@@ -600,6 +959,7 @@ async function computeItems(): Promise<void> {
     currentEntries.value = []
     currentAlternativeGroups.value = []
     checkedItemIds.value = new Set()
+    ownedQuantities.value = {}
     selectedAlternativeOptionKeys.value = {}
     craftPlan.value = null
     craftCheckedKeys.value = new Set()
@@ -620,6 +980,7 @@ async function computeItems(): Promise<void> {
     currentEntries.value = buildBaseEntries(data.value, selectedQuests.value)
     currentAlternativeGroups.value = buildAlternativeGroups(data.value, selectedQuests.value)
     checkedItemIds.value = new Set()
+    ownedQuantities.value = {}
     selectedAlternativeOptionKeys.value = {}
     craftPlan.value = null
     craftCheckedKeys.value = new Set()
@@ -697,11 +1058,11 @@ function toggleChoicePanel(): void {
 }
 
 function craftRowState(line: CraftLine): { checked: boolean; covered: number; done: boolean; label: string } {
-  const checked = craftCheckedKeys.value.has(line.line_key)
-  const covered = Math.min(coveredByItemId.value.get(line.item_id) || 0, line.quantity)
-  const done = checked || covered >= line.quantity
-  const label = covered > 0 && !checked ? `${covered}/${line.quantity} x ${line.name}` : `${line.quantity} x ${line.name}`
-  return { checked, covered, done, label }
+  const checked = craftLineProgress(line) >= line.quantity
+  const covered = craftLineCovered(line)
+  const progress = craftLineProgress(line)
+  const label = progress > 0 && progress < line.quantity ? `${progress}/${line.quantity} x ${line.name}` : `${line.quantity} x ${line.name}`
+  return { checked, covered, done: checked, label }
 }
 
 async function reloadData(): Promise<void> {
@@ -709,8 +1070,9 @@ async function reloadData(): Promise<void> {
   status.value = 'Chargement des données locales...'
   try {
     data.value = await loadQuestPlannerData()
+    await ensureVisibleCachedImageUrls()
     status.value = `Données locales chargées : ${questCount.value} quêtes, ${achievementCount.value} succès, ${itemCount.value} items, ${recipeCount.value} recettes`
-    checkLocalDataStatus()
+    if (!isSmokeMode()) checkLocalDataStatus()
   } catch (error) {
     status.value = error instanceof Error ? error.message : 'Impossible de charger les données locales'
   } finally {
@@ -718,13 +1080,222 @@ async function reloadData(): Promise<void> {
   }
 }
 
+function isForceFullSyncRequested(): boolean {
+  try {
+    if (localStorage.getItem(FORCE_FULL_SYNC_KEY) === '1') return true
+  } catch {
+    // Fall back to the URL flag below.
+  }
+  return new URLSearchParams(window.location.search).get(FORCE_FULL_SYNC_PARAM) === '1'
+}
+
+function clearForceFullSyncRequest(): void {
+  try {
+    localStorage.removeItem(FORCE_FULL_SYNC_KEY)
+  } catch {
+    // Best effort only.
+  }
+  const url = new URL(window.location.href)
+  if (url.searchParams.has(FORCE_FULL_SYNC_PARAM)) {
+    url.searchParams.delete(FORCE_FULL_SYNC_PARAM)
+    window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`)
+  }
+}
+
+function resetSyncProgress(phase: string): void {
+  if (syncHideTimer) {
+    window.clearTimeout(syncHideTimer)
+    syncHideTimer = undefined
+  }
+  syncTasks.value = createSyncTasks()
+  syncStartedAt.value = Date.now()
+  syncUpdatedAt.value = Date.now()
+  syncMeasuredSpeed.value = 0
+  syncExternalWait.value = false
+  syncSpeedSamples = [{ at: syncStartedAt.value, bytesDone: 0 }]
+  syncPhase.value = phase
+  syncVisible.value = true
+}
+
+function completeSyncProgress(phase: string, hideDelay = 900): void {
+  syncPhase.value = phase
+  syncUpdatedAt.value = Date.now()
+  if (syncHideTimer) window.clearTimeout(syncHideTimer)
+  syncHideTimer = window.setTimeout(() => {
+    syncVisible.value = false
+    syncExternalWait.value = false
+    syncHideTimer = undefined
+  }, hideDelay)
+}
+
+function recordSyncSpeedSample(): void {
+  const now = Date.now()
+  const bytesDone = syncTotals.value.bytesDone
+  syncSpeedSamples.push({ at: now, bytesDone })
+  syncSpeedSamples = syncSpeedSamples.filter((sample) => now - sample.at <= 15_000)
+  const first = syncSpeedSamples[0]
+  const last = syncSpeedSamples[syncSpeedSamples.length - 1]
+  if (!first || !last || last.at <= first.at || last.bytesDone <= first.bytesDone) {
+    syncMeasuredSpeed.value = 0
+    return
+  }
+  syncMeasuredSpeed.value = (last.bytesDone - first.bytesDone) / ((last.at - first.at) / 1000)
+}
+
+function updateSyncTask(key: SyncTaskKey, patch: Partial<Omit<SyncTaskState, 'key' | 'label'>>): void {
+  syncTasks.value = {
+    ...syncTasks.value,
+    [key]: {
+      ...syncTasks.value[key],
+      ...patch,
+    },
+  }
+  syncUpdatedAt.value = Date.now()
+  recordSyncSpeedSample()
+}
+
+function isSyncTaskKey(key: string): key is SyncTaskKey {
+  return key === 'items' || key === 'recipes' || key === 'itemSets' || key === 'images'
+}
+
+function seedSyncProgress(info: DatabaseStatus, needsDataSync: boolean): void {
+  if (needsDataSync) {
+    updateSyncTask('items', { done: 0, total: info.remoteItemTotal, bytesDone: 0 })
+    updateSyncTask('recipes', { done: 0, total: info.remoteRecipeTotal, bytesDone: 0 })
+    updateSyncTask('itemSets', { done: 0, total: info.remoteItemSetTotal, bytesDone: 0 })
+  }
+  const estimatedImageTotal = info.missingImageGroups || (needsDataSync ? info.remoteItemTotal : 0)
+  if (estimatedImageTotal > 0) {
+    updateSyncTask('images', {
+      done: 0,
+      total: estimatedImageTotal,
+      bytesDone: 0,
+      bytesTotal: estimatedImageTotal * ESTIMATED_IMAGE_BYTES,
+    })
+  }
+}
+
+function handleSyncProgress(event: QuestSyncProgressEvent | string): void {
+  if (typeof event === 'string') {
+    syncPhase.value = event
+    status.value = event
+    syncUpdatedAt.value = Date.now()
+    return
+  }
+  if (event.kind === 'message') {
+    syncPhase.value = event.message
+    status.value = event.message
+    syncUpdatedAt.value = Date.now()
+    return
+  }
+  if (event.kind === 'images') {
+    updateSyncTask('images', {
+      done: event.done,
+      total: event.total,
+      bytesDone: event.bytesDone,
+      bytesTotal: event.bytesTotal,
+    })
+    status.value = `Images ${formatQuantity(event.done)} / ${formatQuantity(event.total)}`
+    return
+  }
+  if (!isSyncTaskKey(event.endpoint)) return
+  updateSyncTask(event.endpoint, {
+    done: event.done,
+    total: event.total,
+    bytesDone: event.bytesDone,
+  })
+  status.value = `${event.label} ${formatQuantity(event.done)} / ${formatQuantity(event.total)}`
+}
+
+async function waitForSyncDialogPaint(): Promise<void> {
+  await nextTick()
+  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => window.setTimeout(resolve, ms))
+}
+
+function externalSyncMessage(lock: SharedSyncLock): string {
+  const phase = lock.phase ? ` (${lock.phase})` : ''
+  return `${lock.app} met à jour la base Dofus commune${phase}...`
+}
+
+async function waitForExternalSharedSync(lock: SharedSyncLock): Promise<void> {
+  resetSyncProgress(externalSyncMessage(lock))
+  syncExternalWait.value = true
+  status.value = externalSyncMessage(lock)
+  await waitForSyncDialogPaint()
+  let activeLock: SharedSyncLock | null = lock
+  while (activeLock) {
+    syncPhase.value = externalSyncMessage(activeLock)
+    await sleep(2000)
+    activeLock = await readSharedSyncLock().catch(() => null)
+    if (!activeLock) {
+      syncPhase.value = 'Synchronisation commune presque terminée...'
+      await sleep(EXTERNAL_SYNC_IDLE_CONFIRM_MS)
+      activeLock = await readSharedSyncLock().catch(() => null)
+    }
+  }
+  syncPhase.value = 'Synchronisation commune terminée, vérification locale...'
+  data.value = await loadQuestPlannerData()
+  await ensureVisibleCachedImageUrls().catch(() => {})
+}
+
+async function waitForStartupSharedSync(): Promise<boolean> {
+  const lock = await readSharedSyncLock().catch(() => null)
+  if (!lock) return false
+  await waitForExternalSharedSync(lock)
+  completeSyncProgress('Synchronisation commune terminée')
+  return true
+}
+
+async function withSharedSyncLock<T>(phase: string, action: () => Promise<T>): Promise<T> {
+  while (true) {
+    const status = await acquireSharedSyncLock('QuestPlanner', phase)
+    if (status.acquired) {
+      if (syncExternalWait.value) resetSyncProgress(phase)
+      syncExternalWait.value = false
+      syncPhase.value = phase
+      break
+    }
+    if (status.lock) await waitForExternalSharedSync(status.lock)
+    else await sleep(500)
+  }
+  const heartbeat = window.setInterval(() => {
+    void heartbeatSharedSyncLock('QuestPlanner', syncPhase.value || phase).catch(() => {})
+  }, 5000)
+  try {
+    return await action()
+  } finally {
+    window.clearInterval(heartbeat)
+    await releaseSharedSyncLock().catch(() => {})
+  }
+}
+
 async function checkLocalDataStatus(): Promise<void> {
   if (!data.value) return
   try {
+    if (isForceFullSyncRequested()) {
+      await syncDatabases(true)
+      return
+    }
     const info = await checkQuestPlannerDataStatus(data.value)
     if (info.needsSync) {
       status.value = `Mise à jour disponible (${info.missingLabels.join(', ')})`
-      if (isTauriRuntime()) await syncDatabases()
+      const supportLabels = info.missingLabels.filter((label) => label === 'items' || label === 'recettes' || label === 'panoplies')
+      const curatedLabels = info.missingLabels.filter((label) => label === 'quêtes' || label === 'succès' || label === 'catégories')
+      if (supportLabels.length) {
+        await syncDatabases(false, false)
+        return
+      }
+      if (info.missingLabels.includes('images')) {
+        await syncImagesOnly()
+        return
+      }
+      if (curatedLabels.length) {
+        status.value = `Mise à jour quêtes/succès détectée (${curatedLabels.join(', ')}) : import manuel requis`
+      }
       return
     }
     status.value = `Données locales à jour : ${info.localQuestTotal} quêtes, ${info.localAchievementTotal} succès, ${info.localItemTotal} items, ${info.localRecipeTotal} recettes`
@@ -733,29 +1304,86 @@ async function checkLocalDataStatus(): Promise<void> {
   }
 }
 
-async function syncDatabases(): Promise<void> {
+async function syncImagesOnly(): Promise<void> {
+  if (syncing.value || !data.value) return
+  const current = data.value
+  syncing.value = true
+    resetSyncProgress('Synchronisation des images...')
+  try {
+    await withSharedSyncLock('Synchronisation des images', async () => {
+      await syncQuestPlannerImages(current, handleSyncProgress)
+      await ensureVisibleCachedImageUrls()
+      status.value = 'Images synchronisées'
+      completeSyncProgress('Synchronisation terminée')
+    })
+  } catch (error) {
+    console.error('[QuestPlanner] image sync failed', error)
+    status.value = `Erreur sync images : ${String(error)}`
+    completeSyncProgress('Synchronisation impossible, données locales conservées', 1600)
+  } finally {
+    syncing.value = false
+  }
+}
+
+async function syncDatabases(forceFullSync = false, includeQuestData = false): Promise<void> {
   if (syncing.value) return
   syncing.value = true
-  status.value = 'Synchronisation DofusDB...'
+  const phase = forceFullSync
+    ? 'Synchronisation complète forcée...'
+    : includeQuestData
+      ? 'Synchronisation DofusDB...'
+      : 'Synchronisation de la base Dofus commune...'
+  resetSyncProgress(phase)
+  status.value = phase
   try {
-    const synced = await syncQuestPlannerData((message) => {
-      status.value = message
-    }, data.value || undefined)
+    await withSharedSyncLock(phase, async () => {
+    data.value = await loadQuestPlannerData()
+    if (!forceFullSync && !includeQuestData) {
+      const info = await checkQuestPlannerDataStatus(data.value)
+      const supportLabels = info.missingLabels.filter((label) => label === 'items' || label === 'recettes' || label === 'panoplies')
+      if (!supportLabels.length && !info.missingLabels.includes('images')) {
+        status.value = 'Base Dofus commune déjà synchronisée'
+        completeSyncProgress('Données déjà synchronisées')
+        return
+      }
+      seedSyncProgress(info, supportLabels.length > 0)
+      if (!supportLabels.length && info.missingLabels.includes('images')) {
+        await syncQuestPlannerImages(data.value, handleSyncProgress)
+        await ensureVisibleCachedImageUrls()
+        status.value = 'Images synchronisées'
+        completeSyncProgress('Synchronisation terminée')
+        return
+      }
+    }
+    if (forceFullSync) {
+      await clearCachedImages()
+      await saveFailedCachedImages([])
+      cachedImageUrls.value = new Map()
+    }
+    const synced = await syncQuestPlannerData(handleSyncProgress, data.value || undefined, { includeQuestData })
     data.value = synced
+    await syncQuestPlannerImages(synced, handleSyncProgress)
     currentEntries.value = []
     currentAlternativeGroups.value = []
     checkedItemIds.value = new Set()
+    ownedQuantities.value = {}
     selectedAlternativeOptionKeys.value = {}
     craftPlan.value = null
     craftCheckedKeys.value = new Set()
     craftOpen.value = false
     choiceOpen.value = false
-    status.value = `Données synchronisées : ${questCount.value} quêtes, ${achievementCount.value} succès, ${itemCount.value} items, ${recipeCount.value} recettes`
+    await ensureVisibleCachedImageUrls()
+    status.value = `Base Dofus commune synchronisée : ${itemCount.value} items, ${recipeCount.value} recettes`
+    completeSyncProgress('Synchronisation terminée')
+    if (forceFullSync) clearForceFullSyncRequest()
+    })
   } catch (error) {
+    console.error('[QuestPlanner] sync failed', error)
     const message = error instanceof Error ? error.message : String(error)
     status.value = message.includes('Failed to fetch')
       ? "Sync DofusDB indisponible dans le navigateur local ; elle passe par l'app Tauri"
       : `Erreur sync : ${message}`
+    completeSyncProgress('Synchronisation impossible, données locales conservées', 1600)
   } finally {
     syncing.value = false
   }
@@ -817,17 +1445,38 @@ watch(
   { flush: 'post' },
 )
 
+watch(
+  () => visibleImageIds().join(','),
+  () => {
+    void ensureVisibleCachedImageUrls()
+  },
+  { flush: 'post' },
+)
+
 onMounted(async () => {
+  window.addEventListener('wheel', handleOwnedInputWheel, { capture: true, passive: false })
   const savedTheme = localStorage.getItem('questplanner-theme')
   applyTheme(savedTheme === 'light' ? 'light' : 'dark')
-  await reloadData()
+  const loadedFromSharedSync = !isSmokeMode() && await waitForStartupSharedSync()
+  if (loadedFromSharedSync && data.value) {
+    loading.value = false
+    await ensureVisibleCachedImageUrls()
+    status.value = `Données locales chargées : ${questCount.value} quêtes, ${achievementCount.value} succès, ${itemCount.value} items, ${recipeCount.value} recettes`
+    await checkLocalDataStatus()
+  } else {
+    await reloadData()
+  }
   await checkAppUpdate()
   scheduleScrollableListUpdate()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('wheel', handleOwnedInputWheel, { capture: true })
 })
 </script>
 
 <template>
-  <div class="app-shell">
+  <div class="app-shell" @click="questSearchOpen = false">
     <main
       class="workspace"
       :class="{ 'craft-mode': craftOpen && craftPlan, 'choice-mode': choiceOpen }"
@@ -835,7 +1484,7 @@ onMounted(async () => {
     >
       <aside class="quest-sidebar glass-surface">
         <section class="quest-top">
-          <section class="search-block">
+          <section class="search-block" @click.stop>
             <q-input
               v-model="questQuery"
               dense
@@ -843,6 +1492,8 @@ onMounted(async () => {
               clearable
               placeholder="Rechercher une quête ou un succès..."
               :disable="loading"
+              @focus="questSearchOpen = true"
+              @update:model-value="questSearchOpen = true"
               @keyup.enter="addFirstSearchResult"
             >
               <template #prepend>
@@ -877,25 +1528,27 @@ onMounted(async () => {
               </template>
             </q-input>
 
-            <div v-if="questQuery && searchResults.length" class="search-results">
-              <button
-                v-for="result in searchResults"
-                :key="`${result.kind}:${result.kind === 'quest' ? result.questId : result.achievementId}`"
-                class="result-row"
-                :class="{ selected: searchResultSelected(result), achievement: result.kind === 'achievement' }"
-                type="button"
-                @click="addSearchResult(result)"
-              >
-                <q-icon :name="result.kind === 'quest' ? 'assignment' : 'emoji_events'" />
-                <span>{{ result.name }}</span>
-                <small>{{ searchResultMeta(result) }}</small>
-              </button>
+            <div v-if="showSearchResults" class="search-results">
+              <div class="search-results-scroll">
+                <button
+                  v-for="result in searchResults"
+                  :key="`${result.kind}:${result.kind === 'quest' ? result.questId : result.achievementId}`"
+                  class="result-row"
+                  :class="{ selected: searchResultSelected(result), achievement: result.kind === 'achievement' }"
+                  type="button"
+                  @click="addSearchResult(result)"
+                >
+                  <q-icon :name="result.kind === 'quest' ? 'assignment' : 'emoji_events'" />
+                  <span>{{ result.name }}</span>
+                  <small>{{ searchResultMeta(result) }}</small>
+                </button>
+              </div>
             </div>
           </section>
 
           <div class="panel-heading">
             <h2>Quêtes sélectionnées</h2>
-            <q-badge rounded>{{ selectedQuests.length }}</q-badge>
+            <q-badge rounded>{{ formatQuantity(selectedQuests.length) }}</q-badge>
           </div>
         </section>
 
@@ -913,7 +1566,12 @@ onMounted(async () => {
 
       <section class="main-board">
         <div class="item-columns" :aria-hidden="craftOpen && Boolean(craftPlan)">
-          <article v-for="category in CATEGORIES" :key="category" class="item-column glass-surface">
+          <article
+            v-for="category in CATEGORIES"
+            :key="category"
+            class="item-column glass-surface"
+            :style="{ '--quantity-total-width': quantityTotalWidth(category), '--owned-input-width': quantityInputWidth(category) }"
+          >
             <header class="column-heading">
               <h2>{{ categoryTitle(category) }}</h2>
               <q-badge rounded>{{ categoryProgress(category) }}</q-badge>
@@ -932,14 +1590,30 @@ onMounted(async () => {
                   :checked="isEntryDone(entry)"
                   @change="setItemChecked(entry.item_id, ($event.target as HTMLInputElement).checked)"
                 />
-                <button class="item-card" type="button" @click="openDofusDb('object', entry.item_id)">
-                  <img v-if="entry.image_path" :src="imageUrl(entry.image_path)" alt="" />
-                  <span v-else class="image-fallback">{{ entry.name.slice(0, 1) }}</span>
-                  <span class="item-copy">
-                    <strong>{{ entry.quantity }} x {{ entry.name }}</strong>
-                    <small>{{ entryMeta(entry) }}</small>
-                  </span>
-                </button>
+                <div class="quantity-control">
+                  <input
+                    class="owned-input"
+                    type="number"
+                    min="0"
+                    :max="entry.quantity"
+                    :value="entryOwned(entry)"
+                    data-wheel-kind="entry"
+                    :data-item-id="entry.item_id"
+                    aria-label="Quantité possédée"
+                    @change="changeEntryOwned(entry, Number(($event.target as HTMLInputElement).value))"
+                  />
+                  <span class="quantity-total">/ {{ formatQuantity(entry.quantity) }}</span>
+                </div>
+                <div class="item-card">
+                  <button class="item-link" type="button" @click="openDofusDb('object', entry.item_id)">
+                    <img v-if="imageUrl(entry.image_path, entry.item_id)" :src="imageUrl(entry.image_path, entry.item_id)" alt="" />
+                    <span v-else class="image-fallback">{{ entry.name.slice(0, 1) }}</span>
+                    <span class="item-copy">
+                      <strong>{{ entry.name }}</strong>
+                      <small>{{ entryMeta(entry) }}</small>
+                    </span>
+                  </button>
+                </div>
               </article>
 
             </div>
@@ -956,14 +1630,14 @@ onMounted(async () => {
             @click="toggleChoicePanel"
           >
             <span class="rail-title">Choix</span>
-            <span class="rail-badge">{{ unresolvedAlternativeGroups.length }}</span>
+            <span class="rail-badge">{{ formatQuantity(unresolvedAlternativeGroups.length) }}</span>
           </button>
 
           <div v-else class="choice-expanded">
             <header class="craft-heading">
               <q-btn dense round flat icon="close" @click="choiceOpen = false" />
               <h2>Items à choisir</h2>
-              <q-badge rounded color="primary">{{ choiceResolvedCount }}/{{ choiceTotalCount }}</q-badge>
+              <q-badge rounded color="primary">{{ formatQuantity(choiceResolvedCount) }}/{{ formatQuantity(choiceTotalCount) }}</q-badge>
             </header>
 
             <div class="choice-grid">
@@ -1008,10 +1682,10 @@ onMounted(async () => {
                               type="button"
                               @click="openDofusDb('object', item.item_id)"
                             >
-                              <img v-if="item.image_path" :src="imageUrl(item.image_path)" alt="" />
+                              <img v-if="imageUrl(item.image_path, item.item_id)" :src="imageUrl(item.image_path, item.item_id)" alt="" />
                               <span v-else class="image-fallback">{{ item.name.slice(0, 1) }}</span>
                               <span class="item-copy">
-                                <strong>{{ item.quantity }} x {{ item.name }}</strong>
+                                <strong>{{ formatQuantity(item.quantity) }} x {{ item.name }}</strong>
                                 <small>{{ alternativeItemMeta(item) }}</small>
                               </span>
                             </button>
@@ -1035,18 +1709,23 @@ onMounted(async () => {
             @click="toggleCraftPlan"
           >
             <span class="rail-title">Plan craft</span>
-            <span class="rail-badge">{{ craftTargetCount }}</span>
+            <span class="rail-badge">{{ formatQuantity(craftTargetCount) }}</span>
           </button>
 
           <div v-else class="craft-expanded">
             <header class="craft-heading">
               <q-btn dense round flat icon="close" @click="craftOpen = false" />
               <h2>Plan de craft</h2>
-              <q-badge rounded color="primary">{{ craftCheckedCount }}/{{ displayedCraftLines.length }}</q-badge>
+              <q-badge rounded color="primary">{{ formatQuantity(craftCheckedCount) }}/{{ formatQuantity(displayedCraftLines.length) }}</q-badge>
             </header>
 
             <div v-if="craftPanels.length" class="craft-grid">
-              <section v-for="section in craftPanels" :key="section.key" class="craft-section">
+              <section
+                v-for="section in craftPanels"
+                :key="section.key"
+                class="craft-section"
+                :style="{ '--quantity-total-width': craftQuantityTotalWidth(section.lines), '--owned-input-width': craftQuantityInputWidth(section.lines) }"
+              >
                 <header>
                   <h3>{{ section.title }}</h3>
                   <span>{{ craftPanelProgress(section) }}</span>
@@ -1060,21 +1739,39 @@ onMounted(async () => {
                     class="craft-row"
                     :data-item-id="line.item_id"
                     :data-craft-line-key="line.line_key"
+                    :data-progress="craftLineProgress(line)"
+                    :data-quantity="line.quantity"
                     :class="{ done: craftRowState(line).done }"
                   >
                     <input
                       type="checkbox"
-                      :checked="craftRowState(line).done"
+                      :checked="craftLineChecked(line)"
                       @change="setCraftChecked(line, ($event.target as HTMLInputElement).checked)"
                     />
-                    <button class="item-card" type="button" @click="openDofusDb('object', line.item_id)">
-                      <img v-if="line.image_path" :src="imageUrl(line.image_path)" alt="" />
-                      <span v-else class="image-fallback">{{ line.name.slice(0, 1) }}</span>
-                      <span class="item-copy">
-                        <strong>{{ craftRowState(line).label }}</strong>
-                        <small>{{ craftMeta(line) }}</small>
-                      </span>
-                    </button>
+                    <div class="quantity-control">
+                      <input
+                        class="owned-input"
+                        type="number"
+                        min="0"
+                        :max="line.quantity"
+                        :value="craftLineProgress(line)"
+                        data-wheel-kind="craft"
+                        :data-line-key="line.line_key"
+                        aria-label="Quantité validée"
+                        @change="changeCraftOwned(line, Number(($event.target as HTMLInputElement).value))"
+                      />
+                      <span class="quantity-total">/ {{ formatQuantity(line.quantity) }}</span>
+                    </div>
+                    <div class="item-card">
+                      <button class="item-link" type="button" @click="openDofusDb('object', line.item_id)">
+                        <img v-if="imageUrl(line.image_path, line.item_id)" :src="imageUrl(line.image_path, line.item_id)" alt="" />
+                        <span v-else class="image-fallback">{{ line.name.slice(0, 1) }}</span>
+                        <span class="item-copy">
+                          <strong>{{ line.name }}</strong>
+                          <small>{{ craftMeta(line) }}</small>
+                        </span>
+                      </button>
+                    </div>
                   </article>
                 </div>
               </section>
@@ -1085,6 +1782,36 @@ onMounted(async () => {
         </aside>
       </section>
     </main>
+
+    <div v-if="syncVisible" class="sync-dialog catalog-sync-dialog">
+      <section class="sync-card sync-progress-card glass-surface" role="status" aria-live="polite">
+        <header class="sync-progress-head">
+          <div>
+            <span>Synchronisation des données DofusDB</span>
+            <h2>{{ syncPhase }}</h2>
+          </div>
+          <strong v-if="!syncExternalWait">{{ syncPercent }}%</strong>
+        </header>
+        <template v-if="!syncExternalWait">
+          <div class="sync-progress-track">
+            <span :style="{ width: `${syncPercent}%` }"></span>
+          </div>
+          <div class="sync-progress-rows">
+            <div v-for="task in syncRows" :key="task.key" class="sync-progress-row">
+              <span>{{ task.label }}</span>
+              <strong>{{ formatQuantity(task.done) }} / {{ formatQuantity(task.total) }}</strong>
+            </div>
+          </div>
+          <div class="sync-progress-details" aria-label="Détails du téléchargement">
+            <span v-for="detail in syncDownloadDetails" :key="detail.label">
+              {{ detail.label }} :
+              <strong>{{ detail.value }}</strong>
+            </span>
+          </div>
+        </template>
+        <p v-else>Cette app attend que la synchronisation commune se termine.</p>
+      </section>
+    </div>
 
     <div v-if="showAppUpdatePrompt && appUpdate" class="sync-dialog">
       <div class="sync-card glass-surface">
@@ -1118,7 +1845,7 @@ onMounted(async () => {
             @click="selectAchievementOption(option)"
           >
             <span class="choice-visual">
-              <img v-if="option.icon" :src="imageUrl(option.icon)" alt="" />
+              <img v-if="imageUrl(option.icon)" :src="imageUrl(option.icon)" alt="" />
               <q-icon v-else :name="option.materialIcon || 'route'" />
             </span>
             <span class="choice-copy">

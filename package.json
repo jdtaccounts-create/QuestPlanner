@@ -1,7 +1,7 @@
 {
   "name": "questplanner-quasar",
   "private": true,
-  "version": "0.1.11",
+  "version": "0.1.12",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,6 +11,8 @@
     "sync:achievements": "node scripts/sync-achievements.mjs",
     "sync:data": "node scripts/sync-static-data.mjs",
     "cache:images": "node scripts/cache-item-images.mjs",
+    "deduplicate:images": "node scripts/deduplicate-images.mjs",
+    "verify:images": "node scripts/verify-images.mjs",
     "release:latest": "node scripts/generate-latest-json.mjs",
     "tauri": "tauri"
   },

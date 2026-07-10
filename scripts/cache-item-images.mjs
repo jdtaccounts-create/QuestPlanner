@@ -15,6 +15,10 @@ function isRemoteUrl(value) {
   return /^https?:\/\//.test(String(value || ''))
 }
 
+function isLocalCachePath(value) {
+  return String(value || '').replace(/\\/g, '/').startsWith('cache/images/')
+}
+
 function cachedImagePath(itemId) {
   return `cache\\images\\${itemId}.png`
 }
@@ -36,6 +40,10 @@ async function mapWithConcurrency(items, concurrency, worker) {
 }
 
 async function downloadImage(item, index, total) {
+  if (isLocalCachePath(item.image_path) && existsSync(join(rootDir, 'public', item.image_path.replace(/\\/g, '/')))) {
+    return { status: 'cached' }
+  }
+
   const target = join(imageCacheDir, `${item.id}.png`)
   if (existsSync(target)) {
     item.image_path = cachedImagePath(item.id)

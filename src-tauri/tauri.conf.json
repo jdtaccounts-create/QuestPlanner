@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "QuestPlanner",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "identifier": "fr.moufle.questplanner",
   "build": {
     "frontendDist": "../dist",
@@ -18,7 +18,8 @@
         "minWidth": 980,
         "minHeight": 680,
         "resizable": true,
-        "fullscreen": false
+        "fullscreen": false,
+        "maximized": true
       }
     ],
     "security": {

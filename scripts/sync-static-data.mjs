@@ -108,9 +108,9 @@ function extractItemTypeName(rawItem, locale) {
   return rawItem?.type?.name?.[locale] || ''
 }
 
-function itemImagePath(itemId, imageUrl) {
+function itemImagePath(itemId) {
   const cachedPath = join(imageCacheDir, `${itemId}.png`)
-  return existsSync(cachedPath) ? `cache\\images\\${itemId}.png` : imageUrl
+  return existsSync(cachedPath) ? `cache\\images\\${itemId}.png` : ''
 }
 
 function extractItemTypeCategoryId(rawItem) {
@@ -143,7 +143,7 @@ function normalizeApiItem(rawItem) {
     quests_that_use: (rawItem.questsThatUse || []).map(Number),
     quests_that_reward: (rawItem.questsThatReward || []).map(Number),
     image_url: imageUrl,
-    image_path: itemImagePath(Number(id), imageUrl),
+    image_path: itemImagePath(Number(id)),
   }
 }
 

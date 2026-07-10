@@ -1,11 +1,36 @@
-import { loadStoredQuestPlannerData, saveStoredQuestPlannerData } from './questStorage'
+import {
+  loadCachedImageIds,
+  loadFailedCachedImages,
+  pruneCachedImages,
+  saveCachedImage,
+  saveFailedCachedImages,
+  loadSharedCatalog,
+  saveSharedCatalog,
+  loadStoredQuestPlannerData,
+  saveStoredQuestPlannerData,
+  type FailedCachedImage,
+} from './questStorage'
 
 export const CATEGORIES = ['Equipement', 'Consommable', 'Ressource'] as const
 const API_URL = 'https://api.dofusdb.fr'
 const PAGE_LIMIT = 50
 const PAGE_CONCURRENCY = 8
+const REQUEST_TIMEOUT_MS = 8_000
+const ESTIMATED_JSON_COMPRESSION_RATIO = 0.16
+const ESTIMATED_IMAGE_BYTES = 40 * 1024
+const FAILED_IMAGE_RETRY_MS = 24 * 60 * 60 * 1000
+const TRANSIENT_FAILED_IMAGE_RETRY_MS = 15 * 60 * 1000
 
 export type ItemCategory = (typeof CATEGORIES)[number]
+
+export type QuestSyncEndpoint = 'questCategories' | 'achievements' | 'items' | 'recipes' | 'itemSets' | 'quests'
+
+export type QuestSyncProgressEvent =
+  | { kind: 'endpoint'; endpoint: QuestSyncEndpoint; label: string; done: number; total: number; bytesDone: number }
+  | { kind: 'images'; done: number; total: number; bytesDone: number; bytesTotal?: number }
+  | { kind: 'message'; message: string }
+
+export type QuestSyncProgress = (event: QuestSyncProgressEvent | string) => void
 
 export interface CachedQuest {
   id: number
@@ -121,10 +146,49 @@ export interface CachedItem {
   image_path?: string
 }
 
+export interface HarvestableResource {
+  item_id: number
+  job: string
+  rarity: 'normal' | 'rare' | 'meat'
+  source_item_id?: number
+  source_monster_id?: number
+  source_monster_name?: string
+  order: number
+}
+
+export interface ResourceOrigin {
+  item_id: number
+  origins: Array<{
+    monster_id: number
+    monster_name: string
+    race_id: number | null
+    race_name: string
+    super_race_id: number | null
+    super_race_name: string
+    min_level: number | null
+    max_level: number | null
+    drop_rate: number
+    has_criterions: boolean
+  }>
+}
+
+export interface SortMetadata {
+  harvestables: Record<string, HarvestableResource>
+  resourceOrigins: Record<string, ResourceOrigin>
+}
+
 export interface Recipe {
   result_id: number
   ingredient_ids: number[]
   quantities: number[]
+}
+
+export interface ItemSet {
+  id: number
+  name: string
+  name_norm: string
+  compact: string
+  item_ids: number[]
 }
 
 export interface ItemEntry {
@@ -197,6 +261,16 @@ export interface QuestPlannerData {
     item_ids?: number[]
   }
   metadata: Record<string, unknown>
+  sortMetadata?: SortMetadata
+  itemSets?: Record<string, ItemSet>
+}
+
+interface SharedCatalogData {
+  items?: Record<string, CachedItem>
+  recipes?: Record<string, Recipe>
+  itemSets?: Record<string, ItemSet>
+  metadata?: Record<string, unknown>
+  sortMetadata?: SortMetadata
 }
 
 export interface DatabaseStatus {
@@ -211,6 +285,9 @@ export interface DatabaseStatus {
   localItemTotal: number
   remoteRecipeTotal: number
   localRecipeTotal: number
+  remoteItemSetTotal: number
+  localItemSetTotal: number
+  missingImageGroups: number
   missingLabels: string[]
 }
 
@@ -352,25 +429,25 @@ export const ACHIEVEMENT_CHOICE_RULES: Record<number, AchievementChoiceRule> = {
     subtitle: 'Choisis la quête de classe correspondant au personnage.',
     fixedQuestIds: [1958, 1959, 2009, 1960, 1962],
     options: [
-      { key: 'feca', label: 'Féca', description: "Tournée d'inspection", questIds: [1963], icon: 'https://api.dofusdb.fr/img/breeds/symbol_1.png', visualClass: 'choice-class' },
-      { key: 'osamodas', label: 'Osamodas', description: 'Série animalière', questIds: [1964], icon: 'https://api.dofusdb.fr/img/breeds/symbol_2.png', visualClass: 'choice-class' },
-      { key: 'enutrof', label: 'Enutrof', description: 'La fête de la chocopépite', questIds: [1965], icon: 'https://api.dofusdb.fr/img/breeds/symbol_3.png', visualClass: 'choice-class' },
-      { key: 'sram', label: 'Sram', description: 'Crime et châtiment', questIds: [1966], icon: 'https://api.dofusdb.fr/img/breeds/symbol_4.png', visualClass: 'choice-class' },
-      { key: 'xelor', label: 'Xélor', description: "Tarot, t'es très fort", questIds: [1967], icon: 'https://api.dofusdb.fr/img/breeds/symbol_5.png', visualClass: 'choice-class' },
-      { key: 'ecaflip', label: 'Ecaflip', description: 'Au petit malheur la chance', questIds: [1968], icon: 'https://api.dofusdb.fr/img/breeds/symbol_6.png', visualClass: 'choice-class' },
-      { key: 'eniripsa', label: 'Eniripsa', description: 'Piques de solution', questIds: [1969], icon: 'https://api.dofusdb.fr/img/breeds/symbol_7.png', visualClass: 'choice-class' },
-      { key: 'iop', label: 'Iop', description: 'Iop et hop', questIds: [1970], icon: 'https://api.dofusdb.fr/img/breeds/symbol_8.png', visualClass: 'choice-class' },
-      { key: 'cra', label: 'Crâ', description: "C'est pour ta pomme", questIds: [1971], icon: 'https://api.dofusdb.fr/img/breeds/symbol_9.png', visualClass: 'choice-class' },
-      { key: 'sadida', label: 'Sadida', description: "C'est pourtant naturel", questIds: [1972], icon: 'https://api.dofusdb.fr/img/breeds/symbol_10.png', visualClass: 'choice-class' },
-      { key: 'sacrieur', label: 'Sacrieur', description: 'Souffre-douleur', questIds: [1973], icon: 'https://api.dofusdb.fr/img/breeds/symbol_11.png', visualClass: 'choice-class' },
-      { key: 'pandawa', label: 'Pandawa', description: "Trempette dans un verre d'eau", questIds: [1974], icon: 'https://api.dofusdb.fr/img/breeds/symbol_12.png', visualClass: 'choice-class' },
-      { key: 'roublard', label: 'Roublard', description: 'Braquage à la Roublard', questIds: [704], icon: 'https://api.dofusdb.fr/img/breeds/symbol_13.png', visualClass: 'choice-class' },
-      { key: 'zobal', label: 'Zobal', description: 'Zobal Hibaba et les 40 Roublards', questIds: [716], icon: 'https://api.dofusdb.fr/img/breeds/symbol_14.png', visualClass: 'choice-class' },
-      { key: 'steamer', label: 'Steamer', description: "L'étrange créature de l'étang bleu", questIds: [938], icon: 'https://api.dofusdb.fr/img/breeds/symbol_15.png', visualClass: 'choice-class' },
-      { key: 'eliotrope', label: 'Eliotrope', description: 'Un rayon de soleil', questIds: [1615], icon: 'https://api.dofusdb.fr/img/breeds/symbol_16.png', visualClass: 'choice-class' },
-      { key: 'huppermage', label: 'Huppermage', description: "Les paroles s'envolent, les aigris restent", questIds: [1677], icon: 'https://api.dofusdb.fr/img/breeds/symbol_17.png', visualClass: 'choice-class' },
-      { key: 'ouginak', label: 'Ouginak', description: 'Une vie de milichien', questIds: [1841], icon: 'https://api.dofusdb.fr/img/breeds/symbol_18.png', visualClass: 'choice-class' },
-      { key: 'forgelance', label: 'Forgelance', description: 'La routine anodine du chevalier citadin', questIds: [2470], icon: 'https://api.dofusdb.fr/img/breeds/symbol_20.png', visualClass: 'choice-class' },
+      { key: 'feca', label: 'Féca', description: "Tournée d'inspection", questIds: [1963], icon: '/choice-icons/classes/symbol_1.png', visualClass: 'choice-class' },
+      { key: 'osamodas', label: 'Osamodas', description: 'Série animalière', questIds: [1964], icon: '/choice-icons/classes/symbol_2.png', visualClass: 'choice-class' },
+      { key: 'enutrof', label: 'Enutrof', description: 'La fête de la chocopépite', questIds: [1965], icon: '/choice-icons/classes/symbol_3.png', visualClass: 'choice-class' },
+      { key: 'sram', label: 'Sram', description: 'Crime et châtiment', questIds: [1966], icon: '/choice-icons/classes/symbol_4.png', visualClass: 'choice-class' },
+      { key: 'xelor', label: 'Xélor', description: "Tarot, t'es très fort", questIds: [1967], icon: '/choice-icons/classes/symbol_5.png', visualClass: 'choice-class' },
+      { key: 'ecaflip', label: 'Ecaflip', description: 'Au petit malheur la chance', questIds: [1968], icon: '/choice-icons/classes/symbol_6.png', visualClass: 'choice-class' },
+      { key: 'eniripsa', label: 'Eniripsa', description: 'Piques de solution', questIds: [1969], icon: '/choice-icons/classes/symbol_7.png', visualClass: 'choice-class' },
+      { key: 'iop', label: 'Iop', description: 'Iop et hop', questIds: [1970], icon: '/choice-icons/classes/symbol_8.png', visualClass: 'choice-class' },
+      { key: 'cra', label: 'Crâ', description: "C'est pour ta pomme", questIds: [1971], icon: '/choice-icons/classes/symbol_9.png', visualClass: 'choice-class' },
+      { key: 'sadida', label: 'Sadida', description: "C'est pourtant naturel", questIds: [1972], icon: '/choice-icons/classes/symbol_10.png', visualClass: 'choice-class' },
+      { key: 'sacrieur', label: 'Sacrieur', description: 'Souffre-douleur', questIds: [1973], icon: '/choice-icons/classes/symbol_11.png', visualClass: 'choice-class' },
+      { key: 'pandawa', label: 'Pandawa', description: "Trempette dans un verre d'eau", questIds: [1974], icon: '/choice-icons/classes/symbol_12.png', visualClass: 'choice-class' },
+      { key: 'roublard', label: 'Roublard', description: 'Braquage à la Roublard', questIds: [704], icon: '/choice-icons/classes/symbol_13.png', visualClass: 'choice-class' },
+      { key: 'zobal', label: 'Zobal', description: 'Zobal Hibaba et les 40 Roublards', questIds: [716], icon: '/choice-icons/classes/symbol_14.png', visualClass: 'choice-class' },
+      { key: 'steamer', label: 'Steamer', description: "L'étrange créature de l'étang bleu", questIds: [938], icon: '/choice-icons/classes/symbol_15.png', visualClass: 'choice-class' },
+      { key: 'eliotrope', label: 'Eliotrope', description: 'Un rayon de soleil', questIds: [1615], icon: '/choice-icons/classes/symbol_16.png', visualClass: 'choice-class' },
+      { key: 'huppermage', label: 'Huppermage', description: "Les paroles s'envolent, les aigris restent", questIds: [1677], icon: '/choice-icons/classes/symbol_17.png', visualClass: 'choice-class' },
+      { key: 'ouginak', label: 'Ouginak', description: 'Une vie de milichien', questIds: [1841], icon: '/choice-icons/classes/symbol_18.png', visualClass: 'choice-class' },
+      { key: 'forgelance', label: 'Forgelance', description: 'La routine anodine du chevalier citadin', questIds: [2470], icon: '/choice-icons/classes/symbol_20.png', visualClass: 'choice-class' },
     ],
   },
 }
@@ -659,7 +736,7 @@ export function expandAchievementToQuests(
 function itemImagePath(item: CachedItem): string {
   const imagePath = item.image_path || ''
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    return imagePath
+    return ''
   }
   return imagePath.replace(/\\/g, '/')
 }
@@ -847,25 +924,141 @@ export function buildCraftPlan(data: QuestPlannerData, entries: ItemEntry[]): Cr
   }
 }
 
+function stripBundledImagePaths<T extends { items?: Record<string, CachedItem> }>(data: T): { data: T; changed: boolean } {
+  let changed = false
+  const items = Object.fromEntries(Object.entries(data.items || {}).map(([id, item]) => {
+    if (!item.image_path || item.image_path.startsWith('http://') || item.image_path.startsWith('https://')) return [id, item]
+    changed = true
+    return [id, { ...item, image_path: '' }]
+  }))
+  return { data: changed ? { ...data, items } : data, changed }
+}
+
+async function loadSortMetadata(): Promise<Pick<QuestPlannerData, 'sortMetadata'>> {
+  const [harvestables, resourceOrigins] = await Promise.all([
+    fetch('/data/harvestable_resources.json').then((response) => response.json()).catch(() => ({})) as Promise<Record<string, HarvestableResource>>,
+    fetch('/data/resource_origins.json').then((response) => response.json()).catch(() => ({})) as Promise<Record<string, ResourceOrigin>>,
+  ])
+  return { sortMetadata: { harvestables, resourceOrigins } }
+}
+
+function normalizeSharedItems(items: Record<string, CachedItem> | undefined): Record<string, CachedItem> | null {
+  if (!items || !Object.keys(items).length) return null
+  return Object.fromEntries(Object.entries(items).map(([id, item]) => {
+    const rawType = item.raw_type || 'Equipement'
+    const typeName = item.type_name || ''
+    return [id, {
+      ...item,
+      id: Number(item.id ?? id),
+      raw_type: rawType,
+      type_name: typeName,
+      category: item.category || normalizeItemCategory(rawType, typeName),
+      image_url: item.image_url || '',
+      image_path: item.image_path?.startsWith('http') ? item.image_path : '',
+    }]
+  }))
+}
+
+function applySharedCatalog(data: QuestPlannerData, shared: SharedCatalogData | null): QuestPlannerData {
+  const items = normalizeSharedItems(shared?.items)
+  if (!items || !shared?.recipes || !Object.keys(shared.recipes).length) return data
+  return {
+    ...data,
+    items,
+    recipes: shared.recipes,
+    itemSets: shared.itemSets || data.itemSets,
+    metadata: {
+      ...data.metadata,
+      ...(shared.metadata || {}),
+      dofusdb_item_total: Number(shared.metadata?.item_total || Object.keys(items).length),
+      dofusdb_recipe_total: Number(shared.metadata?.recipe_total || Object.keys(shared.recipes).length),
+      dofusdb_item_set_total: Number(shared.metadata?.item_set_total || Object.keys(shared.itemSets || {}).length),
+    },
+    sortMetadata: shared.sortMetadata || data.sortMetadata,
+  }
+}
+
+function toSharedCatalog(data: QuestPlannerData, previous: SharedCatalogData | null): SharedCatalogData {
+  const sharedItems = stripBundledImagePaths({ items: data.items }).data.items || {}
+  const remote = data.metadata?.remote || previous?.metadata?.remote
+  return {
+    ...(previous || {}),
+    items: sharedItems,
+    recipes: Object.fromEntries(Object.entries(data.recipes || {}).filter((entry): entry is [string, Recipe] => Boolean(entry[1]))),
+    itemSets: data.itemSets || previous?.itemSets || {},
+    metadata: {
+      ...(previous?.metadata || {}),
+      item_total: Object.keys(data.items || {}).length,
+      recipe_total: Object.keys(data.recipes || {}).length,
+      item_set_total: Object.keys(data.itemSets || previous?.itemSets || {}).length,
+      last_sync: data.metadata?.last_sync || new Date().toISOString(),
+      remote,
+      shared_sync_state: data.metadata?.shared_sync_state || (remote ? 'complete' : 'bootstrap'),
+    },
+    sortMetadata: data.sortMetadata,
+  }
+}
+
 export async function loadQuestPlannerData(): Promise<QuestPlannerData> {
   const stored = await loadStoredQuestPlannerData().catch(() => null)
+  const sharedCatalog = await loadSharedCatalog<SharedCatalogData>().catch(() => null)
+  const sortMetadata = await loadSortMetadata()
   if (stored) {
     try {
       const bundledMetadata = await fetch('/data/metadata.json').then((response) => response.json())
-      const storedWithAchievements = { ...stored, achievements: stored.achievements || {} }
+      const normalizedStored = stripBundledImagePaths(stored)
+      const storedWithAchievements = applySharedCatalog({ ...normalizedStored.data, achievements: stored.achievements || {}, ...sortMetadata }, sharedCatalog)
+      const storedWasSynced = Boolean(storedWithAchievements.metadata?.last_sync)
       const bundledIsNewer =
-        Number(bundledMetadata.item_total || 0) > Object.keys(storedWithAchievements.items || {}).length
-        || Number(bundledMetadata.recipe_total || 0) > Object.keys(storedWithAchievements.recipes || {}).length
-        || Number(bundledMetadata.quest_total || 0) > Object.keys(storedWithAchievements.quests || {}).length
-        || Number(bundledMetadata.achievement_total || 0) > Object.keys(storedWithAchievements.achievements || {}).length
-        || Number(bundledMetadata.quest_need_schema_version || 0) > Number(storedWithAchievements.metadata?.quest_need_schema_version || 0)
+        Number(bundledMetadata.quest_need_schema_version || 0) > Number(storedWithAchievements.metadata?.quest_need_schema_version || 0)
+        || (!storedWasSynced && (
+          Number(bundledMetadata.quest_total || 0) > Object.keys(storedWithAchievements.quests || {}).length
+          || Number(bundledMetadata.achievement_total || 0) > Object.keys(storedWithAchievements.achievements || {}).length
+          || Number(bundledMetadata.quest_category_total || 0) > Object.keys(storedWithAchievements.categories || {}).length
+        ))
 
-      if (!bundledIsNewer) return storedWithAchievements
+      if (!bundledIsNewer) {
+        if (normalizedStored.changed) void saveStoredQuestPlannerData(storedWithAchievements).catch(() => {})
+        if (!sharedCatalog) void saveSharedCatalog(toSharedCatalog(storedWithAchievements, sharedCatalog)).catch(() => {})
+        return storedWithAchievements
+      }
+
+      if (storedWasSynced) {
+        const [quests, achievements, categories, exclusions] = await Promise.all([
+          fetch('/data/quests.json').then((response) => response.json()),
+          fetch('/data/achievements.json').then((response) => response.json()).catch(() => ({})),
+          fetch('/data/quest_categories.json').then((response) => response.json()),
+          fetch('/data/item_exclusions.json').then((response) => response.json()),
+        ])
+        const merged: QuestPlannerData = {
+          quests,
+          achievements,
+          categories,
+          items: storedWithAchievements.items,
+          recipes: storedWithAchievements.recipes,
+          exclusions,
+        metadata: {
+          ...bundledMetadata,
+          item_total: Object.keys(storedWithAchievements.items || {}).length,
+          recipe_total: Object.keys(storedWithAchievements.recipes || {}).length,
+          dofusdb_item_total: Number(storedWithAchievements.metadata?.dofusdb_item_total || Object.keys(storedWithAchievements.items || {}).length),
+          dofusdb_recipe_total: Number(storedWithAchievements.metadata?.dofusdb_recipe_total || Object.keys(storedWithAchievements.recipes || {}).length),
+          item_ids_checksum: idsChecksum(Object.keys(storedWithAchievements.items || {})),
+          recipe_ids_checksum: idsChecksum(Object.keys(storedWithAchievements.recipes || {})),
+          last_sync: storedWithAchievements.metadata?.last_sync || new Date().toISOString(),
+          },
+          ...sortMetadata,
+        }
+        await saveStoredQuestPlannerData(merged).catch(() => {})
+        if (!sharedCatalog) void saveSharedCatalog(toSharedCatalog(merged, sharedCatalog)).catch(() => {})
+        return merged
+      }
     } catch {
-      return {
+      return applySharedCatalog({
         ...stored,
         achievements: stored.achievements || {},
-      }
+        ...sortMetadata,
+      }, sharedCatalog)
     }
   }
 
@@ -879,7 +1072,9 @@ export async function loadQuestPlannerData(): Promise<QuestPlannerData> {
     fetch('/data/metadata.json').then((response) => response.json()),
   ])
 
-  return { quests, achievements, categories, items, recipes, exclusions, metadata }
+  const bundled = stripBundledImagePaths({ quests, achievements, categories, items, recipes, exclusions, metadata, ...sortMetadata }).data
+  if (!sharedCatalog) void saveSharedCatalog(toSharedCatalog(bundled, sharedCatalog)).catch(() => {})
+  return applySharedCatalog(bundled, sharedCatalog)
 }
 
 function optionCategory(items: AlternativeItemLine[]): ItemCategory {
@@ -948,19 +1143,83 @@ function isTauriRuntime(): boolean {
   return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
 }
 
-async function apiGet(path: string, params: Record<string, string | number> = {}): Promise<any> {
+function isRemoteImage(path: string | undefined): boolean {
+  return /^https?:\/\//.test(path || '')
+}
+
+function itemImageSource(item: CachedItem): string {
+  if (isRemoteImage(item.image_url)) return item.image_url || ''
+  return isRemoteImage(item.image_path) ? item.image_path || '' : ''
+}
+
+export function groupMissingImages(data: QuestPlannerData, cachedIds: ReadonlySet<number>): Array<[string, CachedItem[]]> {
+  const missingBySource = Object.values(data.items || {}).reduce((groups, item) => {
+    const source = itemImageSource(item)
+    if (!source || cachedIds.has(item.id)) return groups
+    const group = groups.get(source) || []
+    group.push(item)
+    groups.set(source, group)
+    return groups
+  }, new Map<string, CachedItem[]>())
+  return [...missingBySource.entries()]
+}
+
+function failedImageRetryMs(row: FailedCachedImage): number {
+  return /failed to fetch|timeout|network|abort/i.test(row.reason || '')
+    ? TRANSIENT_FAILED_IMAGE_RETRY_MS
+    : FAILED_IMAGE_RETRY_MS
+}
+
+function isTransientImageFailure(row: FailedCachedImage): boolean {
+  return failedImageRetryMs(row) === TRANSIENT_FAILED_IMAGE_RETRY_MS
+}
+
+function isRecentFailedImage(row: FailedCachedImage, now = Date.now()): boolean {
+  return now - Date.parse(row.failedAt) < failedImageRetryMs(row)
+}
+
+function recentFailedImageIds(rows: FailedCachedImage[] | null, now = Date.now()): Set<number> {
+  return new Set((rows || [])
+    .filter((row) => isRecentFailedImage(row, now))
+    .map((row) => row.itemId))
+}
+
+function mergeFailedImages(previous: FailedCachedImage[] | null, next: FailedCachedImage[]): FailedCachedImage[] {
+  const recent = (previous || []).filter((row) => isRecentFailedImage(row))
+  const byId = new Map(recent.map((row) => [row.itemId, row]))
+  next.forEach((row) => byId.set(row.itemId, row))
+  return [...byId.values()]
+}
+
+function estimatedCompressedJsonBytes(text: string, fallbackBytes?: number | null): number {
+  const knownBytes = Number(fallbackBytes || 0)
+  if (knownBytes > 0) return knownBytes
+  return Math.max(1, Math.round(new Blob([text]).size * ESTIMATED_JSON_COMPRESSION_RATIO))
+}
+
+async function apiGetPayload(path: string, params: Record<string, string | number> = {}): Promise<{ data: any; bytes: number }> {
   const url = new URL(`${API_URL}${path}`)
   Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, String(value)))
 
   if (isTauriRuntime()) {
     const { invoke } = await import('@tauri-apps/api/core')
     const text = await invoke<string>('http_get', { url: url.toString() })
-    return JSON.parse(text)
+    return { data: JSON.parse(text), bytes: estimatedCompressedJsonBytes(text) }
   }
 
-  const response = await fetch(url)
+  const response = await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) })
   if (!response.ok) throw new Error(`DofusDB ${response.status} ${response.statusText}`)
-  return response.json()
+  const text = await response.text()
+  const headerBytes = Number(response.headers.get('content-length') || 0)
+  const timingEntries = performance
+    .getEntriesByName(url.toString())
+    .filter((entry): entry is PerformanceResourceTiming => 'encodedBodySize' in entry)
+  const timingBytes = timingEntries.length ? timingEntries[timingEntries.length - 1].encodedBodySize : 0
+  return { data: JSON.parse(text), bytes: estimatedCompressedJsonBytes(text, headerBytes || timingBytes || 0) }
+}
+
+async function apiGet(path: string, params: Record<string, string | number> = {}): Promise<any> {
+  return (await apiGetPayload(path, params)).data
 }
 
 async function mapWithConcurrency<T, R>(
@@ -989,14 +1248,17 @@ async function mapWithConcurrency<T, R>(
 async function fetchPaginated(
   path: string,
   limit: number,
+  endpoint: QuestSyncEndpoint,
   label: string,
-  progress?: (message: string) => void,
+  progress?: QuestSyncProgress,
 ): Promise<any[]> {
-  const firstPage = await apiGet(path, { $limit: limit, $skip: 0 })
+  const firstPayload = await apiGetPayload(path, { $limit: limit, $skip: 0 })
+  const firstPage = firstPayload.data
   const total = Number(firstPage.total || 0)
   const pageLimit = Number(firstPage.limit || limit)
   const rows = [...(firstPage.data || [])]
-  progress?.(`${label} ${Math.min(rows.length, total)}/${total}`)
+  let bytesDone = firstPayload.bytes
+  progress?.({ kind: 'endpoint', endpoint, label, done: Math.min(rows.length, total), total, bytesDone })
 
   if (rows.length >= total || !rows.length) return rows
 
@@ -1006,10 +1268,12 @@ async function fetchPaginated(
   }
 
   await mapWithConcurrency(skips, PAGE_CONCURRENCY, async (skip) => {
-    const page = await apiGet(path, { $limit: limit, $skip: skip })
+    const payload = await apiGetPayload(path, { $limit: limit, $skip: skip })
+    const page = payload.data
     const data = page.data || []
     rows.push(...data)
-    progress?.(`${label} ${Math.min(rows.length, total)}/${total}`)
+    bytesDone += payload.bytes
+    progress?.({ kind: 'endpoint', endpoint, label, done: Math.min(rows.length, total), total, bytesDone })
     return data.length
   })
 
@@ -1066,7 +1330,10 @@ export async function ensureItems(
   for (const itemId of missingIds) {
     const bundled = bundledItems[String(itemId)]
     if (bundled && !itemNeedsRepair(bundled, itemId)) {
-      data.items[String(itemId)] = bundled
+      data.items[String(itemId)] = {
+        ...bundled,
+        image_path: bundled.image_path?.startsWith('http') ? bundled.image_path : '',
+      }
       changed = true
     }
   }
@@ -1227,20 +1494,20 @@ function normalizeApiItem(rawItem: any): CachedItem | null {
     quests_that_use: (rawItem.questsThatUse || []).map(Number),
     quests_that_reward: (rawItem.questsThatReward || []).map(Number),
     image_url: imageUrl,
-    image_path: imageUrl,
+    image_path: '',
   }
 }
 
 function preserveCachedItemImage(item: CachedItem | null, curatedItems: Record<string, CachedItem>): CachedItem | null {
   if (!item) return null
   const curatedImagePath = curatedItems[String(item.id)]?.image_path || ''
-  if (!curatedImagePath || curatedImagePath.startsWith('http://') || curatedImagePath.startsWith('https://')) {
+  if (!curatedImagePath) {
     return item
   }
 
   return {
     ...item,
-    image_path: curatedImagePath,
+    image_path: curatedImagePath.startsWith('http://') || curatedImagePath.startsWith('https://') ? curatedImagePath : '',
   }
 }
 
@@ -1250,6 +1517,18 @@ function normalizeRecipe(rawRecipe: any): Recipe | null {
     result_id: Number(rawRecipe.resultId),
     ingredient_ids: (rawRecipe.ingredientIds || []).map(Number),
     quantities: (rawRecipe.quantities || []).map(Number),
+  }
+}
+
+function normalizeSet(rawSet: any): ItemSet | null {
+  if (rawSet?.id == null) return null
+  const name = rawSet.name?.fr || rawSet.slug?.fr || `Panoplie ${rawSet.id}`
+  return {
+    id: Number(rawSet.id),
+    name,
+    name_norm: normalizeText(name),
+    compact: compactText(name),
+    item_ids: (rawSet.items || []).map((item: any) => Number(item.id)).filter(Number.isFinite),
   }
 }
 
@@ -1271,26 +1550,115 @@ function idsChecksum(ids: Iterable<string>): string {
   return String(hash >>> 0)
 }
 
+function latestUpdatedAt(rows: any[]): string {
+  return rows.reduce((latest, row) => {
+    const value = String(row?.updatedAt || '')
+    return value > latest ? value : latest
+  }, '')
+}
+
+async function endpointInfo(path: string): Promise<{ total: number; latestUpdatedAt: string }> {
+  const page = await apiGet(path, { $limit: 1, $skip: 0, '$sort[updatedAt]': -1 })
+  return {
+    total: Number(page.total || 0),
+    latestUpdatedAt: String(page.data?.[0]?.updatedAt || ''),
+  }
+}
+
+function localRemoteMetadata(data: QuestPlannerData, sharedCatalog: SharedCatalogData | null, endpoint: 'items' | 'recipes' | 'itemSets'): { total: number; latestUpdatedAt: string } {
+  if (data.metadata?.shared_sync_state === 'bootstrap' || sharedCatalog?.metadata?.shared_sync_state === 'bootstrap') {
+    return { total: 0, latestUpdatedAt: '' }
+  }
+  const remote = (data.metadata?.remote || sharedCatalog?.metadata?.remote) as Record<string, { total?: number; latestUpdatedAt?: string }> | undefined
+  const totalKeys = {
+    items: 'dofusdb_item_total',
+    recipes: 'dofusdb_recipe_total',
+    itemSets: 'dofusdb_item_set_total',
+  }
+  const sharedTotalKeys = {
+    items: 'item_total',
+    recipes: 'recipe_total',
+    itemSets: 'item_set_total',
+  }
+  const fallbackTotals = {
+    items: Object.keys(data.items || sharedCatalog?.items || {}).length,
+    recipes: Object.keys(data.recipes || sharedCatalog?.recipes || {}).length,
+    itemSets: Object.keys(data.itemSets || sharedCatalog?.itemSets || {}).length,
+  }
+  return {
+    total: Number(remote?.[endpoint]?.total || data.metadata?.[totalKeys[endpoint]] || sharedCatalog?.metadata?.[sharedTotalKeys[endpoint]] || 0) || fallbackTotals[endpoint],
+    latestUpdatedAt: String(remote?.[endpoint]?.latestUpdatedAt || ''),
+  }
+}
+
 export async function syncQuestPlannerData(
-  progress?: (message: string) => void,
+  progress?: QuestSyncProgress,
   curatedData?: QuestPlannerData,
+  options: { includeQuestData?: boolean } = {},
 ): Promise<QuestPlannerData> {
-  progress?.('Synchronisation DofusDB : catégories...')
-  const rawCategoriesPromise = fetchPaginated('/quest-categories', PAGE_LIMIT, 'Catégories', progress)
-  const rawAchievementsPromise = fetchPaginated('/achievements', PAGE_LIMIT, 'Succès', progress)
-  const rawItemsPromise = fetchPaginated('/items', PAGE_LIMIT, 'Items', progress)
-  const rawRecipesPromise = fetchPaginated('/recipes', PAGE_LIMIT, 'Recettes', progress)
+  const includeQuestData = options.includeQuestData !== false
+  if (!includeQuestData && curatedData) {
+    progress?.({ kind: 'message', message: 'Synchronisation DofusDB : base commune...' })
+    const [rawItems, rawRecipes, rawSets] = await Promise.all([
+      fetchPaginated('/items', PAGE_LIMIT, 'items', 'Items', progress),
+      fetchPaginated('/recipes', PAGE_LIMIT, 'recipes', 'Recettes', progress),
+      fetchPaginated('/item-sets', PAGE_LIMIT, 'itemSets', 'Panoplies', progress),
+    ])
+    const curatedItems = curatedData.items || {}
+    const items = byId(rawItems.map((rawItem) => preserveCachedItemImage(normalizeApiItem(rawItem), curatedItems)), 'id')
+    const recipes = byId(rawRecipes.map(normalizeRecipe), 'result_id')
+    const itemSets = byId(rawSets.map(normalizeSet), 'id')
+    const sortMetadata = curatedData.sortMetadata ? { sortMetadata: curatedData.sortMetadata } : await loadSortMetadata()
+    const data: QuestPlannerData = {
+      ...curatedData,
+      items,
+      recipes,
+      itemSets,
+      metadata: {
+        ...curatedData.metadata,
+        item_total: Object.keys(items).length,
+        recipe_total: Object.keys(recipes).length,
+        item_set_total: Object.keys(itemSets).length,
+        dofusdb_item_total: Object.keys(items).length,
+        dofusdb_recipe_total: Object.keys(recipes).length,
+        dofusdb_item_set_total: Object.keys(itemSets).length,
+        item_ids_checksum: idsChecksum(Object.keys(items)),
+        recipe_ids_checksum: idsChecksum(Object.keys(recipes)),
+        item_schema_version: 2,
+        last_sync: new Date().toISOString(),
+      remote: {
+        items: { total: Object.keys(items).length, latestUpdatedAt: latestUpdatedAt(rawItems) },
+        recipes: { total: Object.keys(recipes).length, latestUpdatedAt: latestUpdatedAt(rawRecipes) },
+        itemSets: { total: Object.keys(itemSets).length, latestUpdatedAt: latestUpdatedAt(rawSets) },
+      },
+      shared_sync_state: 'complete',
+    },
+      ...sortMetadata,
+    }
+    await saveStoredQuestPlannerData(data)
+    await saveSharedCatalog(toSharedCatalog(data, await loadSharedCatalog<SharedCatalogData>().catch(() => null))).catch(() => {})
+    progress?.({ kind: 'message', message: `Données synchronisées : ${Object.keys(items).length} items, ${Object.keys(recipes).length} recettes, ${Object.keys(itemSets).length} panoplies` })
+    return data
+  }
+
+  progress?.({ kind: 'message', message: 'Synchronisation DofusDB : catégories...' })
+  const rawCategoriesPromise = fetchPaginated('/quest-categories', PAGE_LIMIT, 'questCategories', 'Catégories', progress)
+  const rawAchievementsPromise = fetchPaginated('/achievements', PAGE_LIMIT, 'achievements', 'Succès', progress)
+  const rawItemsPromise = fetchPaginated('/items', PAGE_LIMIT, 'items', 'Items', progress)
+  const rawRecipesPromise = fetchPaginated('/recipes', PAGE_LIMIT, 'recipes', 'Recettes', progress)
+  const rawSetsPromise = fetchPaginated('/item-sets', PAGE_LIMIT, 'itemSets', 'Panoplies', progress)
 
   const rawCategories = await rawCategoriesPromise
   const categories = byId(rawCategories.map(normalizeQuestCategory), 'id')
 
-  progress?.('Synchronisation DofusDB : quêtes...')
-  const rawQuestsPromise = fetchPaginated('/quests', PAGE_LIMIT, 'Quêtes', progress)
-  const [rawQuests, rawAchievements, rawItems, rawRecipes] = await Promise.all([
+  progress?.({ kind: 'message', message: 'Synchronisation DofusDB : quêtes...' })
+  const rawQuestsPromise = fetchPaginated('/quests', PAGE_LIMIT, 'quests', 'Quêtes', progress)
+  const [rawQuests, rawAchievements, rawItems, rawRecipes, rawSets] = await Promise.all([
     rawQuestsPromise,
     rawAchievementsPromise,
     rawItemsPromise,
     rawRecipesPromise,
+    rawSetsPromise,
   ])
   const curatedQuests = curatedData?.quests || {}
   const quests = byId(
@@ -1301,10 +1669,16 @@ export async function syncQuestPlannerData(
   const curatedItems = curatedData?.items || {}
   const items = byId(rawItems.map((rawItem) => preserveCachedItemImage(normalizeApiItem(rawItem), curatedItems)), 'id')
   const recipes = byId(rawRecipes.map(normalizeRecipe), 'result_id')
+  const itemSets = byId(rawSets.map(normalizeSet), 'id')
+  const sortMetadata = curatedData?.sortMetadata ? { sortMetadata: curatedData.sortMetadata } : await loadSortMetadata()
 
   const metadata = {
     item_total: Object.keys(items).length,
     recipe_total: Object.keys(recipes).length,
+    item_set_total: Object.keys(itemSets).length,
+    dofusdb_item_total: Object.keys(items).length,
+    dofusdb_recipe_total: Object.keys(recipes).length,
+    dofusdb_item_set_total: Object.keys(itemSets).length,
     quest_total: Object.keys(quests).length,
     achievement_total: Object.keys(achievements).length,
     quest_category_total: Object.keys(categories).length,
@@ -1316,6 +1690,12 @@ export async function syncQuestPlannerData(
     item_schema_version: 2,
     quest_need_schema_version: Number(curatedData?.metadata?.quest_need_schema_version || 2),
     last_sync: new Date().toISOString(),
+    remote: {
+      items: { total: Object.keys(items).length, latestUpdatedAt: latestUpdatedAt(rawItems) },
+      recipes: { total: Object.keys(recipes).length, latestUpdatedAt: latestUpdatedAt(rawRecipes) },
+      itemSets: { total: Object.keys(itemSets).length, latestUpdatedAt: latestUpdatedAt(rawSets) },
+    },
+    shared_sync_state: 'complete',
   }
 
   const data: QuestPlannerData = {
@@ -1324,6 +1704,7 @@ export async function syncQuestPlannerData(
     categories,
     items,
     recipes,
+    itemSets,
     exclusions: {
       item_type_category_ids: [4],
       item_type_ids: [80],
@@ -1331,21 +1712,94 @@ export async function syncQuestPlannerData(
       item_ids: [],
     },
     metadata,
+    ...sortMetadata,
   }
 
   await saveStoredQuestPlannerData(data)
-  progress?.(`Données synchronisées : ${metadata.quest_total} quêtes, ${metadata.achievement_total} succès, ${metadata.item_total} items, ${metadata.recipe_total} recettes`)
+  await saveSharedCatalog(toSharedCatalog(data, await loadSharedCatalog<SharedCatalogData>().catch(() => null))).catch(() => {})
+  progress?.({ kind: 'message', message: `Données synchronisées : ${metadata.quest_total} quêtes, ${metadata.achievement_total} succès, ${metadata.item_total} items, ${metadata.recipe_total} recettes` })
   return data
 }
 
+export async function syncQuestPlannerImages(
+  data: QuestPlannerData,
+  progress?: QuestSyncProgress,
+): Promise<Map<number, string>> {
+  const cachedIds = await loadCachedImageIds()
+  const previousFailures = await loadFailedCachedImages().catch(() => null)
+  const ignoredImageIds = recentFailedImageIds(previousFailures)
+  const missing = groupMissingImages(data, new Set([...cachedIds, ...ignoredImageIds]))
+  let cursor = 0
+  let completed = 0
+  let bytesDone = 0
+  let successful = 0
+  let bytesTotal = missing.length * ESTIMATED_IMAGE_BYTES
+  const failures: FailedCachedImage[] = []
+  progress?.({ kind: 'images', done: 0, total: missing.length, bytesDone, bytesTotal })
+  await Promise.all(Array.from({ length: Math.min(PAGE_CONCURRENCY, missing.length) }, async () => {
+    while (cursor < missing.length) {
+      const [source, items] = missing[cursor++]
+      const savedItemIds = new Set<number>()
+      try {
+        const response = await fetch(source, { cache: 'no-store', signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) })
+        if (!response.ok) throw new Error(`Image ${response.status}`)
+        const blob = await response.blob()
+        bytesDone += blob.size
+        successful += 1
+        if (successful > 0) bytesTotal = Math.max(bytesDone, (bytesDone / successful) * missing.length)
+        for (const item of items) {
+          await saveCachedImage(item.id, blob)
+          savedItemIds.add(item.id)
+        }
+      } catch (error) {
+        const failedItems = items.filter((item) => !savedItemIds.has(item.id))
+        if (failedItems.length) {
+          const reason = String(error)
+          console.warn('[QuestPlanner] image sync failed', {
+            source,
+            reason,
+            items: failedItems.map((item) => ({ id: item.id, name: item.name })),
+          })
+          failures.push(...failedItems.map((item) => ({ itemId: item.id, source, failedAt: new Date().toISOString(), reason })))
+        }
+      } finally {
+        completed += 1
+        if (completed % 50 === 0 || completed === missing.length || completed === 1 || missing.length - completed <= 50) {
+          progress?.({ kind: 'images', done: completed, total: missing.length, bytesDone, bytesTotal })
+        }
+      }
+    }
+  }))
+  const transientFailures = failures.filter(isTransientImageFailure)
+  const durableFailures = failures.filter((row) => !isTransientImageFailure(row))
+  if (transientFailures.length) {
+    throw new Error(`Connexion interrompue : ${transientFailures.length} images restent à télécharger`)
+  }
+  const validItemIds = Object.keys(data.items).map(Number)
+  const validItemIdSet = new Set(validItemIds)
+  const nextFailures = mergeFailedImages(previousFailures, durableFailures).filter((row) => validItemIdSet.has(row.itemId))
+  if (durableFailures.length || nextFailures.length !== (previousFailures?.length || 0)) {
+    await saveFailedCachedImages(nextFailures)
+  }
+  await pruneCachedImages(validItemIds).catch((error) => {
+    console.warn('[QuestPlanner] shared image prune failed', error)
+  })
+  return new Map()
+}
+
 export async function checkQuestPlannerDataStatus(data: QuestPlannerData): Promise<DatabaseStatus> {
-  const [questPage, achievementPage, categoryPage, itemPage, recipePage] = await Promise.all([
+  const [questPage, achievementPage, categoryPage, itemPage, recipePage, itemSetPage] = await Promise.all([
     apiGet('/quests', { $limit: 1, $skip: 0 }),
     apiGet('/achievements', { $limit: 1, $skip: 0 }),
     apiGet('/quest-categories', { $limit: 1, $skip: 0 }),
-    apiGet('/items', { $limit: 1, $skip: 0 }),
-    apiGet('/recipes', { $limit: 1, $skip: 0 }),
+    endpointInfo('/items'),
+    endpointInfo('/recipes'),
+    endpointInfo('/item-sets'),
   ])
+  const sharedCatalog = await loadSharedCatalog<SharedCatalogData>().catch(() => null)
+  const localItems = localRemoteMetadata(data, sharedCatalog, 'items')
+  const localRecipes = localRemoteMetadata(data, sharedCatalog, 'recipes')
+  const localItemSets = localRemoteMetadata(data, sharedCatalog, 'itemSets')
 
   const status = {
     remoteQuestTotal: Number(questPage.total || 0),
@@ -1354,21 +1808,26 @@ export async function checkQuestPlannerDataStatus(data: QuestPlannerData): Promi
     localAchievementTotal: Object.keys(data.achievements || {}).length,
     remoteQuestCategoryTotal: Number(categoryPage.total || 0),
     localQuestCategoryTotal: Object.keys(data.categories).length,
-    remoteItemTotal: Number(itemPage.total || 0),
-    localItemTotal: Object.keys(data.items).length,
-    remoteRecipeTotal: Number(recipePage.total || 0),
-    localRecipeTotal: Object.keys(data.recipes).length,
+    remoteItemTotal: itemPage.total,
+    localItemTotal: localItems.total,
+    remoteRecipeTotal: recipePage.total,
+    localRecipeTotal: localRecipes.total,
+    remoteItemSetTotal: itemSetPage.total,
+    localItemSetTotal: localItemSets.total,
   }
 
   const missingLabels = []
-  if (status.remoteQuestTotal !== status.localQuestTotal) missingLabels.push('quêtes')
-  if (status.remoteAchievementTotal !== status.localAchievementTotal) missingLabels.push('succès')
-  if (status.remoteQuestCategoryTotal !== status.localQuestCategoryTotal) missingLabels.push('catégories')
-  if (status.remoteItemTotal !== status.localItemTotal) missingLabels.push('items')
-  if (status.remoteRecipeTotal !== status.localRecipeTotal) missingLabels.push('recettes')
+  if (status.remoteItemTotal !== status.localItemTotal || (itemPage.latestUpdatedAt && itemPage.latestUpdatedAt !== localItems.latestUpdatedAt)) missingLabels.push('items')
+  if (status.remoteRecipeTotal !== status.localRecipeTotal || (recipePage.latestUpdatedAt && recipePage.latestUpdatedAt !== localRecipes.latestUpdatedAt)) missingLabels.push('recettes')
+  if (status.remoteItemSetTotal !== status.localItemSetTotal || (itemSetPage.latestUpdatedAt && itemSetPage.latestUpdatedAt !== localItemSets.latestUpdatedAt)) missingLabels.push('panoplies')
+  const cachedIds = new Set(await loadCachedImageIds())
+  const ignoredImageIds = recentFailedImageIds(await loadFailedCachedImages())
+  const missingImageGroups = groupMissingImages(data, new Set([...cachedIds, ...ignoredImageIds])).length
+  if (missingImageGroups > 0) missingLabels.push('images')
 
   return {
     ...status,
+    missingImageGroups,
     missingLabels,
     needsSync: missingLabels.length > 0,
   }

@@ -1,72 +1,75 @@
 # QuestPlanner
 
-QuestPlanner est une application Windows non officielle pour préparer les items de quêtes DOFUS et construire un plan de craft à partir des données DofusDB.
+QuestPlanner est une application Windows communautaire, gratuite et non officielle pour préparer les items nécessaires aux quêtes et succès DOFUS.
 
-Projet communautaire gratuit, non commercial, non affilié à Ankama ni à DofusDB.
+## Présentation
 
-DOFUS et Ankama sont des marques ou propriétés de leurs ayants droit respectifs.
+QuestPlanner permet de sélectionner des quêtes, des succès ou des suites de quêtes, puis d'agréger automatiquement les items demandés. Les besoins sont répartis en équipements, consommables et ressources, avec un plan de craft récursif pour distinguer les crafts principaux, les sous-crafts et les ingrédients directement nécessaires.
 
-Données issues de DofusDB. Utilisation soumise à la LPNC-IA 1.0.
-
-Voir aussi [NOTICE.md](NOTICE.md) pour les crédits et notes de droits.
-
-## Avertissement droits
-
-QuestPlanner est un outil communautaire non officiel. Il n'est pas affilié, approuvé, sponsorisé ou maintenu par Ankama, DofusDB ou leurs ayants droit.
-
-Les noms, visuels, icônes et données liés à DOFUS restent la propriété de leurs ayants droit respectifs. Les données DofusDB sont utilisées uniquement pour afficher les quêtes, items et crafts dans un cadre gratuit et non commercial.
-
-## Installer l'application
-
-Télécharge l'application depuis la dernière release :
-
-[Télécharger QuestPlanner v0.1.0](https://github.com/jdtaccounts-create/QuestPlanner/releases/tag/v0.1.0)
-
-Fichier recommandé :
-
-- `QuestPlanner_0.1.0_x64-setup.exe` pour l'installation classique Windows.
-
-Autre fichier disponible :
-
-- `QuestPlanner_0.1.0_x64_en-US.msi` pour le format MSI.
+L'application utilise une base locale commune pour les données DofusDB et conserve séparément ses corrections de quêtes curatées. Les données de quêtes corrigées manuellement ne sont pas écrasées par une synchronisation automatique.
 
 ## Fonctionnalités
 
-- Recherche et sélection de quêtes.
+- Recherche et sélection de quêtes, succès et suites de quêtes.
+- Choix guidés pour les embranchements de quêtes connus.
 - Parsing d'une liste de quêtes depuis le presse-papier.
-- Agrégation des items nécessaires.
+- Agrégation exacte des besoins et des doublons.
 - Séparation par équipements, consommables et ressources.
-- Plan de craft en trois colonnes : base à craft, sous-crafts, ingrédients.
-- Synchronisation locale avec DofusDB.
-- Mode clair et mode sombre.
+- Quantités possédées ajustables au clavier ou à la molette au survol.
+- Cases à cocher synchronisées avec les quantités.
+- Plan de craft récursif avec base à craft, sous-crafts et ingrédients.
+- Gestion cohérente des ressources partagées entre plusieurs crafts.
+- Tri enrichi des ressources par récoltables, origines de monstres, familles, types et ordre alphabétique.
+- Liens directs vers les fiches DofusDB.
+- Modes clair et sombre.
+- Synchronisation automatique des données, recettes, panoplies et images utiles.
+- Mises à jour automatiques signées.
 
-## Données et droits
+## Données hors ligne
 
-Cette application utilise des données publiques issues de DofusDB pour les quêtes, items, recettes et images d'items.
+La base locale commune est stockée dans :
 
-Le projet est publié à titre non commercial. Il ne doit pas être vendu, monétisé par publicité, abonnement ou intégré dans un service commercial.
+```text
+%LOCALAPPDATA%\DofusCompanionData
+```
 
-Si un ayant droit souhaite une modification, une attribution différente ou le retrait de certains contenus, le dépôt pourra être ajusté en conséquence.
+Elle contient le catalogue DofusDB synchronisé, les recettes, les panoplies, les images utiles et les échecs d'images déjà connus. Les images inutiles ou devenues obsolètes sont nettoyées après une synchronisation réussie.
 
-## Développement
+Les données de quêtes propres à l'application restent dans l'application et dans son stockage local. Elles sont volontairement séparées de la base DofusDB synchronisable.
 
-Prérequis :
+## Télécharger
 
-- Node.js
-- Rust/Cargo
-- GitHub CLI uniquement si tu veux publier une release
+La dernière version Windows est disponible dans les [releases GitHub](https://github.com/jdtaccounts-create/QuestPlanner/releases/latest).
 
-Commandes utiles :
+Fichier recommandé :
+
+- `QuestPlanner_x.x.x_x64-setup.exe` pour l'installation classique Windows.
+
+## Désinstallation
+
+La désinstallation Windows retire l'application installée. Le dossier `%LOCALAPPDATA%\DofusCompanionData` n'est pas supprimé automatiquement, car il peut être partagé par plusieurs outils locaux utilisant les mêmes données DOFUS.
+
+Pour tout supprimer après avoir désinstallé les outils concernés, supprimer manuellement :
+
+```text
+%LOCALAPPDATA%\DofusCompanionData
+```
+
+## Développement local
 
 ```powershell
 npm install
-npm run dev
+npm run smoke
 npm run build
-npm run tauri -- build
+npm run dev
 ```
 
-L'exécutable généré se trouve dans :
+Ouvrir ensuite `http://127.0.0.1:5174`.
 
-```text
-src-tauri/target/release/app.exe
-```
+## Publication
+
+La procédure de build signé et de release est décrite dans [RELEASE.md](RELEASE.md). La clé privée de signature ne doit jamais être affichée ni commitée.
+
+## Crédits et droits
+
+QuestPlanner n'est affilié ni à Ankama ni à DofusDB. Les crédits détaillés, conditions d'utilisation des données et mentions de droits figurent dans [NOTICE.md](NOTICE.md).
