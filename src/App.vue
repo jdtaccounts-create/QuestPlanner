@@ -15,6 +15,7 @@ import {
   searchQuestsAndCategories,
   syncQuestPlannerImages,
   syncQuestPlannerData,
+  syncCharacteristicSupportData,
   type AchievementChoiceOption,
   type AchievementChoiceRule,
   type AchievementInfo,
@@ -95,7 +96,7 @@ const FORCE_FULL_SYNC_PARAM = 'forceFullSync'
 const EXTERNAL_SYNC_IDLE_CONFIRM_MS = 3500
 const ESTIMATED_IMAGE_BYTES = 40 * 1024
 
-type SyncTaskKey = 'items' | 'recipes' | 'itemSets' | 'images'
+type SyncTaskKey = 'items' | 'recipes' | 'itemSets' | 'characteristics' | 'images' | 'statIcons'
 
 interface SyncTaskState {
   key: SyncTaskKey
@@ -106,12 +107,14 @@ interface SyncTaskState {
   bytesTotal?: number
 }
 
-const syncTaskOrder: SyncTaskKey[] = ['items', 'recipes', 'itemSets', 'images']
+const syncTaskOrder: SyncTaskKey[] = ['items', 'recipes', 'itemSets', 'characteristics', 'images', 'statIcons']
 const syncTaskLabels: Record<SyncTaskKey, string> = {
   items: 'Items',
   recipes: 'Recettes',
   itemSets: 'Panoplies',
+  characteristics: 'Stats',
   images: 'Images',
+  statIcons: 'Icônes stats',
 }
 
 function createSyncTasks(): Record<SyncTaskKey, SyncTaskState> {
@@ -1185,7 +1188,7 @@ function updateSyncTask(key: SyncTaskKey, patch: Partial<Omit<SyncTaskState, 'ke
 }
 
 function isSyncTaskKey(key: string): key is SyncTaskKey {
-  return key === 'items' || key === 'recipes' || key === 'itemSets' || key === 'images'
+  return key === 'items' || key === 'recipes' || key === 'itemSets' || key === 'characteristics' || key === 'images' || key === 'statIcons'
 }
 
 function seedSyncProgress(info: DatabaseStatus, needsDataSync: boolean): void {
@@ -1193,6 +1196,7 @@ function seedSyncProgress(info: DatabaseStatus, needsDataSync: boolean): void {
     updateSyncTask('items', { done: 0, total: info.remoteItemTotal, bytesDone: 0 })
     updateSyncTask('recipes', { done: 0, total: info.remoteRecipeTotal, bytesDone: 0 })
     updateSyncTask('itemSets', { done: 0, total: info.remoteItemSetTotal, bytesDone: 0 })
+    updateSyncTask('characteristics', { done: 0, total: info.remoteCharacteristicTotal, bytesDone: 0 })
   }
   const estimatedImageTotal = info.missingImageGroups || (needsDataSync ? info.remoteItemTotal : 0)
   if (estimatedImageTotal > 0) {
@@ -1201,6 +1205,13 @@ function seedSyncProgress(info: DatabaseStatus, needsDataSync: boolean): void {
       total: estimatedImageTotal,
       bytesDone: 0,
       bytesTotal: estimatedImageTotal * ESTIMATED_IMAGE_BYTES,
+    })
+  }
+  if (needsDataSync || info.missingCharacteristicIcons > 0) {
+    updateSyncTask('statIcons', {
+      done: 0,
+      total: info.missingCharacteristicIcons,
+      bytesDone: 0,
     })
   }
 }
@@ -1228,13 +1239,79 @@ function handleSyncProgress(event: QuestSyncProgressEvent | string): void {
     status.value = `Images ${formatQuantity(event.done)} / ${formatQuantity(event.total)}`
     return
   }
+  if (event.kind === 'statIcons') {
+    updateSyncTask('statIcons', {
+      done: event.done,
+      total: event.total,
+      bytesDone: event.bytesDone,
+      bytesTotal: event.bytesTotal,
+    })
+    status.value = `Icônes stats ${formatQuantity(event.done)} / ${formatQuantity(event.total)}`
+    return
+  }
   if (!isSyncTaskKey(event.endpoint)) return
   updateSyncTask(event.endpoint, {
     done: event.done,
     total: event.total,
     bytesDone: event.bytesDone,
   })
-  status.value = `${event.label} ${formatQuantity(event.done)} / ${formatQuantity(event.total)}`
+  status.value = `${event.label || syncTaskLabels[event.endpoint]} ${formatQuantity(event.done)} / ${formatQuantity(event.total)}`
+}
+
+function seedSharedSyncStatus(event: any): void {
+  const remote = event.remote || {}
+  if (remote.items?.total) updateSyncTask('items', { done: 0, total: Number(remote.items.total), bytesDone: 0 })
+  if (remote.recipes?.total) updateSyncTask('recipes', { done: 0, total: Number(remote.recipes.total), bytesDone: 0 })
+  if (remote.itemSets?.total) updateSyncTask('itemSets', { done: 0, total: Number(remote.itemSets.total), bytesDone: 0 })
+  if (remote.characteristics?.total) updateSyncTask('characteristics', { done: 0, total: Number(remote.characteristics.total), bytesDone: 0 })
+  if (event.missingImages) {
+    updateSyncTask('images', {
+      done: 0,
+      total: Number(event.missingImages),
+      bytesDone: 0,
+      bytesTotal: Number(event.missingImages) * ESTIMATED_IMAGE_BYTES,
+    })
+  }
+  if (event.missingStatIcons) updateSyncTask('statIcons', { done: 0, total: Number(event.missingStatIcons), bytesDone: 0 })
+  status.value = event.needsSync ? `Mise à jour disponible : ${(event.labels || []).join(', ')}` : 'Base Dofus commune déjà synchronisée'
+}
+
+function handleSharedSyncEnginePayload(payload: string): void {
+  const event = JSON.parse(payload)
+  if (event.kind === 'status') {
+    seedSharedSyncStatus(event)
+    return
+  }
+  if (event.kind === 'complete') {
+    status.value = event.changed ? 'Base Dofus commune synchronisée' : 'Base Dofus commune déjà synchronisée'
+    return
+  }
+  if (event.kind === 'error') {
+    status.value = `Synchronisation impossible : ${event.message}`
+    return
+  }
+  if (event.kind === 'message' || event.kind === 'endpoint' || event.kind === 'images' || event.kind === 'statIcons') {
+    handleSyncProgress(event as QuestSyncProgressEvent)
+  }
+}
+
+async function runSharedSyncEngine(appName: string, force: boolean): Promise<void> {
+  const [{ invoke }, { listen }] = await Promise.all([
+    import('@tauri-apps/api/core'),
+    import('@tauri-apps/api/event'),
+  ])
+  const unlisten = await listen<string>('shared-sync-event', (event) => {
+    try {
+      handleSharedSyncEnginePayload(event.payload)
+    } catch (error) {
+      console.error('[QuestPlanner] shared sync event parse failed', error, event.payload)
+    }
+  })
+  try {
+    await invoke('run_shared_sync_engine', { appName, force })
+  } finally {
+    unlisten()
+  }
 }
 
 async function waitForSyncDialogPaint(): Promise<void> {
@@ -1335,28 +1412,42 @@ async function checkLocalDataStatus(): Promise<void> {
 }
 
 async function syncImagesOnly(): Promise<void> {
-  if (syncing.value || !data.value) return
-  const current = data.value
-  syncing.value = true
-    resetSyncProgress('Synchronisation des images...')
-  try {
-    await withSharedSyncLock('Synchronisation des images', async () => {
-      await syncQuestPlannerImages(current, handleSyncProgress)
-      await ensureVisibleCachedImageUrls()
-      status.value = 'Images synchronisées'
-      completeSyncProgress('Synchronisation terminée')
-    })
-  } catch (error) {
-    console.error('[QuestPlanner] image sync failed', error)
-    status.value = `Erreur sync images : ${String(error)}`
-    completeSyncProgress('Synchronisation impossible, données locales conservées', 1600)
-  } finally {
-    syncing.value = false
-  }
+  await syncDatabases(false, false)
 }
 
 async function syncDatabases(forceFullSync = false, includeQuestData = false): Promise<void> {
   if (syncing.value) return
+  if (!includeQuestData) {
+    syncing.value = true
+    const phase = forceFullSync ? 'Synchronisation complète forcée...' : 'Synchronisation de la base Dofus commune...'
+    resetSyncProgress(phase)
+    status.value = phase
+    try {
+      await waitForSyncDialogPaint()
+      await runSharedSyncEngine('QuestPlanner', forceFullSync)
+      data.value = await loadQuestPlannerData()
+      currentEntries.value = []
+      currentAlternativeGroups.value = []
+      checkedItemIds.value = new Set()
+      ownedQuantities.value = {}
+      selectedAlternativeOptionKeys.value = {}
+      craftPlan.value = null
+      craftCheckedKeys.value = new Set()
+      craftOpen.value = false
+      choiceOpen.value = false
+      await ensureVisibleCachedImageUrls()
+      status.value = `Base Dofus commune synchronisée : ${itemCount.value} items, ${recipeCount.value} recettes`
+      completeSyncProgress('Synchronisation terminée')
+      if (forceFullSync) clearForceFullSyncRequest()
+    } catch (error) {
+      console.error('[QuestPlanner] shared sync failed', error)
+      status.value = `Erreur sync : ${String(error)}`
+      completeSyncProgress('Synchronisation impossible, données locales conservées', 1600)
+    } finally {
+      syncing.value = false
+    }
+    return
+  }
   syncing.value = true
   const phase = forceFullSync
     ? 'Synchronisation complète forcée...'
@@ -1370,8 +1461,8 @@ async function syncDatabases(forceFullSync = false, includeQuestData = false): P
     data.value = await loadQuestPlannerData()
     if (!forceFullSync && !includeQuestData) {
       const info = await checkQuestPlannerDataStatus(data.value)
-      const supportLabels = info.missingLabels.filter((label) => label === 'items' || label === 'recettes' || label === 'panoplies')
-      if (!supportLabels.length && !info.missingLabels.includes('images')) {
+      const supportLabels = info.missingLabels.filter((label) => label === 'items' || label === 'recettes' || label === 'panoplies' || label === 'caractéristiques')
+      if (!supportLabels.length && !info.missingLabels.includes('images') && !info.missingLabels.includes('icônes de stats')) {
         status.value = 'Base Dofus commune déjà synchronisée'
         completeSyncProgress('Données déjà synchronisées')
         return
@@ -1380,6 +1471,11 @@ async function syncDatabases(forceFullSync = false, includeQuestData = false): P
       if (!supportLabels.length && info.missingLabels.includes('images')) {
         await syncQuestPlannerImages(data.value, handleSyncProgress)
         await ensureVisibleCachedImageUrls()
+      }
+      if (!supportLabels.length && info.missingLabels.includes('icônes de stats')) {
+        await syncCharacteristicSupportData(handleSyncProgress)
+      }
+      if (!supportLabels.length && (info.missingLabels.includes('images') || info.missingLabels.includes('icônes de stats'))) {
         status.value = 'Images synchronisées'
         completeSyncProgress('Synchronisation terminée')
         return

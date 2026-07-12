@@ -1,10 +1,13 @@
 import {
   loadCachedImageIds,
+  loadCharacteristicIconFiles,
   loadFailedCachedImages,
   pruneCachedImages,
   saveCachedImage,
+  saveCharacteristicIcon,
   saveFailedCachedImages,
   loadSharedCatalog,
+  saveSharedJson,
   saveSharedCatalog,
   loadStoredQuestPlannerData,
   saveStoredQuestPlannerData,
@@ -18,16 +21,27 @@ const PAGE_CONCURRENCY = 8
 const REQUEST_TIMEOUT_MS = 8_000
 const ESTIMATED_JSON_COMPRESSION_RATIO = 0.16
 const ESTIMATED_IMAGE_BYTES = 40 * 1024
+const ESTIMATED_CHARACTERISTIC_ICON_BYTES = 6 * 1024
 const FAILED_IMAGE_RETRY_MS = 24 * 60 * 60 * 1000
 const TRANSIENT_FAILED_IMAGE_RETRY_MS = 15 * 60 * 1000
+const CHARACTERISTIC_ICON_BASE_URL = 'https://dofusdb.fr/icons/characteristics'
+const CHARACTERISTIC_ICON_ALIASES: Record<string, string> = {
+  tx_lifePoints: 'tx_health.png',
+  tx_strengthRes: 'tx_res_strength.png',
+  tx_intelligenceRes: 'tx_res_intelligence.png',
+  tx_chanceRes: 'tx_res_chance.png',
+  tx_agilityRes: 'tx_res_agility.png',
+  tx_neutralRes: 'tx_res_neutre.png',
+}
 
 export type ItemCategory = (typeof CATEGORIES)[number]
 
-export type QuestSyncEndpoint = 'questCategories' | 'achievements' | 'items' | 'recipes' | 'itemSets' | 'quests'
+export type QuestSyncEndpoint = 'questCategories' | 'achievements' | 'items' | 'recipes' | 'itemSets' | 'characteristics' | 'quests'
 
 export type QuestSyncProgressEvent =
   | { kind: 'endpoint'; endpoint: QuestSyncEndpoint; label: string; done: number; total: number; bytesDone: number }
   | { kind: 'images'; done: number; total: number; bytesDone: number; bytesTotal?: number }
+  | { kind: 'statIcons'; done: number; total: number; bytesDone: number; bytesTotal?: number }
   | { kind: 'message'; message: string }
 
 export type QuestSyncProgress = (event: QuestSyncProgressEvent | string) => void
@@ -134,11 +148,16 @@ export interface AchievementChoiceRule {
 export interface CachedItem {
   id: number
   name?: string
+  level?: number | null
   raw_type?: string
   category?: string
   type_id?: number | null
   type_name?: string
   item_type_category_id?: number | null
+  item_set_id?: number | null
+  slot_positions?: number[]
+  effects?: ItemEffect[]
+  possible_effects?: unknown[]
   criterions?: string
   quests_that_use?: number[]
   quests_that_reward?: number[]
@@ -189,6 +208,29 @@ export interface ItemSet {
   name_norm: string
   compact: string
   item_ids: number[]
+  effects?: ItemEffect[][]
+}
+
+export interface ItemEffect {
+  from: number
+  to: number
+  characteristic: number
+  category: number
+  elementId: number
+  effectId: number
+}
+
+export interface Characteristic {
+  id: number
+  keyword: string
+  name: string
+  asset: string
+  icon_file: string | null
+  icon_path: string | null
+  visible: boolean
+  order: number
+  category_id: number | null
+  upgradable: boolean
 }
 
 export interface ItemEntry {
@@ -287,7 +329,10 @@ export interface DatabaseStatus {
   localRecipeTotal: number
   remoteItemSetTotal: number
   localItemSetTotal: number
+  remoteCharacteristicTotal: number
+  localCharacteristicTotal: number
   missingImageGroups: number
+  missingCharacteristicIcons: number
   missingLabels: string[]
 }
 
@@ -1504,17 +1549,33 @@ function normalizeApiItem(rawItem: any): CachedItem | null {
   return {
     id: Number(id),
     name,
+    level: Number.isFinite(Number(rawItem.level)) ? Number(rawItem.level) : null,
     raw_type: rawType,
     category: normalizeItemCategory(rawType, typeName),
     type_id: extractItemTypeId(rawItem),
     type_name: typeName,
     item_type_category_id: extractItemTypeCategoryId(rawItem),
+    item_set_id: Number.isFinite(Number(rawItem.itemSetId)) ? Number(rawItem.itemSetId) : null,
+    slot_positions: Array.isArray(rawItem.type?.superType?.positions) ? rawItem.type.superType.positions.map(Number).filter(Number.isFinite) : [],
+    effects: normalizeEffects(rawItem.effects),
+    possible_effects: Array.isArray(rawItem.possibleEffects) ? rawItem.possibleEffects : [],
     criterions: rawItem.criterions || '',
     quests_that_use: (rawItem.questsThatUse || []).map(Number),
     quests_that_reward: (rawItem.questsThatReward || []).map(Number),
     image_url: imageUrl,
     image_path: '',
   }
+}
+
+function normalizeEffects(rows: any[]): ItemEffect[] {
+  return (Array.isArray(rows) ? rows : []).map((effect) => ({
+    from: Number(effect.from || 0),
+    to: Number(effect.to || 0),
+    characteristic: Number(effect.characteristic ?? -1),
+    category: Number(effect.category ?? -1),
+    elementId: Number(effect.elementId ?? -1),
+    effectId: Number(effect.effectId ?? -1),
+  }))
 }
 
 function preserveCachedItemImage(item: CachedItem | null, curatedItems: Record<string, CachedItem>): CachedItem | null {
@@ -1548,6 +1609,30 @@ function normalizeSet(rawSet: any): ItemSet | null {
     name_norm: normalizeText(name),
     compact: compactText(name),
     item_ids: (rawSet.items || []).map((item: any) => Number(item.id)).filter(Number.isFinite),
+    effects: (Array.isArray(rawSet.effects) ? rawSet.effects : []).map((group: any[]) => normalizeEffects(group)),
+  }
+}
+
+function characteristicIconFile(asset: string): string | null {
+  if (!asset) return null
+  return CHARACTERISTIC_ICON_ALIASES[asset] || `${asset}.png`
+}
+
+function normalizeCharacteristic(raw: any): Characteristic | null {
+  if (raw?.id == null) return null
+  const asset = String(raw.asset || '')
+  const iconFile = characteristicIconFile(asset)
+  return {
+    id: Number(raw.id),
+    keyword: String(raw.keyword || ''),
+    name: raw.name?.fr || raw.name?.en || `Caractéristique ${raw.id}`,
+    asset,
+    icon_file: iconFile,
+    icon_path: iconFile ? `icons/characteristics/${iconFile}` : null,
+    visible: Boolean(raw.visible),
+    order: Number(raw.order || 0),
+    category_id: Number.isFinite(Number(raw.categoryId)) ? Number(raw.categoryId) : null,
+    upgradable: Boolean(raw.upgradable),
   }
 }
 
@@ -1584,7 +1669,7 @@ async function endpointInfo(path: string): Promise<{ total: number; latestUpdate
   }
 }
 
-function localRemoteMetadata(data: QuestPlannerData, sharedCatalog: SharedCatalogData | null, endpoint: 'items' | 'recipes' | 'itemSets'): { total: number; latestUpdatedAt: string } {
+function localRemoteMetadata(data: QuestPlannerData, sharedCatalog: SharedCatalogData | null, endpoint: 'items' | 'recipes' | 'itemSets' | 'characteristics'): { total: number; latestUpdatedAt: string } {
   if (data.metadata?.shared_sync_state === 'bootstrap' || sharedCatalog?.metadata?.shared_sync_state === 'bootstrap') {
     return { total: 0, latestUpdatedAt: '' }
   }
@@ -1593,21 +1678,121 @@ function localRemoteMetadata(data: QuestPlannerData, sharedCatalog: SharedCatalo
     items: 'dofusdb_item_total',
     recipes: 'dofusdb_recipe_total',
     itemSets: 'dofusdb_item_set_total',
+    characteristics: 'dofusdb_characteristic_total',
   }
   const sharedTotalKeys = {
     items: 'item_total',
     recipes: 'recipe_total',
     itemSets: 'item_set_total',
+    characteristics: 'characteristic_total',
   }
   const fallbackTotals = {
     items: Object.keys(data.items || sharedCatalog?.items || {}).length,
     recipes: Object.keys(data.recipes || sharedCatalog?.recipes || {}).length,
     itemSets: Object.keys(data.itemSets || sharedCatalog?.itemSets || {}).length,
+    characteristics: Number(data.metadata?.characteristic_total || sharedCatalog?.metadata?.characteristic_total || 0),
   }
   return {
     total: Number(remote?.[endpoint]?.total || data.metadata?.[totalKeys[endpoint]] || sharedCatalog?.metadata?.[sharedTotalKeys[endpoint]] || 0) || fallbackTotals[endpoint],
     latestUpdatedAt: String(remote?.[endpoint]?.latestUpdatedAt || ''),
   }
+}
+
+function sharedSyncManifest(): Record<string, unknown> {
+  return {
+    schema_version: 2,
+    updated_at: new Date().toISOString(),
+    app_family: 'DofusCompanion',
+    storage_root: '%LOCALAPPDATA%\\DofusCompanionData',
+    required_json: [
+      { key: 'catalog', path: 'catalog/catalog.json', kind: 'catalog', required: true, syncable: true },
+      { key: 'failed-images', path: 'catalog/failed-images.json', kind: 'image-failures', required: false, syncable: true },
+      { key: 'characteristics', path: 'catalog/characteristics.json', kind: 'endpoint', required: true, syncable: true, endpoint: '/characteristics', page_limit: 150, normalizer: 'characteristics.v1' },
+      { key: 'characteristic-icons', path: 'catalog/characteristic-icons.json', kind: 'asset-manifest', required: true, syncable: true },
+      { key: 'characteristic-icon-aliases', path: 'catalog/characteristic-icon-aliases.json', kind: 'alias-map', required: true, syncable: true },
+      { key: 'sync-manifest', path: 'catalog/sync-manifest.json', kind: 'manifest', required: true, syncable: false },
+    ],
+    required_asset_groups: [
+      { key: 'item-images', path: 'images/items', required: true, syncable: true, source: 'item.image_url', extension: 'png' },
+      { key: 'characteristic-icons', path: 'icons/characteristics', required: true, syncable: true, source: `${CHARACTERISTIC_ICON_BASE_URL}/{file}`, extension: 'png' },
+    ],
+    endpoint_contracts: {
+      items: { endpoint: '/items', page_limit: PAGE_LIMIT, metadata_key: 'items', normalizer: 'items.v2' },
+      recipes: { endpoint: '/recipes', page_limit: PAGE_LIMIT, metadata_key: 'recipes', normalizer: 'recipes.v1' },
+      itemSets: { endpoint: '/item-sets', page_limit: PAGE_LIMIT, metadata_key: 'itemSets', normalizer: 'itemSets.v2' },
+      characteristics: { endpoint: '/characteristics', page_limit: 150, metadata_key: 'characteristics', normalizer: 'characteristics.v1' },
+    },
+    icon_aliases: CHARACTERISTIC_ICON_ALIASES,
+  }
+}
+
+async function saveSharedSyncManifest(): Promise<void> {
+  await saveSharedJson('sync-manifest', sharedSyncManifest())
+}
+
+async function syncCharacteristicSupport(rawCharacteristics: any[], progress?: QuestSyncProgress): Promise<Characteristic[]> {
+  const characteristics = rawCharacteristics
+    .map(normalizeCharacteristic)
+    .filter((row): row is Characteristic => Boolean(row))
+  const aliases = Object.entries(CHARACTERISTIC_ICON_ALIASES).map(([asset, file]) => ({ asset, file }))
+  await saveSharedJson('characteristics', characteristics)
+  await saveSharedJson('characteristic-icon-aliases', aliases)
+  await saveSharedSyncManifest()
+  await syncCharacteristicIcons(characteristics, progress)
+  return characteristics
+}
+
+export async function syncCharacteristicSupportData(progress?: QuestSyncProgress): Promise<Characteristic[]> {
+  const rawCharacteristics = await fetchPaginated('/characteristics', 150, 'characteristics', 'Stats', progress)
+  return syncCharacteristicSupport(rawCharacteristics, progress)
+}
+
+export async function syncCharacteristicIcons(characteristics: Characteristic[], progress?: QuestSyncProgress): Promise<void> {
+  const existing = new Set(await loadCharacteristicIconFiles())
+  const required = [...new Set(characteristics.map((row) => row.icon_file).filter((file): file is string => Boolean(file)))]
+  const missing = required.filter((file) => !existing.has(file))
+  let cursor = 0
+  let completed = 0
+  let bytesDone = 0
+  let successful = 0
+  let bytesTotal = missing.length * ESTIMATED_CHARACTERISTIC_ICON_BYTES
+  const manifest: Array<{ file: string; path: string; source: string; bytes: number }> = []
+  progress?.({ kind: 'statIcons', done: 0, total: missing.length, bytesDone, bytesTotal })
+  await Promise.all(Array.from({ length: Math.min(PAGE_CONCURRENCY, missing.length) }, async () => {
+    while (cursor < missing.length) {
+      const file = missing[cursor++]
+      const source = `${CHARACTERISTIC_ICON_BASE_URL}/${file}`
+      const response = await fetch(source, { cache: 'no-store', signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) })
+      if (!response.ok) throw new Error(`Icône caractéristique ${response.status}`)
+      const blob = await response.blob()
+      await saveCharacteristicIcon(file, blob)
+      bytesDone += blob.size
+      successful += 1
+      if (successful > 0) bytesTotal = Math.max(bytesDone, (bytesDone / successful) * missing.length)
+      manifest.push({ file, path: `icons/characteristics/${file}`, source, bytes: blob.size })
+      completed += 1
+      progress?.({ kind: 'statIcons', done: completed, total: missing.length, bytesDone, bytesTotal })
+    }
+  }))
+  const rows = required.map((file) => {
+    const downloaded = manifest.find((row) => row.file === file)
+    return downloaded || {
+      file,
+      path: `icons/characteristics/${file}`,
+      source: `${CHARACTERISTIC_ICON_BASE_URL}/${file}`,
+      bytes: 0,
+    }
+  })
+  await saveSharedJson('characteristic-icons', rows)
+}
+
+async function missingCharacteristicIconFiles(): Promise<string[]> {
+  const rawCharacteristics = await fetchPaginated('/characteristics', 150, 'characteristics', 'Stats')
+  const required = [...new Set(rawCharacteristics
+    .map((row) => characteristicIconFile(String(row.asset || '')))
+    .filter((file): file is string => Boolean(file)))]
+  const existing = new Set(await loadCharacteristicIconFiles())
+  return required.filter((file) => !existing.has(file))
 }
 
 export async function syncQuestPlannerData(
@@ -1618,11 +1803,13 @@ export async function syncQuestPlannerData(
   const includeQuestData = options.includeQuestData !== false
   if (!includeQuestData && curatedData) {
     progress?.({ kind: 'message', message: 'Synchronisation DofusDB : base commune...' })
-    const [rawItems, rawRecipes, rawSets] = await Promise.all([
+    const [rawItems, rawRecipes, rawSets, rawCharacteristics] = await Promise.all([
       fetchPaginated('/items', PAGE_LIMIT, 'items', 'Items', progress),
       fetchPaginated('/recipes', PAGE_LIMIT, 'recipes', 'Recettes', progress),
       fetchPaginated('/item-sets', PAGE_LIMIT, 'itemSets', 'Panoplies', progress),
+      fetchPaginated('/characteristics', 150, 'characteristics', 'Stats', progress),
     ])
+    const characteristics = await syncCharacteristicSupport(rawCharacteristics, progress)
     const curatedItems = curatedData.items || {}
     const items = byId(rawItems.map((rawItem) => preserveCachedItemImage(normalizeApiItem(rawItem), curatedItems)), 'id')
     const recipes = byId(rawRecipes.map(normalizeRecipe), 'result_id')
@@ -1638,9 +1825,11 @@ export async function syncQuestPlannerData(
         item_total: Object.keys(items).length,
         recipe_total: Object.keys(recipes).length,
         item_set_total: Object.keys(itemSets).length,
+        characteristic_total: characteristics.length,
         dofusdb_item_total: Object.keys(items).length,
         dofusdb_recipe_total: Object.keys(recipes).length,
         dofusdb_item_set_total: Object.keys(itemSets).length,
+        dofusdb_characteristic_total: characteristics.length,
         item_ids_checksum: idsChecksum(Object.keys(items)),
         recipe_ids_checksum: idsChecksum(Object.keys(recipes)),
         item_schema_version: 2,
@@ -1649,6 +1838,7 @@ export async function syncQuestPlannerData(
         items: { total: Object.keys(items).length, latestUpdatedAt: latestUpdatedAt(rawItems) },
         recipes: { total: Object.keys(recipes).length, latestUpdatedAt: latestUpdatedAt(rawRecipes) },
         itemSets: { total: Object.keys(itemSets).length, latestUpdatedAt: latestUpdatedAt(rawSets) },
+        characteristics: { total: rawCharacteristics.length, latestUpdatedAt: latestUpdatedAt(rawCharacteristics) },
       },
       shared_sync_state: 'complete',
     },
@@ -1666,19 +1856,22 @@ export async function syncQuestPlannerData(
   const rawItemsPromise = fetchPaginated('/items', PAGE_LIMIT, 'items', 'Items', progress)
   const rawRecipesPromise = fetchPaginated('/recipes', PAGE_LIMIT, 'recipes', 'Recettes', progress)
   const rawSetsPromise = fetchPaginated('/item-sets', PAGE_LIMIT, 'itemSets', 'Panoplies', progress)
+  const rawCharacteristicsPromise = fetchPaginated('/characteristics', 150, 'characteristics', 'Stats', progress)
 
   const rawCategories = await rawCategoriesPromise
   const categories = byId(rawCategories.map(normalizeQuestCategory), 'id')
 
   progress?.({ kind: 'message', message: 'Synchronisation DofusDB : quêtes...' })
   const rawQuestsPromise = fetchPaginated('/quests', PAGE_LIMIT, 'quests', 'Quêtes', progress)
-  const [rawQuests, rawAchievements, rawItems, rawRecipes, rawSets] = await Promise.all([
+  const [rawQuests, rawAchievements, rawItems, rawRecipes, rawSets, rawCharacteristics] = await Promise.all([
     rawQuestsPromise,
     rawAchievementsPromise,
     rawItemsPromise,
     rawRecipesPromise,
     rawSetsPromise,
+    rawCharacteristicsPromise,
   ])
+  const characteristics = await syncCharacteristicSupport(rawCharacteristics, progress)
   const curatedQuests = curatedData?.quests || {}
   const quests = byId(
     rawQuests.map((rawQuest) => preserveCuratedQuestNeeds(normalizeQuest(rawQuest, categories), curatedQuests)),
@@ -1695,9 +1888,11 @@ export async function syncQuestPlannerData(
     item_total: Object.keys(items).length,
     recipe_total: Object.keys(recipes).length,
     item_set_total: Object.keys(itemSets).length,
+    characteristic_total: characteristics.length,
     dofusdb_item_total: Object.keys(items).length,
     dofusdb_recipe_total: Object.keys(recipes).length,
     dofusdb_item_set_total: Object.keys(itemSets).length,
+    dofusdb_characteristic_total: characteristics.length,
     quest_total: Object.keys(quests).length,
     achievement_total: Object.keys(achievements).length,
     quest_category_total: Object.keys(categories).length,
@@ -1713,6 +1908,7 @@ export async function syncQuestPlannerData(
       items: { total: Object.keys(items).length, latestUpdatedAt: latestUpdatedAt(rawItems) },
       recipes: { total: Object.keys(recipes).length, latestUpdatedAt: latestUpdatedAt(rawRecipes) },
       itemSets: { total: Object.keys(itemSets).length, latestUpdatedAt: latestUpdatedAt(rawSets) },
+      characteristics: { total: rawCharacteristics.length, latestUpdatedAt: latestUpdatedAt(rawCharacteristics) },
     },
     shared_sync_state: 'complete',
   }
@@ -1807,18 +2003,20 @@ export async function syncQuestPlannerImages(
 }
 
 export async function checkQuestPlannerDataStatus(data: QuestPlannerData): Promise<DatabaseStatus> {
-  const [questPage, achievementPage, categoryPage, itemPage, recipePage, itemSetPage] = await Promise.all([
+  const [questPage, achievementPage, categoryPage, itemPage, recipePage, itemSetPage, characteristicPage] = await Promise.all([
     apiGet('/quests', { $limit: 1, $skip: 0 }),
     apiGet('/achievements', { $limit: 1, $skip: 0 }),
     apiGet('/quest-categories', { $limit: 1, $skip: 0 }),
     endpointInfo('/items'),
     endpointInfo('/recipes'),
     endpointInfo('/item-sets'),
+    endpointInfo('/characteristics'),
   ])
   const sharedCatalog = await loadSharedCatalog<SharedCatalogData>().catch(() => null)
   const localItems = localRemoteMetadata(data, sharedCatalog, 'items')
   const localRecipes = localRemoteMetadata(data, sharedCatalog, 'recipes')
   const localItemSets = localRemoteMetadata(data, sharedCatalog, 'itemSets')
+  const localCharacteristics = localRemoteMetadata(data, sharedCatalog, 'characteristics')
 
   const status = {
     remoteQuestTotal: Number(questPage.total || 0),
@@ -1833,20 +2031,26 @@ export async function checkQuestPlannerDataStatus(data: QuestPlannerData): Promi
     localRecipeTotal: localRecipes.total,
     remoteItemSetTotal: itemSetPage.total,
     localItemSetTotal: localItemSets.total,
+    remoteCharacteristicTotal: characteristicPage.total,
+    localCharacteristicTotal: localCharacteristics.total,
   }
 
   const missingLabels = []
   if (status.remoteItemTotal !== status.localItemTotal || (itemPage.latestUpdatedAt && itemPage.latestUpdatedAt !== localItems.latestUpdatedAt)) missingLabels.push('items')
   if (status.remoteRecipeTotal !== status.localRecipeTotal || (recipePage.latestUpdatedAt && recipePage.latestUpdatedAt !== localRecipes.latestUpdatedAt)) missingLabels.push('recettes')
   if (status.remoteItemSetTotal !== status.localItemSetTotal || (itemSetPage.latestUpdatedAt && itemSetPage.latestUpdatedAt !== localItemSets.latestUpdatedAt)) missingLabels.push('panoplies')
+  if (status.remoteCharacteristicTotal !== status.localCharacteristicTotal || (characteristicPage.latestUpdatedAt && characteristicPage.latestUpdatedAt !== localCharacteristics.latestUpdatedAt)) missingLabels.push('caractéristiques')
   const cachedIds = new Set(await loadCachedImageIds())
   const ignoredImageIds = recentFailedImageIds(await loadFailedCachedImages())
   const missingImageGroups = groupMissingImages(data, new Set([...cachedIds, ...ignoredImageIds])).length
   if (missingImageGroups > 0) missingLabels.push('images')
+  const missingCharacteristicIcons = await missingCharacteristicIconFiles().then((rows) => rows.length)
+  if (missingCharacteristicIcons > 0) missingLabels.push('icônes de stats')
 
   return {
     ...status,
     missingImageGroups,
+    missingCharacteristicIcons,
     missingLabels,
     needsSync: missingLabels.length > 0,
   }
