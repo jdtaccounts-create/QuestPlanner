@@ -1939,7 +1939,7 @@ onBeforeUnmount(() => {
       </section>
     </div>
 
-    <div v-if="showAppUpdatePrompt && appUpdate" class="sync-dialog">
+    <div v-if="showAppUpdatePrompt && appUpdate && !syncVisible" class="sync-dialog">
       <div class="sync-card glass-surface">
         <h2>Mise à jour nécessaire</h2>
         <p>
