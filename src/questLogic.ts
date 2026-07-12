@@ -2,6 +2,7 @@ import {
   loadCachedImageIds,
   loadCharacteristicIconFiles,
   loadFailedCachedImages,
+  loadSharedJson,
   pruneCachedImages,
   saveCachedImage,
   saveCharacteristicIcon,
@@ -1792,7 +1793,11 @@ async function missingCharacteristicIconFiles(): Promise<string[]> {
     .map((row) => characteristicIconFile(String(row.asset || '')))
     .filter((file): file is string => Boolean(file)))]
   const existing = new Set(await loadCharacteristicIconFiles())
-  return required.filter((file) => !existing.has(file))
+  const manifest = await loadSharedJson<Array<{ file?: string; missing?: boolean }>>('characteristic-icons').catch(() => null)
+  const knownMissing = new Set((manifest || [])
+    .filter((row) => row.missing && row.file)
+    .map((row) => row.file!))
+  return required.filter((file) => !existing.has(file) && !knownMissing.has(file))
 }
 
 export async function syncQuestPlannerData(
