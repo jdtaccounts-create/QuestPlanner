@@ -13,16 +13,12 @@ import {
   loadQuestPlannerData,
   parseClipboardQuests,
   searchQuestsAndCategories,
-  syncQuestPlannerImages,
-  syncQuestPlannerData,
-  syncCharacteristicSupportData,
   type AchievementChoiceOption,
   type AchievementChoiceRule,
   type AchievementInfo,
   type AlternativeItemGroupEntry,
   type AlternativeItemLine,
   type CraftLine,
-  type DatabaseStatus,
   type CraftPlan,
   type ItemEntry,
   type QuestInfo,
@@ -34,12 +30,10 @@ import { allocateOwned, setCraftLineAllocation, type OwnedQuantities } from './p
 import { compareItemIds } from './resourceSort'
 import {
   acquireSharedSyncLock,
-  clearCachedImages,
   heartbeatSharedSyncLock,
   loadCachedImagesForIds,
   readSharedSyncLock,
   releaseSharedSyncLock,
-  saveFailedCachedImages,
   type SharedSyncLock,
 } from './questStorage'
 
@@ -1191,31 +1185,6 @@ function isSyncTaskKey(key: string): key is SyncTaskKey {
   return key === 'items' || key === 'recipes' || key === 'itemSets' || key === 'characteristics' || key === 'images' || key === 'statIcons'
 }
 
-function seedSyncProgress(info: DatabaseStatus, needsDataSync: boolean): void {
-  if (needsDataSync) {
-    updateSyncTask('items', { done: 0, total: info.remoteItemTotal, bytesDone: 0 })
-    updateSyncTask('recipes', { done: 0, total: info.remoteRecipeTotal, bytesDone: 0 })
-    updateSyncTask('itemSets', { done: 0, total: info.remoteItemSetTotal, bytesDone: 0 })
-    updateSyncTask('characteristics', { done: 0, total: info.remoteCharacteristicTotal, bytesDone: 0 })
-  }
-  const estimatedImageTotal = info.missingImageGroups || (needsDataSync ? info.remoteItemTotal : 0)
-  if (estimatedImageTotal > 0) {
-    updateSyncTask('images', {
-      done: 0,
-      total: estimatedImageTotal,
-      bytesDone: 0,
-      bytesTotal: estimatedImageTotal * ESTIMATED_IMAGE_BYTES,
-    })
-  }
-  if (needsDataSync || info.missingCharacteristicIcons > 0) {
-    updateSyncTask('statIcons', {
-      done: 0,
-      total: info.missingCharacteristicIcons,
-      bytesDone: 0,
-    })
-  }
-}
-
 function handleSyncProgress(event: QuestSyncProgressEvent | string): void {
   if (typeof event === 'string') {
     syncPhase.value = event
@@ -1357,29 +1326,6 @@ async function waitForStartupSharedSync(): Promise<boolean> {
   return true
 }
 
-async function withSharedSyncLock<T>(phase: string, action: () => Promise<T>): Promise<T> {
-  while (true) {
-    const status = await acquireSharedSyncLock('QuestPlanner', phase)
-    if (status.acquired) {
-      if (syncExternalWait.value) resetSyncProgress(phase)
-      syncExternalWait.value = false
-      syncPhase.value = phase
-      break
-    }
-    if (status.lock) await waitForExternalSharedSync(status.lock)
-    else await sleep(500)
-  }
-  const heartbeat = window.setInterval(() => {
-    void heartbeatSharedSyncLock('QuestPlanner', syncPhase.value || phase).catch(() => {})
-  }, 5000)
-  try {
-    return await action()
-  } finally {
-    window.clearInterval(heartbeat)
-    await releaseSharedSyncLock().catch(() => {})
-  }
-}
-
 async function checkLocalDataStatus(): Promise<void> {
   if (!data.value) return
   try {
@@ -1393,7 +1339,7 @@ async function checkLocalDataStatus(): Promise<void> {
       const supportLabels = info.missingLabels.filter((label) => label === 'items' || label === 'recettes' || label === 'panoplies')
       const curatedLabels = info.missingLabels.filter((label) => label === 'quêtes' || label === 'succès' || label === 'catégories')
       if (supportLabels.length) {
-        await syncDatabases(false, false)
+        await syncDatabases(false)
         return
       }
       if (info.missingLabels.includes('images')) {
@@ -1412,83 +1358,19 @@ async function checkLocalDataStatus(): Promise<void> {
 }
 
 async function syncImagesOnly(): Promise<void> {
-  await syncDatabases(false, false)
+  await syncDatabases(false)
 }
 
-async function syncDatabases(forceFullSync = false, includeQuestData = false): Promise<void> {
+async function syncDatabases(forceFullSync = false): Promise<void> {
   if (syncing.value) return
-  if (!includeQuestData) {
-    syncing.value = true
-    const phase = forceFullSync ? 'Synchronisation complète forcée...' : 'Synchronisation de la base Dofus commune...'
-    resetSyncProgress(phase)
-    status.value = phase
-    try {
-      await waitForSyncDialogPaint()
-      await runSharedSyncEngine('QuestPlanner', forceFullSync)
-      data.value = await loadQuestPlannerData()
-      currentEntries.value = []
-      currentAlternativeGroups.value = []
-      checkedItemIds.value = new Set()
-      ownedQuantities.value = {}
-      selectedAlternativeOptionKeys.value = {}
-      craftPlan.value = null
-      craftCheckedKeys.value = new Set()
-      craftOpen.value = false
-      choiceOpen.value = false
-      await ensureVisibleCachedImageUrls()
-      status.value = `Base Dofus commune synchronisée : ${itemCount.value} items, ${recipeCount.value} recettes`
-      completeSyncProgress('Synchronisation terminée')
-      if (forceFullSync) clearForceFullSyncRequest()
-    } catch (error) {
-      console.error('[QuestPlanner] shared sync failed', error)
-      status.value = `Erreur sync : ${String(error)}`
-      completeSyncProgress('Synchronisation impossible, données locales conservées', 1600)
-    } finally {
-      syncing.value = false
-    }
-    return
-  }
   syncing.value = true
-  const phase = forceFullSync
-    ? 'Synchronisation complète forcée...'
-    : includeQuestData
-      ? 'Synchronisation DofusDB...'
-      : 'Synchronisation de la base Dofus commune...'
+  const phase = forceFullSync ? 'Synchronisation complète forcée...' : 'Synchronisation de la base Dofus commune...'
   resetSyncProgress(phase)
   status.value = phase
   try {
-    await withSharedSyncLock(phase, async () => {
+    await waitForSyncDialogPaint()
+    await runSharedSyncEngine('QuestPlanner', forceFullSync)
     data.value = await loadQuestPlannerData()
-    if (!forceFullSync && !includeQuestData) {
-      const info = await checkQuestPlannerDataStatus(data.value)
-      const supportLabels = info.missingLabels.filter((label) => label === 'items' || label === 'recettes' || label === 'panoplies' || label === 'caractéristiques')
-      if (!supportLabels.length && !info.missingLabels.includes('images') && !info.missingLabels.includes('icônes de stats')) {
-        status.value = 'Base Dofus commune déjà synchronisée'
-        completeSyncProgress('Données déjà synchronisées')
-        return
-      }
-      seedSyncProgress(info, supportLabels.length > 0)
-      if (!supportLabels.length && info.missingLabels.includes('images')) {
-        await syncQuestPlannerImages(data.value, handleSyncProgress)
-        await ensureVisibleCachedImageUrls()
-      }
-      if (!supportLabels.length && info.missingLabels.includes('icônes de stats')) {
-        await syncCharacteristicSupportData(handleSyncProgress)
-      }
-      if (!supportLabels.length && (info.missingLabels.includes('images') || info.missingLabels.includes('icônes de stats'))) {
-        status.value = 'Images synchronisées'
-        completeSyncProgress('Synchronisation terminée')
-        return
-      }
-    }
-    if (forceFullSync) {
-      await clearCachedImages()
-      await saveFailedCachedImages([])
-      cachedImageUrls.value = new Map()
-    }
-    const synced = await syncQuestPlannerData(handleSyncProgress, data.value || undefined, { includeQuestData })
-    data.value = synced
-    await syncQuestPlannerImages(synced, handleSyncProgress)
     currentEntries.value = []
     currentAlternativeGroups.value = []
     checkedItemIds.value = new Set()
@@ -1502,13 +1384,9 @@ async function syncDatabases(forceFullSync = false, includeQuestData = false): P
     status.value = `Base Dofus commune synchronisée : ${itemCount.value} items, ${recipeCount.value} recettes`
     completeSyncProgress('Synchronisation terminée')
     if (forceFullSync) clearForceFullSyncRequest()
-    })
   } catch (error) {
-    console.error('[QuestPlanner] sync failed', error)
-    const message = error instanceof Error ? error.message : String(error)
-    status.value = message.includes('Failed to fetch')
-      ? "Sync DofusDB indisponible dans le navigateur local ; elle passe par l'app Tauri"
-      : `Erreur sync : ${message}`
+    console.error('[QuestPlanner] shared sync failed', error)
+    status.value = `Erreur sync : ${String(error)}`
     completeSyncProgress('Synchronisation impossible, données locales conservées', 1600)
   } finally {
     syncing.value = false
